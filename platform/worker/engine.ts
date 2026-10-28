@@ -21,13 +21,84 @@ export function ensure(
 ): asserts ok {
   if (!ok) throw new MarketError(code, message, status);
 }
-export type Symbol = "DAT" | "OPENAI" | "ANTHROPIC";
+export type Symbol = string;
+export type InstrumentConfig = {
+  symbol: string;
+  name: string;
+  initialPrice: number;
+  icon: string;
+};
+export const DEFAULT_INSTRUMENTS: InstrumentConfig[] = [
+  { symbol: "OPENAI", name: "OpenAI", initialPrice: 10000, icon: "◉" },
+  { symbol: "ANTHROPIC", name: "Anthropic", initialPrice: 10000, icon: "✳" },
+];
+export const instrumentConfigs = (config: MarketConfig): InstrumentConfig[] =>
+  config.assetMode === "legacy"
+    ? [{ symbol: "DAT", name: "DAT", initialPrice: 10000, icon: "◈" }]
+    : (config.instruments ?? DEFAULT_INSTRUMENTS);
+export function validIcon(icon: string) {
+  if (!icon.startsWith("https://"))
+    return (
+      [...icon].length >= 1 &&
+      [...icon].length <= 8 &&
+      !/[\u0000-\u001f]/.test(icon)
+    );
+  try {
+    const url = new URL(icon);
+    return icon.length <= 512 && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+export function validateInstruments(instruments: InstrumentConfig[]) {
+  ensure(
+    instruments.length >= 1 && instruments.length <= 8,
+    "INVALID_INSTRUMENTS",
+    "每场可设置 1–8 个标的",
+  );
+  ensure(
+    new Set(instruments.map((i) => i.symbol)).size === instruments.length,
+    "INVALID_INSTRUMENTS",
+    "标的代码不能重复",
+  );
+  for (const i of instruments) {
+    ensure(
+      /^[A-Z][A-Z0-9_]{0,15}$/.test(i.symbol) && i.symbol !== "DAT",
+      "INVALID_INSTRUMENTS",
+      "标的代码须为 1–16 位大写字母、数字或下划线，DAT 保留给历史比赛",
+    );
+    ensure(
+      i.name.trim().length >= 1 && i.name.length <= 40,
+      "INVALID_INSTRUMENTS",
+      "标的名称须为 1–40 字",
+    );
+    ensure(
+      Number.isSafeInteger(i.initialPrice) &&
+        i.initialPrice >= MIN_PRICE &&
+        i.initialPrice <= MAX_PRICE,
+      "INVALID_INSTRUMENTS",
+      "初始价格须为 1–200 DUSD，精确到分",
+    );
+    ensure(
+      validIcon(i.icon),
+      "INVALID_INSTRUMENTS",
+      "图标请使用 1–8 个字符或有效的 HTTPS 图片地址",
+    );
+  }
+}
 export const AI_SYMBOLS = ["OPENAI", "ANTHROPIC"] as const;
-export const assetName = (symbol: Symbol) =>
-  ({ DAT: "DAT", OPENAI: "OpenAI", ANTHROPIC: "Anthropic" })[symbol];
+export const assetName = (symbol: Symbol, config?: MarketConfig) =>
+  config?.instruments?.find((i) => i.symbol === symbol)?.name ??
+  (
+    { DAT: "DAT", OPENAI: "OpenAI", ANTHROPIC: "Anthropic" } as Record<
+      string,
+      string
+    >
+  )[symbol] ??
+  symbol;
 type AssetLedger = { path: number[]; total: number; treasury: number };
 export const symbols = (s: State): Symbol[] =>
-  s.assets ? [...AI_SYMBOLS] : ["DAT"];
+  s.assets ? Object.keys(s.assets) : ["DAT"];
 export const pathFor = (s: State, symbol: Symbol) =>
   symbol === "DAT" ? s.path : s.assets![symbol].path;
 export const holding = (a: Agent, symbol: Symbol) =>
@@ -38,19 +109,27 @@ function changeHolding(a: Agent, symbol: Symbol, delta: number) {
 }
 const orderSymbol = (o: { symbol?: Symbol }): Symbol => o.symbol ?? "DAT";
 export type Side = "BUY" | "SELL" | "PASS";
-export type InitialBalances = {
-  cash: number;
-  DAT: number;
-  OPENAI: number;
-  ANTHROPIC: number;
-};
-export const startingBalances = (config: MarketConfig): InitialBalances =>
-  config.initialBalances ?? {
+export type InitialBalances = { cash: number; [symbol: string]: number };
+export const startingBalances = (config: MarketConfig): InitialBalances => {
+  const values: InitialBalances = {
     cash: INITIAL_CASH,
     DAT: INITIAL_DAT,
     OPENAI: INITIAL_DAT,
     ANTHROPIC: INITIAL_DAT,
+    ...Object.fromEntries(
+      instrumentConfigs(config).map((i) => [i.symbol, INITIAL_DAT]),
+    ),
+    ...config.initialBalances,
   };
+  return config.instruments
+    ? {
+        cash: values.cash,
+        ...Object.fromEntries(
+          config.instruments.map((i) => [i.symbol, values[i.symbol]]),
+        ),
+      }
+    : values;
+};
 function validateBalances(config: MarketConfig) {
   const b = startingBalances(config);
   ensure(
@@ -58,9 +137,12 @@ function validateBalances(config: MarketConfig) {
     "INVALID_BALANCES",
     "初始现金须为 0–10,000,000 DUSD，精确到分",
   );
-  for (const symbol of ["DAT", ...AI_SYMBOLS] as const)
+  for (const symbol of Object.keys(b).filter((key) => key !== "cash"))
     ensure(
-      Number.isSafeInteger(b[symbol]) && b[symbol] >= 0 && b[symbol] <= 100_000,
+      /^[A-Z][A-Z0-9_]{0,15}$/.test(symbol) &&
+        Number.isSafeInteger(b[symbol]) &&
+        b[symbol] >= 0 &&
+        b[symbol] <= 100_000,
       "INVALID_BALANCES",
       "初始股票数量须为 0–100,000 的整数",
     );
@@ -81,11 +163,12 @@ export type MarketConfig = {
   newsEnabled?: boolean;
   makerCashShare?: number;
   initialBalances?: InitialBalances;
+  instruments?: InstrumentConfig[];
 };
 export type NewsItem = {
   id: string;
   round: number;
-  symbol: "OPENAI" | "ANTHROPIC";
+  symbol: Symbol;
   headline: string;
   impactBps: number;
   before: number;
@@ -95,13 +178,13 @@ export type Agent = {
   system?: "fundamental-maker";
   initialCash?: number;
   initialHoldings?: number;
-  initialInventory?: Record<"OPENAI" | "ANTHROPIC", number>;
+  initialInventory?: Record<Symbol, number>;
   id: string;
   name: string;
   description: string;
   cash: number;
   dat: number;
-  holdings?: Record<"OPENAI" | "ANTHROPIC", number>;
+  holdings?: Record<Symbol, number>;
   createdAt: number;
   keyHash: string;
 };
@@ -148,7 +231,7 @@ export type AuditEvent = {
   detail: string;
 };
 export type State = {
-  assets?: Record<"OPENAI" | "ANTHROPIC", AssetLedger>;
+  assets?: Record<Symbol, AssetLedger>;
   news?: NewsItem[];
   config: MarketConfig;
   status: "lobby" | "running" | "paused" | "finished";
@@ -177,7 +260,12 @@ export function hash32(s: string) {
     h = Math.imul(h ^ s.charCodeAt(i), 16777619);
   return h >>> 0;
 }
-export async function generatePath(seed: string, rounds: number) {
+export async function generatePath(
+  seed: string,
+  rounds: number,
+  initialPrice = 10000,
+  custom = false,
+) {
   const noise = await Promise.all(
     Array.from(
       { length: rounds },
@@ -187,9 +275,18 @@ export async function generatePath(seed: string, rounds: number) {
         600,
     ),
   );
-  const path = [10000];
+  const path = [initialPrice];
   for (const n of noise)
-    path.push(Math.max(2500, Math.min(17500, path[path.length - 1] + n)));
+    path.push(
+      Math.max(
+        custom ? MIN_PRICE : 2500,
+        Math.min(
+          custom ? MAX_PRICE : 17500,
+          path[path.length - 1] +
+            (custom ? Math.round((n * initialPrice) / 10000) : n),
+        ),
+      ),
+    );
   return path;
 }
 export async function sha256(text: string) {
@@ -206,27 +303,42 @@ export async function createState(
   seed: string,
   now: number,
 ): Promise<State> {
+  if (config.instruments) {
+    ensure(
+      config.assetMode === "ai",
+      "INVALID_CONFIG",
+      "自定义标的需要使用多标的模式",
+    );
+    validateInstruments(config.instruments);
+  }
   validateBalances(config);
+  if (config.instruments && config.initialBalances)
+    config = { ...config, initialBalances: startingBalances(config) };
   const path = await generatePath(seed, config.rounds);
-  const assets =
+  const assets: Record<Symbol, AssetLedger> | undefined =
     config.assetMode === "ai"
-      ? {
-          OPENAI: {
-            path: await generatePath(`${seed}:OPENAI`, config.rounds),
-            total: 0,
-            treasury: 0,
-          },
-          ANTHROPIC: {
-            path: await generatePath(`${seed}:ANTHROPIC`, config.rounds),
-            total: 0,
-            treasury: 0,
-          },
-        }
+      ? Object.fromEntries(
+          await Promise.all(
+            instrumentConfigs(config).map(async (i) => [
+              i.symbol,
+              {
+                path: await generatePath(
+                  `${seed}:${i.symbol}`,
+                  config.rounds,
+                  i.initialPrice,
+                  !!config.instruments,
+                ),
+                total: 0,
+                treasury: 0,
+              },
+            ]),
+          ),
+        )
       : undefined;
   ensure(
     !config.newsEnabled || assets,
     "INVALID_CONFIG",
-    "随机新闻仅适用于双标的比赛",
+    "随机新闻仅适用于多标的比赛",
   );
   const share = config.makerCashShare ?? 0;
   ensure(
@@ -240,24 +352,28 @@ export async function createState(
   ensure(
     !share || (assets && config.newsEnabled),
     "INVALID_CONFIG",
-    "庄家需要开启双标的随机新闻",
+    "庄家需要开启多标的随机新闻",
   );
   const news: NewsItem[] | undefined = config.newsEnabled ? [] : undefined;
   if (news && assets) {
-    const positive = [
-      "企业客户签约增长",
-      "新模型评测取得突破",
-      "算力成本下降",
-      "开发者使用量超预期",
-    ];
-    const negative = [
-      "产品交付出现延期",
-      "算力供应趋紧",
-      "企业订单增速放缓",
-      "服务可靠性承压",
-    ];
-    for (const symbol of AI_SYMBOLS) {
-      const values = [10000];
+    const positive = config.instruments
+      ? ["客户需求增长", "研发取得突破", "运营成本下降", "收入表现超预期"]
+      : [
+          "企业客户签约增长",
+          "新模型评测取得突破",
+          "算力成本下降",
+          "开发者使用量超预期",
+        ];
+    const negative = config.instruments
+      ? ["项目交付出现延期", "供应链趋紧", "订单增速放缓", "运营可靠性承压"]
+      : [
+          "产品交付出现延期",
+          "算力供应趋紧",
+          "企业订单增速放缓",
+          "服务可靠性承压",
+        ];
+    for (const symbol of Object.keys(assets)) {
+      const values = [assets[symbol].path[0]];
       for (let round = 2; round <= config.rounds; round++) {
         const digest = await sha256(`${seed}:news:${symbol}:${round}`);
         const draw = (offset: number) =>
@@ -267,8 +383,11 @@ export async function createState(
         if (draw(0) % 100 < 35) {
           const impactBps = (draw(8) % 2 ? 1 : -1) * (300 + (draw(16) % 901));
           after = Math.max(
-            2500,
-            Math.min(17500, Math.round(before * (1 + impactBps / 10000))),
+            config.instruments ? MIN_PRICE : 2500,
+            Math.min(
+              config.instruments ? MAX_PRICE : 17500,
+              Math.round(before * (1 + impactBps / 10000)),
+            ),
           );
           news.push({
             id: `${symbol}:${round}`,
@@ -277,7 +396,7 @@ export async function createState(
             impactBps,
             before,
             after,
-            headline: `${assetName(symbol)}：${(impactBps > 0 ? positive : negative)[draw(24) % 4]}`,
+            headline: `${assetName(symbol, config)}：${(impactBps > 0 ? positive : negative)[draw(24) % 4]}`,
           });
         }
         values.push(after);
@@ -293,10 +412,9 @@ export async function createState(
       assets
         ? {
             seed,
-            paths: {
-              OPENAI: assets.OPENAI.path,
-              ANTHROPIC: assets.ANTHROPIC.path,
-            },
+            paths: Object.fromEntries(
+              Object.entries(assets).map(([symbol, a]) => [symbol, a.path]),
+            ),
             ...(news ? { news } : {}),
           }
         : { seed, path },
@@ -315,7 +433,7 @@ export async function createState(
     finishedAt: null,
     seed,
     commitment,
-    path: assets?.OPENAI.path ?? path,
+    path: assets ? Object.values(assets)[0].path : path,
     agents: [],
     orders: [],
     trades: [],
@@ -369,7 +487,11 @@ export function addAgent(
     cash: b.cash,
     dat: s.assets ? 0 : b.DAT,
     ...(s.assets
-      ? { holdings: { OPENAI: b.OPENAI, ANTHROPIC: b.ANTHROPIC } }
+      ? {
+          holdings: Object.fromEntries(
+            symbols(s).map((symbol) => [symbol, b[symbol]]),
+          ),
+        }
       : {}),
     createdAt: now,
   };
@@ -381,7 +503,7 @@ export function addAgent(
   s.treasuryCash += reserve;
   s.totalCash += b.cash + reserve;
   if (s.assets)
-    for (const symbol of AI_SYMBOLS) s.assets[symbol].total += b[symbol];
+    for (const symbol of symbols(s)) s.assets[symbol].total += b[symbol];
   else s.totalDat += b.DAT;
   event(s, now, "agent_joined", a.id);
   audit(s);
@@ -395,12 +517,15 @@ export function setInitialBalances(
 ) {
   ensure(s.status === "lobby", "BAD_STATE", "仅可在开赛前调整初始资产", 409);
   validateBalances({ ...s.config, initialBalances: balances });
+  balances = startingBalances({ ...s.config, initialBalances: balances });
   const before = startingBalances(s.config);
   s.config.initialBalances = { ...balances };
   for (const a of s.agents) {
     a.cash = balances.cash;
     if (s.assets)
-      a.holdings = { OPENAI: balances.OPENAI, ANTHROPIC: balances.ANTHROPIC };
+      a.holdings = Object.fromEntries(
+        symbols(s).map((symbol) => [symbol, balances[symbol]]),
+      );
     else a.dat = balances.DAT;
   }
   const count = s.agents.length;
@@ -410,7 +535,7 @@ export function setInitialBalances(
   );
   s.totalCash = s.treasuryCash + count * balances.cash;
   if (s.assets)
-    for (const symbol of AI_SYMBOLS)
+    for (const symbol of symbols(s))
       s.assets[symbol].total = count * balances[symbol];
   else s.totalDat = count * balances.DAT;
   event(
@@ -420,6 +545,31 @@ export function setInitialBalances(
     JSON.stringify({ before, after: balances, agents: count }),
   );
   audit(s);
+}
+export async function reconfigureInstruments(
+  s: State,
+  instruments: InstrumentConfig[],
+  now: number,
+) {
+  ensure(
+    s.status === "lobby" && s.assets,
+    "BAD_STATE",
+    "仅可在多标的比赛开赛前调整标的",
+    409,
+  );
+  const fresh = await createState(
+    { ...s.config, instruments },
+    s.seed,
+    s.createdAt,
+  );
+  s.config = fresh.config;
+  s.assets = fresh.assets;
+  s.path = fresh.path;
+  s.news = fresh.news;
+  s.commitment = fresh.commitment;
+  setInitialBalances(s, startingBalances(s.config), now);
+  event(s, now, "instruments_changed", JSON.stringify(instruments));
+  return s;
 }
 export function authenticate(s: State, keyHash: string) {
   const a = s.agents.find((a) => !a.system && a.keyHash === keyHash);
@@ -483,7 +633,7 @@ export function submit(
   ensure(
     symbols(s).includes(symbol),
     "INVALID_SYMBOL",
-    "请选择本场标的 OPENAI 或 ANTHROPIC；历史比赛使用 DAT",
+    "请选择本场标的 instruments 中有效的 symbol；历史比赛使用 DAT",
   );
   const prior = s.orders.find(
     (x) => x.agentId === agentId && x.requestId === d.requestId,
@@ -695,7 +845,7 @@ export function advance(s: State, now: number) {
 }
 export function audit(s: State) {
   if (s.assets)
-    for (const symbol of AI_SYMBOLS) {
+    for (const symbol of symbols(s)) {
       const asset = s.assets[symbol];
       ensure(
         s.agents.every(
@@ -838,10 +988,9 @@ export function publicState(s: State, now: number) {
         ? s.assets
           ? {
               seed: s.seed,
-              paths: {
-                OPENAI: s.assets.OPENAI.path,
-                ANTHROPIC: s.assets.ANTHROPIC.path,
-              },
+              paths: Object.fromEntries(
+                Object.entries(s.assets).map(([symbol, a]) => [symbol, a.path]),
+              ),
               ...(s.news ? { news: s.news } : {}),
             }
           : { seed: s.seed, path: s.path }
@@ -937,7 +1086,10 @@ export function instrumentState(s: State, symbol: Symbol) {
     path[s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)];
   return {
     symbol,
-    name: assetName(symbol),
+    name: assetName(symbol, s.config),
+    icon:
+      instrumentConfigs(s.config).find((i) => i.symbol === symbol)?.icon ?? "◈",
+    initialPrice: path[0],
     reference,
     history: path.slice(
       0,
@@ -962,14 +1114,14 @@ function initializeMaker(s: State, now: number) {
   const ordinaryCash = s.agents.reduce((sum, a) => sum + a.cash, 0);
   const cash = Math.round((ordinaryCash * share) / (1 - share));
   const inventory = Object.fromEntries(
-    AI_SYMBOLS.map((symbol) => [
+    symbols(s).map((symbol) => [
       symbol,
       Math.floor(
         (s.agents.reduce((n, a) => n + holding(a, symbol), 0) * share) /
           (1 - share),
       ),
     ]),
-  ) as Record<"OPENAI" | "ANTHROPIC", number>;
+  ) as Record<Symbol, number>;
   const maker: Agent = {
     id: `system-maker:${s.config.id}`,
     name: "基本面庄家",
@@ -980,15 +1132,16 @@ function initializeMaker(s: State, now: number) {
     dat: 0,
     holdings: { ...inventory },
     initialCash: cash,
-    initialHoldings: inventory.OPENAI,
+    initialHoldings: inventory[symbols(s)[0]],
     initialInventory: inventory,
     createdAt: now,
   };
   s.agents.push(maker);
-  const reserve = (inventory.OPENAI + inventory.ANTHROPIC) * MAX_PRICE;
+  const reserve =
+    Object.values(inventory).reduce((n, q) => n + q, 0) * MAX_PRICE;
   s.treasuryCash += reserve;
   s.totalCash += cash + reserve;
-  for (const symbol of AI_SYMBOLS) s.assets![symbol].total += inventory[symbol];
+  for (const symbol of symbols(s)) s.assets![symbol].total += inventory[symbol];
   event(
     s,
     now,
@@ -1009,16 +1162,24 @@ function openRound(s: State, now: number) {
   if (!a) return;
   // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
   // of current cash per asset / 10% of inventory offered per round. No future reads.
-  const cashPerAsset = Math.floor(a.cash * 0.1);
-  for (const symbol of AI_SYMBOLS) {
+  const cashPerAsset = Math.floor(
+    a.cash * Math.min(0.1, 0.8 / symbols(s).length),
+  );
+  for (const symbol of symbols(s)) {
     const fundamental = pathFor(s, symbol)[s.round - 1];
     const inventory = holding(a, symbol);
     const initial = a.initialInventory?.[symbol] ?? a.initialHoldings!;
     const imbalance = (inventory - initial) / Math.max(1, initial);
     const skew = Math.max(-0.02, Math.min(0.02, imbalance * 0.02));
     const center = fundamental * (1 - skew);
-    const bid = Math.max(MIN_PRICE, Math.floor(center - fundamental * 0.01));
-    const ask = Math.min(MAX_PRICE, Math.ceil(center + fundamental * 0.01));
+    const ask = Math.max(
+      MIN_PRICE + 1,
+      Math.min(MAX_PRICE, Math.ceil(center + fundamental * 0.01)),
+    );
+    const bid = Math.min(
+      ask - 1,
+      Math.max(MIN_PRICE, Math.floor(center - fundamental * 0.01)),
+    );
     for (const side of ["BUY", "SELL"] as const) {
       const price = side === "BUY" ? bid : ask;
       const quantity =
@@ -1049,13 +1210,14 @@ function openRound(s: State, now: number) {
 export function makerState(s: State) {
   const a = s.agents.find((a) => a.system);
   if (!a) return null;
-  const initialInventory = a.initialInventory ?? {
-    OPENAI: a.initialHoldings!,
-    ANTHROPIC: a.initialHoldings!,
-  };
+  const initialInventory =
+    a.initialInventory ??
+    Object.fromEntries(
+      symbols(s).map((symbol) => [symbol, a.initialHoldings!]),
+    );
   const initialEquity =
     a.initialCash! +
-    AI_SYMBOLS.reduce(
+    symbols(s).reduce(
       (n, symbol) => n + initialInventory[symbol] * pathFor(s, symbol)[0],
       0,
     );

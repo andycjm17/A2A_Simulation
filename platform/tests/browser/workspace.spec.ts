@@ -107,7 +107,7 @@ test("complete participant workflow, safety and responsive UI", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "比赛规则", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "30 分钟，两种模拟资产" }),
+    page.getByRole("heading", { name: "30 分钟，模拟资产交易" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "市场总览", exact: true }).click();
   await expect(

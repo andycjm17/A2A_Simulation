@@ -1012,3 +1012,40 @@ describe('organizer bulk initial balances',()=>{
   expect((await req(`${base}/account`,{token:a.apiKey})).body.cash).toBe(123456);
  });
 });
+
+describe('configurable instruments over HTTP',()=>{
+ const items=[{symbol:'RED',name:'红杉模拟',initialPrice:4200,icon:'🌲'},{symbol:'BLUE',name:'海洋模拟',initialPrice:12500,icon:'🌊'},{symbol:'GOLD',name:'黄金模拟',initialPrice:19900,icon:'🌟'}];
+ it('updates a waiting room, survives eviction, joins with all custom stocks, and accepts custom-symbol orders',async()=>{
+  const id='custom-runtime',base=`/api/markets/${id}`,manage=`/api/admin/markets/${id}`;
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom runtime',practice:true,newsEnabled:true,makerCashShare:.2}});
+  const a=(await req(`${base}/join`,{data:{name:'Custom Existing'}})).body;
+  expect((await req(`${manage}/instruments`,{token:a.apiKey,data:items})).status).toBe(403);
+  expect((await req(`${manage}/instruments`,{token:admin,data:[items[0],items[0]]})).status).toBe(400);
+  expect((await req(`${manage}/instruments`,{token:admin,data:items})).status).toBe(200);
+  const stub=env.MARKETS.get(env.MARKETS.idFromName(id));await evictDurableObject(stub);
+  const view=(await req(base)).body;
+  expect(view.instruments.map((i:any)=>[i.symbol,i.name,i.reference,i.icon])).toEqual(items.map(i=>[i.symbol,i.name,i.initialPrice,i.icon]));
+  expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({RED:100,BLUE:100,GOLD:100});
+  const b=(await req(`${base}/join`,{data:{name:'Custom Later'}})).body;
+  expect(b.account.holdings).toEqual({RED:100,BLUE:100,GOLD:100});
+  await req(`${manage}/start`,{token:admin,data:{}});
+  expect((await req(`${manage}/instruments`,{token:admin,data:items.slice(0,1)})).status).toBe(409);
+  expect((await req(`${base}/decision`,{token:a.apiKey,data:{...order,symbol:'RED',price:4500,quantity:2}})).status).toBe(200);
+  expect((await req(`${base}/decision`,{token:a.apiKey,data:{...order,symbol:'OPENAI',requestId:'invalid-symbol-custom'}})).status).toBe(400);
+  await evictDurableObject(stub);
+  expect((await req(`${base}/account`,{token:a.apiKey})).body.orders[0].symbol).toBe('RED');
+  expect((await req(`${manage}/status`,{token:admin})).body.conserved).toBe(true);
+ });
+ it('cannot overwrite a concurrent join during asynchronous price commitment generation',async()=>{
+  const id='custom-race',base=`/api/markets/${id}`,manage=`/api/admin/markets/${id}`;
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom race',practice:true,newsEnabled:true,makerCashShare:.2}});
+  const [configured,joined]=await Promise.all([req(`${manage}/instruments`,{token:admin,data:items}),req(`${base}/join`,{data:{name:'Concurrent join'}})]);
+  expect(joined.status).toBe(201);expect([200,409]).toContain(configured.status);
+  const account=(await req(`${base}/account`,{token:joined.body.apiKey})).body;
+  expect(account.name).toBe('Concurrent join');
+  if(configured.status===409)expect((await req(`${manage}/instruments`,{token:admin,data:items})).status).toBe(200);
+  const view=(await req(base)).body;
+  expect(view.participantCount).toBe(1);expect(view.instruments).toHaveLength(3);
+  expect((await req(`${base}/account`,{token:joined.body.apiKey})).body.holdings).toEqual({RED:100,BLUE:100,GOLD:100});
+ });
+});

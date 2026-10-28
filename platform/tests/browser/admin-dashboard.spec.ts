@@ -172,7 +172,7 @@ test('organizer configures creation balances and updates all registered agents b
   const id=`initial-ui-${info.project.name}-${Date.now()}`;
   await page.goto('/?view=admin');
   await page.getByLabel('组织者管理凭证').fill(admin);
-  const create=page.locator('section').filter({has:page.getByRole('heading',{name:'创建双标的比赛',exact:true})});
+  const create=page.locator('section').filter({has:page.getByRole('heading',{name:'创建多标的比赛',exact:true})});
   await create.getByLabel('比赛名称',{exact:true}).fill('初始资产调试测试');
   await create.getByLabel('比赛编号',{exact:true}).fill(id);
   await create.getByLabel('初始现金（DUSD）',{exact:true}).fill('1234.56');

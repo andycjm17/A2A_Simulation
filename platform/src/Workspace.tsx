@@ -1,5 +1,15 @@
 import { useState, useEffect } from "react";
-import { startingBalances, type InitialBalances } from "../worker/engine";
+import {
+  startingBalances,
+  DEFAULT_INSTRUMENTS,
+  type InitialBalances,
+  type InstrumentConfig,
+} from "../worker/engine";
+import {
+  InstrumentFields,
+  InstrumentsEditor,
+  CapitalPreview,
+} from "./InstrumentSettings";
 import { AdminDashboard } from "./AdminDashboard";
 import { useSessionGuard } from "./useSessionGuard";
 import {
@@ -14,18 +24,20 @@ import {
 export function Connect({
   id,
   legacy = false,
+  s,
 }: {
   id: string;
   legacy?: boolean;
+  s?: Snapshot | null;
 }) {
   const base = location.origin,
     market = id || "YOUR_MARKET_ID",
     endpoint = `${base}/mcp/${market}`;
-  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${legacy ? "DAT" : "OPENAI"}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
+  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${s?.instruments[0]?.symbol ?? (legacy ? "DAT" : "OPENAI")}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
   return (
     <>
       <div className="notice">
-        外部 Agent 自行运行。平台提供双标的行情、五档盘口、成交 K
+        外部 Agent 自行运行。平台提供可配置标的行情、五档盘口、成交 K
         线、共享现金账户与撮合，不调用你的模型，也不需要模型 API Key。
       </div>
       <div className="grid">
@@ -108,8 +120,8 @@ export function Connect({
             ))}
             <p className="hint">
               货币与价格均为整数“分”：<strong>10000 = 100.00 DUSD</strong>。每单
-              1–10 份。新比赛须传入 symbol: OPENAI 或
-              ANTHROPIC；两者共用现金。PASS 的价格与数量都为 0。
+              1–10 份。下单须传入当前 snapshot.instruments 中对应标的的
+              symbol；所有标的共用现金。PASS 的价格与数量都为 0。
             </p>
           </div>
         </section>
@@ -138,31 +150,31 @@ export function Connect({
 export function Rules() {
   return (
     <section className="panel padding rules">
-      <h2>30 分钟，两种模拟资产</h2>
+      <h2>30 分钟，模拟资产交易</h2>
       {[
         [
           "01 / 自己构建 Agent",
           "使用你喜欢的模型、框架或程序。每位参与者在开赛前注册一个 Agent，以专属凭证接入 MCP / API。正式赛由组织者发放单次邀请码；请只使用分配给自己的名额。",
         ],
         [
-          "02 / 一组模拟资产",
-          "新比赛默认每位 Agent 初始拥有 10,000 DUSD、100 份 OpenAI 和 100 份 Anthropic 模拟资产。组织者可在开赛前统一调整现金和每种股票数量，本场配置以市场页为准。两种标的共用现金，库存分别记账，资产跨轮次保留。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
+          "02 / 可配置的模拟资产",
+          "组织者可设置 1–8 个标的的名称、交易代码、图标和初始价格，并统一设置每位 Agent 的初始现金和每种股票数量。默认配置为 OpenAI、Anthropic 各 100 份和 10,000 DUSD。所有标的共用现金，库存分别记账；本场配置以市场页为准。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
         ],
         [
           "03 / 每种标的每轮一个决定",
-          "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。OPENAI、ANTHROPIC 各可提交一个决定；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
+          "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。每个当前标的各可提交一个决定，交易代码见市场页和 API；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
         ],
         [
           "04 / 平台统一撮合",
-          "新比赛公开每种标的买卖各五档，按价格汇总未成交数量，不公开挂单者身份或备注。两种标的分别撮合，买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
+          "新比赛公开每种标的买卖各五档，按价格汇总未成交数量，不公开挂单者身份或备注。各标的分别撮合，买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
         ],
         [
           "05 / 结算与奖品",
-          "新比赛净资产 = 共享现金 + OpenAI 持仓 × 对应参考价 + Anthropic 持仓 × 对应参考价，默认初始净资产为 30,000 DUSD，调整初始配置后按实际现金和持仓计算。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后两种资产分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
+          "新比赛净资产 = 共享现金 + 所有标的持仓 × 各自参考价之和，默认初始净资产为 30,000 DUSD，调整初始配置后按实际现金和持仓计算。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后各标的分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
         ],
         [
           "06 / 随机新闻与固定庄家",
-          "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，受 25–175 DUSD 边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
+          "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，自定义标的受 1–200 DUSD 价格边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
         ],
         [
           "07 / 可核验的过程",
@@ -196,6 +208,9 @@ export function Admin({
     [practice, setPractice] = useState(false),
     [capacity, setCapacity] = useState(50),
     [makerCashShare, setMakerCashShare] = useState(0.2),
+    [instruments, setInstruments] = useState<InstrumentConfig[]>(
+      DEFAULT_INSTRUMENTS.map((i) => ({ ...i })),
+    ),
     [initialBalances, setInitialBalances] = useState<InitialBalances>(
       startingBalances({} as Snapshot["config"]),
     ),
@@ -262,7 +277,7 @@ export function Admin({
       <div className="grid">
         <section className="panel">
           <div className="paneltitle">
-            <h2>创建双标的比赛</h2>
+            <h2>创建多标的比赛</h2>
           </div>
           <form
             className="padding stack"
@@ -278,6 +293,7 @@ export function Admin({
                   newsEnabled: true,
                   makerCashShare,
                   initialBalances,
+                  instruments,
                   rounds: 30,
                   roundMs: 60000,
                 });
@@ -315,7 +331,9 @@ export function Admin({
                 onChange={(e) => setCapacity(Number(e.target.value))}
               />
             </label>
+            <InstrumentFields value={instruments} change={setInstruments} />
             <InitialBalanceFields
+              instruments={instruments}
               value={initialBalances}
               change={setInitialBalances}
             />
@@ -359,6 +377,25 @@ export function Admin({
           </div>
           <div className="padding stack">
             <strong>{s?.config.name || "选择一场比赛"}</strong>
+            {s && (
+              <InstrumentsEditor
+                s={s}
+                busy={busy || !token}
+                save={(items, applied) =>
+                  action(async (current) => {
+                    await api(
+                      `/api/admin/markets/${id}/instruments`,
+                      token,
+                      items,
+                    );
+                    if (current()) {
+                      await changed(undefined, current);
+                      if (current()) applied();
+                    }
+                  })
+                }
+              />
+            )}
             {s && (
               <InitialBalancesEditor
                 key={id}
@@ -524,8 +561,10 @@ function InitialBalanceFields({
   change,
   legacy = false,
   disabled = false,
+  instruments = DEFAULT_INSTRUMENTS,
 }: {
   value: InitialBalances;
+  instruments?: Pick<InstrumentConfig, "symbol" | "name">[];
   change: (value: InitialBalances) => void;
   legacy?: boolean;
   disabled?: boolean;
@@ -547,22 +586,17 @@ function InitialBalanceFields({
           }
         />
       </label>
-      {(legacy ? (["DAT"] as const) : (["OPENAI", "ANTHROPIC"] as const)).map(
-        (symbol) => (
+      {(legacy ? [{ symbol: "DAT", name: "DAT" }] : instruments).map(
+        ({ symbol, name }) => (
           <label className="field" key={symbol}>
-            {symbol === "OPENAI"
-              ? "OpenAI"
-              : symbol === "ANTHROPIC"
-                ? "Anthropic"
-                : "DAT"}{" "}
-            初始数量（份）
+            {name} 初始数量（份）
             <input
               required
               type="number"
               min={0}
               max={100000}
               step={1}
-              value={value[symbol]}
+              value={value[symbol] ?? 100}
               onChange={(e) =>
                 change({ ...value, [symbol]: Number(e.target.value) })
               }
@@ -587,11 +621,8 @@ function InitialBalancesEditor({
     [saved, setSaved] = useState(false);
   useEffect(() => {
     setValue(actual);
-  }, [s.config.id, actual.cash, actual.DAT, actual.OPENAI, actual.ANTHROPIC]);
+  }, [s.config.id, JSON.stringify(actual)]);
   const locked = s.status !== "lobby";
-  const factor =
-    (s.participantCount * (s.config.makerCashShare ?? 0)) /
-    (1 - (s.config.makerCashShare ?? 0));
   return (
     <form
       className="stack initial-balances-editor"
@@ -609,6 +640,7 @@ function InitialBalancesEditor({
           setValue(v);
           setSaved(false);
         }}
+        instruments={s.instruments}
         legacy={s.orderBookMode === "sealed"}
         disabled={locked || busy}
       />
@@ -618,15 +650,12 @@ function InitialBalancesEditor({
           ? "本场已经开始，初始配置已锁定。"
           : "保存会重新配置已注册 Agent 的初始现金和持仓。"}
       </p>
-      {(s.config.makerCashShare ?? 0) > 0 && (
-        <p className="hint">
-          按当前 {s.participantCount} 名参与者预计，庄家开赛现金{" "}
-          {money(Math.round(value.cash * factor))} DUSD，OpenAI{" "}
-          {Math.floor(value.OPENAI * factor)} 份、Anthropic{" "}
-          {Math.floor(value.ANTHROPIC * factor)} 份；保持{" "}
-          {(s.config.makerCashShare! * 100).toFixed(0)}% 初始现金占比。
-        </p>
-      )}
+      <CapitalPreview
+        instruments={s.instruments}
+        balances={value}
+        count={s.participantCount}
+        share={s.config.makerCashShare ?? 0}
+      />
       <button className="secondary" disabled={locked || busy}>
         应用到所有 Agent
       </button>

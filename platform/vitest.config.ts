@@ -5,6 +5,7 @@ export default defineConfig({
       "tests/engine.test.ts",
       "tests/multi-asset.test.ts",
       "tests/news-maker.test.ts",
+      "tests/configurable-assets.test.ts",
     ],
     reporters: ["default", "json"],
     outputFile: { json: "reports/unit.json" },

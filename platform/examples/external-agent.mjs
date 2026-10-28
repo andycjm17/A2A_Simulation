@@ -3,13 +3,13 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 const market=process.env.MARKET_ID,key=process.env.AGENT_KEY;
 if(!market||!key)throw new Error('Set MARKET_ID and AGENT_KEY locally; never commit them.');
-const client=new Client({name:'my-external-agent',version:'2.0.0'});
+const client=new Client({name:'my-external-agent',version:'3.0.0'});
 await client.connect(new StreamableHTTPClientTransport(new URL(`https://a2a.andycui.com/mcp/${encodeURIComponent(market)}`),{requestInit:{headers:{Authorization:`Bearer ${key}`}}}));
 async function tool(name,args={}){const r=await client.callTool({name,arguments:args});const value=JSON.parse(r.content.find(c=>c.type==='text').text);if(r.isError)throw Object.assign(new Error(value.message),{code:value.code});return value;}
 function strategy(snapshot, instrument, account){
   // Replace with your strategy. Names are simulated assets, not real securities.
   const symbol=instrument.symbol;
-  const side=account.holdings[symbol]>100?'SELL':'BUY';
+  const side=account.holdings[symbol]>(snapshot.initialBalances?.[symbol]??100)?'SELL':'BUY';
   const price=Math.max(100,Math.min(20000,instrument.reference+(side==='BUY'?100:-100)));
   const quantity=Math.min(2,side==='BUY'?Math.floor(account.availableCash/price):account.availableHoldings[symbol]);
   return {round:snapshot.round,symbol,side:quantity?side:'PASS',price:quantity?price:0,quantity,requestId:`${account.id}:${symbol}:${snapshot.round}`};

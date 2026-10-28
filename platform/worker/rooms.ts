@@ -18,11 +18,15 @@ import {
   accountState,
   settlementAt,
   setInitialBalances,
+  reconfigureInstruments,
 } from "./engine";
 
 export const decisionSchema = z
   .object({
-    symbol: z.enum(["OPENAI", "ANTHROPIC", "DAT"]).optional(),
+    symbol: z
+      .string()
+      .regex(/^[A-Z][A-Z0-9_]{0,15}$/)
+      .optional(),
     round: z.number().int().min(1).max(100),
     side: z.enum(["BUY", "SELL", "PASS"]),
     price: z.number().int().min(0).max(20000),
@@ -36,13 +40,29 @@ export const decisionSchema = z
   })
   .strict();
 export const initialBalancesSchema = z
-  .object({
-    cash: z.number().int().min(0).max(1_000_000_000),
-    DAT: z.number().int().min(0).max(100_000),
-    OPENAI: z.number().int().min(0).max(100_000),
-    ANTHROPIC: z.number().int().min(0).max(100_000),
-  })
-  .strict();
+  .object({ cash: z.number().int().min(0).max(1_000_000_000) })
+  .catchall(z.number().int().min(0).max(100_000))
+  .refine(
+    (b) =>
+      Object.keys(b).length <= 32 &&
+      Object.keys(b).every(
+        (k) => k === "cash" || /^[A-Z][A-Z0-9_]{0,15}$/.test(k),
+      ),
+    { message: "初始库存须使用有效的标的代码" },
+  );
+export const instrumentsSchema = z
+  .array(
+    z
+      .object({
+        symbol: z.string().regex(/^[A-Z][A-Z0-9_]{0,15}$/),
+        name: z.string().trim().min(1).max(40),
+        initialPrice: z.number().int().min(100).max(20000),
+        icon: z.string().min(1).max(512),
+      })
+      .strict(),
+  )
+  .min(1)
+  .max(8);
 export const configSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]{2,39}$/),
@@ -55,6 +75,7 @@ export const configSchema = z
     newsEnabled: z.boolean().default(false),
     makerCashShare: z.number().min(0).max(0.5).default(0),
     initialBalances: initialBalancesSchema.optional(),
+    instruments: instrumentsSchema.optional(),
   })
   .strict()
   .refine((c) => c.practice || (c.rounds === 30 && c.roundMs === 60000), {
@@ -308,6 +329,19 @@ export class MarketRoom extends DurableObject<Env> {
               );
           });
           data = { count: hashes.length };
+          break;
+        }
+        case "instruments": {
+          const before = this.state;
+          await reconfigureInstruments(s, instrumentsSchema.parse(c.data), now);
+          ensure(
+            this.state === before,
+            "STATE_CHANGED",
+            "比赛状态已变化，请重新读取后再保存标的",
+            409,
+          );
+          changed = true;
+          data = publicState(s, now);
           break;
         }
         case "initial-balances": {

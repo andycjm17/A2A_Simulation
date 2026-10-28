@@ -16,7 +16,9 @@ export function NewsPanel({ s }: { s: Snapshot }) {
               <article className="news-item" key={n.id}>
                 <div className="row between">
                   <span className="hint">
-                    第 {n.round} 轮 · {n.symbol}
+                    第 {n.round} 轮 ·{" "}
+                    {s.instruments.find((i) => i.symbol === n.symbol)?.name ??
+                      n.symbol}
                   </span>
                   <strong
                     className={n.after >= n.before ? "positive" : "negative"}
@@ -75,9 +77,10 @@ export function NewsPanel({ s }: { s: Snapshot }) {
               </div>
             </dl>
             <p className="hint">
-              占比按全市场初始可交易现金计算，不含结算金库。每轮买单各使用 10%
-              当前现金，卖单各使用 10% 对应库存；数量可超过普通 Agent 的 10
-              份上限。报价为基本面 ±1%，按库存最多偏移 2%。
+              占比按全市场初始可交易现金计算，不含结算金库。每轮每种标的买单最多使用
+              10% 当前现金（全部买单合计最多 80%），卖单各使用 10%
+              对应库存；数量可超过普通 Agent 的 10 份上限。报价为基本面
+              ±1%，按库存最多偏移 2%。
             </p>
           </aside>
         ) : (

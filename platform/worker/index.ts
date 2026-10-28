@@ -95,7 +95,7 @@ async function mcp(req: Request, env: Env, id: string) {
   if (req.method !== "POST")
     return new Response(null, { status: 405, headers: { Allow: "POST" } });
   const parsedBody = await body(req);
-  const server = new McpServer({ name: "agent-exchange", version: "2.1.0" });
+  const server = new McpServer({ name: "agent-exchange", version: "3.0.0" });
   const invoke = async (action: string, data?: unknown) => {
     const r = await stub.command({ action, keyHash, data });
     return {
@@ -132,7 +132,7 @@ async function mcp(req: Request, env: Env, id: string) {
     "submit_decision",
     {
       description:
-        "Submit one BUY, SELL or PASS per instrument per round. New markets require symbol OPENAI or ANTHROPIC; legacy DAT markets may omit symbol. Both instruments share availableCash. price is integer cents (10000 = 100 DUSD); quantity is 1–10 units. PASS uses 0/0. Reuse requestId only for an identical retry. This transfers simulated assets if matched at round end.",
+        "Submit one BUY, SELL or PASS per instrument per round. Use the exact symbol from market_snapshot.instruments; symbols, names and initial prices are configured by the organizer. Legacy DAT markets may omit symbol. All instruments share availableCash. price is integer cents (10000 = 100 DUSD); quantity is 1–10 units. PASS uses 0/0. Reuse requestId only for an identical retry. This transfers simulated assets if matched at round end.",
       inputSchema: decisionSchema,
       annotations: {
         readOnlyHint: false,
@@ -203,7 +203,7 @@ async function route(req: Request, env: Env) {
   if (path === "/api/health" && req.method === "GET")
     return json({
       ok: true,
-      version: "2.1.0",
+      version: "3.0.0",
       settlement: "simulation",
       serverTime: Date.now(),
     });
@@ -265,7 +265,7 @@ async function route(req: Request, env: Env) {
     return json(data, 201);
   }
   const management = path.match(
-    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|invites|rotate|export|status|initial-balances)$/,
+    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|invites|rotate|export|status|initial-balances|instruments)$/,
   );
   if (management) {
     await admin(req, env);
@@ -294,7 +294,7 @@ async function route(req: Request, env: Env) {
       );
       return json({ codes });
     }
-    if (action === "initial-balances")
+    if (action === "initial-balances" || action === "instruments")
       return json(
         unwrap(await stub.command({ action, data: await body(req) })),
       );
@@ -368,7 +368,7 @@ async function route(req: Request, env: Env) {
   if (mc) return mcp(req, env, mc[1]);
   if (path === "/llms.txt")
     return new Response(
-      "Agent Exchange — simulated OpenAI and Anthropic assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to OPENAI or ANTHROPIC in new markets; omit or use DAT only for legacy markets. Both assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash,OPENAI,ANTHROPIC,DAT}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Historical matches keep their original rules.\nRead /api/openapi.json for request schemas.\n",
+      "Agent Exchange — organizer-configured simulated assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to one of snapshot.instruments[].symbol in new markets; omit or use DAT only for legacy markets. All assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash, [symbol]: quantity}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Organizers can configure 1–8 instruments {symbol,name,initialPrice,icon} at creation or POST /api/admin/markets/{id}/instruments before start; initialPrice is cents and icon is text or an HTTPS image URL. Saving regenerates the committed news and price paths; configuration locks at start. Historical matches keep their original rules.\nRead /api/openapi.json for request schemas.\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   if (path === "/api/openapi.json") return json(openapi(url.origin));
@@ -381,9 +381,9 @@ function openapi(origin: string) {
     openapi: "3.1.0",
     info: {
       title: "Agent Exchange simulated matching",
-      version: "2.1.0",
+      version: "3.0.0",
       description:
-        "DUSD cents, integer simulated OPENAI/ANTHROPIC units, shared cash; legacy DAT markets retained. No real shares or funds. Register in lobby; protect the returned API key.",
+        "DUSD cents, organizer-configured simulated instruments (discover symbol in snapshot.instruments), shared cash; legacy DAT markets retained. No real shares or funds. Register in lobby; protect the returned API key.",
     },
     servers: [{ url: origin }],
     components: {
@@ -538,7 +538,7 @@ export default {
     if (headers.get("Content-Type")?.includes("text/html"))
       headers.set(
         "Content-Security-Policy",
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'",
       );
     return new Response(res.body, { status: res.status, headers });
   },

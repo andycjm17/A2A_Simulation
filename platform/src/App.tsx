@@ -15,6 +15,7 @@ import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
+import { InstrumentIcon } from "./InstrumentSettings";
 import { assetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
 export type Snapshot = ReturnType<typeof publicState>;
@@ -357,7 +358,7 @@ export default function App() {
             />
           )}
           {view === "connect" && (
-            <Connect id={id} legacy={s?.orderBookMode === "sealed"} />
+            <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
           )}{" "}
           {view === "rules" && <Rules />}
           {view === "admin" && (
@@ -379,8 +380,7 @@ export default function App() {
             />
           )}
           <div className="footnote">
-            OpenAI / Anthropic
-            为本平台的模拟标的，与两家公司无关联，不代表真实股票、股权或报价。DUSD
+            本平台的标的名称和图标由组织者配置，仅用于模拟，不代表真实股票、股权或报价，也不表示与相应公司存在关联。DUSD
             为模拟现金，不可充值或提现。
           </div>
         </div>
@@ -442,6 +442,7 @@ function MarketView({
             <div>
               <span className="instrument-symbol">{instrument.symbol}</span>
               <h2>
+                <InstrumentIcon icon={instrument.icon} name={instrument.name} />
                 {instrument.name} <span className="subtle">/ DUSD · 模拟</span>
               </h2>
             </div>
@@ -454,7 +455,10 @@ function MarketView({
                 aria-pressed={instrument.symbol === i.symbol}
                 onClick={() => setSymbol(i.symbol)}
               >
-                <span>{i.name}</span>
+                <span>
+                  <InstrumentIcon icon={i.icon} name={i.name} />
+                  {i.name}
+                </span>
                 <small>
                   {i.lastPrice === null ? "暂无成交" : money(i.lastPrice)}
                 </small>
@@ -551,7 +555,9 @@ function MarketView({
             </div>
             <div className="hint">
               初始资产：
-              {money((s.initialBalances ?? startingBalances(s.config)).cash)}{" "}
+              {money(
+                (s.initialBalances ?? startingBalances(s.config)).cash,
+              )}{" "}
               DUSD
               {s.instruments.map((i) => (
                 <span key={i.symbol}>
@@ -773,11 +779,7 @@ function AgentView({
                       ([symbol, quantity]) => (
                         <div key={symbol}>
                           {quantity}{" "}
-                          <small>
-                            {assetName(
-                              symbol as "DAT" | "OPENAI" | "ANTHROPIC",
-                            )}
-                          </small>
+                          <small>{assetName(symbol, s?.config)}</small>
                         </div>
                       ),
                     )}
@@ -845,7 +847,7 @@ function AgentView({
                 {[...account.orders].reverse().map((o) => (
                   <tr key={o.id}>
                     <td>R{o.round}</td>
-                    <td>{assetName(o.symbol ?? "DAT")}</td>
+                    <td>{assetName(o.symbol ?? "DAT", s?.config)}</td>
                     <td>{o.side}</td>
                     <td>{o.side === "PASS" ? "—" : money(o.price)}</td>
                     <td>{o.quantity}</td>
