@@ -15,7 +15,7 @@ import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
-import { assetName } from "../worker/engine";
+import { assetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
 export type Snapshot = ReturnType<typeof publicState>;
 export type Account = ReturnType<typeof accountState>;
@@ -550,7 +550,17 @@ function MarketView({
               <span>{(s.config.rounds * s.config.roundMs) / 60000} 分钟</span>
             </div>
             <div className="hint">
-              初始资产：10,000 DUSD + 每种标的 100 份
+              初始资产：
+              {money((s.initialBalances ?? startingBalances(s.config)).cash)}{" "}
+              DUSD
+              {s.instruments.map((i) => (
+                <span key={i.symbol}>
+                  {" "}
+                  + {i.name}{" "}
+                  {(s.initialBalances ?? startingBalances(s.config))[i.symbol]}{" "}
+                  份
+                </span>
+              ))}
               <br />
               机制：
               {s.orderBookMode === "sealed" ? "历史密封订单" : "公开五档盘口"}

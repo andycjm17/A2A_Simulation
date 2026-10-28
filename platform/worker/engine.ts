@@ -38,6 +38,38 @@ function changeHolding(a: Agent, symbol: Symbol, delta: number) {
 }
 const orderSymbol = (o: { symbol?: Symbol }): Symbol => o.symbol ?? "DAT";
 export type Side = "BUY" | "SELL" | "PASS";
+export type InitialBalances = {
+  cash: number;
+  DAT: number;
+  OPENAI: number;
+  ANTHROPIC: number;
+};
+export const startingBalances = (config: MarketConfig): InitialBalances =>
+  config.initialBalances ?? {
+    cash: INITIAL_CASH,
+    DAT: INITIAL_DAT,
+    OPENAI: INITIAL_DAT,
+    ANTHROPIC: INITIAL_DAT,
+  };
+function validateBalances(config: MarketConfig) {
+  const b = startingBalances(config);
+  ensure(
+    Number.isSafeInteger(b.cash) && b.cash >= 0 && b.cash <= 1_000_000_000,
+    "INVALID_BALANCES",
+    "初始现金须为 0–10,000,000 DUSD，精确到分",
+  );
+  for (const symbol of ["DAT", ...AI_SYMBOLS] as const)
+    ensure(
+      Number.isSafeInteger(b[symbol]) && b[symbol] >= 0 && b[symbol] <= 100_000,
+      "INVALID_BALANCES",
+      "初始股票数量须为 0–100,000 的整数",
+    );
+  ensure(
+    !(config.makerCashShare && b.cash === 0),
+    "INVALID_BALANCES",
+    "启用庄家时，普通 Agent 初始现金须大于 0",
+  );
+}
 export type MarketConfig = {
   id: string;
   name: string;
@@ -48,6 +80,7 @@ export type MarketConfig = {
   assetMode?: "ai" | "legacy";
   newsEnabled?: boolean;
   makerCashShare?: number;
+  initialBalances?: InitialBalances;
 };
 export type NewsItem = {
   id: string;
@@ -62,6 +95,7 @@ export type Agent = {
   system?: "fundamental-maker";
   initialCash?: number;
   initialHoldings?: number;
+  initialInventory?: Record<"OPENAI" | "ANTHROPIC", number>;
   id: string;
   name: string;
   description: string;
@@ -172,6 +206,7 @@ export async function createState(
   seed: string,
   now: number,
 ): Promise<State> {
+  validateBalances(config);
   const path = await generatePath(seed, config.rounds);
   const assets =
     config.assetMode === "ai"
@@ -325,28 +360,66 @@ export function addAgent(
     "Agent 名称已被使用",
     409,
   );
+  const b = startingBalances(s.config);
   const agent = {
     id: a.id,
     name: a.name,
     description: a.description,
     keyHash: a.keyHash,
-    cash: INITIAL_CASH,
-    dat: s.assets ? 0 : INITIAL_DAT,
+    cash: b.cash,
+    dat: s.assets ? 0 : b.DAT,
     ...(s.assets
-      ? { holdings: { OPENAI: INITIAL_DAT, ANTHROPIC: INITIAL_DAT } }
+      ? { holdings: { OPENAI: b.OPENAI, ANTHROPIC: b.ANTHROPIC } }
       : {}),
     createdAt: now,
   };
   s.agents.push(agent);
-  const reserve = INITIAL_DAT * MAX_PRICE * symbols(s).length;
+  const reserve = symbols(s).reduce(
+    (sum, symbol) => sum + b[symbol] * MAX_PRICE,
+    0,
+  );
   s.treasuryCash += reserve;
-  s.totalCash += INITIAL_CASH + reserve;
+  s.totalCash += b.cash + reserve;
   if (s.assets)
-    for (const symbol of AI_SYMBOLS) s.assets[symbol].total += INITIAL_DAT;
-  else s.totalDat += INITIAL_DAT;
+    for (const symbol of AI_SYMBOLS) s.assets[symbol].total += b[symbol];
+  else s.totalDat += b.DAT;
   event(s, now, "agent_joined", a.id);
   audit(s);
   return agent;
+}
+/** Reset a waiting match atomically; already registered and future agents get the same allocation. */
+export function setInitialBalances(
+  s: State,
+  balances: InitialBalances,
+  now: number,
+) {
+  ensure(s.status === "lobby", "BAD_STATE", "仅可在开赛前调整初始资产", 409);
+  validateBalances({ ...s.config, initialBalances: balances });
+  const before = startingBalances(s.config);
+  s.config.initialBalances = { ...balances };
+  for (const a of s.agents) {
+    a.cash = balances.cash;
+    if (s.assets)
+      a.holdings = { OPENAI: balances.OPENAI, ANTHROPIC: balances.ANTHROPIC };
+    else a.dat = balances.DAT;
+  }
+  const count = s.agents.length;
+  s.treasuryCash = symbols(s).reduce(
+    (sum, symbol) => sum + balances[symbol] * count * MAX_PRICE,
+    0,
+  );
+  s.totalCash = s.treasuryCash + count * balances.cash;
+  if (s.assets)
+    for (const symbol of AI_SYMBOLS)
+      s.assets[symbol].total = count * balances[symbol];
+  else s.totalDat = count * balances.DAT;
+  event(
+    s,
+    now,
+    "initial_balances_changed",
+    JSON.stringify({ before, after: balances, agents: count }),
+  );
+  audit(s);
 }
 export function authenticate(s: State, keyHash: string) {
   const a = s.agents.find((a) => !a.system && a.keyHash === keyHash);
@@ -696,10 +769,11 @@ export function publicState(s: State, now: number) {
   const equity = (a: Agent) =>
     a.cash +
     instruments.reduce((n, i) => n + holding(a, i.symbol) * i.reference, 0);
+  const balances = startingBalances(s.config);
   const initialEquity =
-    INITIAL_CASH +
+    balances.cash +
     symbols(s).reduce(
-      (n, symbol) => n + INITIAL_DAT * pathFor(s, symbol)[0],
+      (n, symbol) => n + balances[symbol] * pathFor(s, symbol)[0],
       0,
     );
   const standings = s.agents
@@ -729,6 +803,7 @@ export function publicState(s: State, now: number) {
     config: s.config,
     instruments,
     initialEquity,
+    initialBalances: balances,
     orderBookMode: s.assets ? ("public-top5" as const) : ("sealed" as const),
     status: s.status,
     round: s.round,
@@ -886,9 +961,15 @@ function initializeMaker(s: State, now: number) {
   ensure(!s.agents.some((a) => a.system), "INVARIANT", "庄家重复初始化", 500);
   const ordinaryCash = s.agents.reduce((sum, a) => sum + a.cash, 0);
   const cash = Math.round((ordinaryCash * share) / (1 - share));
-  const quantity = Math.floor(
-    (s.agents.length * INITIAL_DAT * share) / (1 - share),
-  );
+  const inventory = Object.fromEntries(
+    AI_SYMBOLS.map((symbol) => [
+      symbol,
+      Math.floor(
+        (s.agents.reduce((n, a) => n + holding(a, symbol), 0) * share) /
+          (1 - share),
+      ),
+    ]),
+  ) as Record<"OPENAI" | "ANTHROPIC", number>;
   const maker: Agent = {
     id: `system-maker:${s.config.id}`,
     name: "基本面庄家",
@@ -897,21 +978,26 @@ function initializeMaker(s: State, now: number) {
     keyHash: "",
     cash,
     dat: 0,
-    holdings: { OPENAI: quantity, ANTHROPIC: quantity },
+    holdings: { ...inventory },
     initialCash: cash,
-    initialHoldings: quantity,
+    initialHoldings: inventory.OPENAI,
+    initialInventory: inventory,
     createdAt: now,
   };
   s.agents.push(maker);
-  const reserve = quantity * MAX_PRICE * 2;
+  const reserve = (inventory.OPENAI + inventory.ANTHROPIC) * MAX_PRICE;
   s.treasuryCash += reserve;
   s.totalCash += cash + reserve;
-  for (const symbol of AI_SYMBOLS) s.assets![symbol].total += quantity;
+  for (const symbol of AI_SYMBOLS) s.assets![symbol].total += inventory[symbol];
   event(
     s,
     now,
     "maker_funded",
-    JSON.stringify({ cash, quantity, cashShare: cash / (cash + ordinaryCash) }),
+    JSON.stringify({
+      cash,
+      inventory,
+      cashShare: cash / (cash + ordinaryCash),
+    }),
   );
   audit(s);
 }
@@ -927,8 +1013,8 @@ function openRound(s: State, now: number) {
   for (const symbol of AI_SYMBOLS) {
     const fundamental = pathFor(s, symbol)[s.round - 1];
     const inventory = holding(a, symbol);
-    const imbalance =
-      (inventory - a.initialHoldings!) / Math.max(1, a.initialHoldings!);
+    const initial = a.initialInventory?.[symbol] ?? a.initialHoldings!;
+    const imbalance = (inventory - initial) / Math.max(1, initial);
     const skew = Math.max(-0.02, Math.min(0.02, imbalance * 0.02));
     const center = fundamental * (1 - skew);
     const bid = Math.max(MIN_PRICE, Math.floor(center - fundamental * 0.01));
@@ -963,7 +1049,16 @@ function openRound(s: State, now: number) {
 export function makerState(s: State) {
   const a = s.agents.find((a) => a.system);
   if (!a) return null;
-  const initialEquity = a.initialCash! + a.initialHoldings! * 20000;
+  const initialInventory = a.initialInventory ?? {
+    OPENAI: a.initialHoldings!,
+    ANTHROPIC: a.initialHoldings!,
+  };
+  const initialEquity =
+    a.initialCash! +
+    AI_SYMBOLS.reduce(
+      (n, symbol) => n + initialInventory[symbol] * pathFor(s, symbol)[0],
+      0,
+    );
   const equity =
     a.cash +
     symbols(s).reduce(
@@ -988,8 +1083,11 @@ export function makerState(s: State) {
     profit: equity - initialEquity,
     initialEquity,
     initialCash: a.initialCash!,
+    initialInventory,
     cashShare:
-      a.initialCash! / (a.initialCash! + (s.agents.length - 1) * INITIAL_CASH),
+      a.initialCash! /
+      (a.initialCash! +
+        (s.agents.length - 1) * startingBalances(s.config).cash),
     volume: makerVolume,
     volumeShare: volume ? makerVolume / volume : null,
     policy: "public-fundamentals-v1" as const,

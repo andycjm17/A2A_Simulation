@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { startingBalances, type InitialBalances } from "../worker/engine";
 import { AdminDashboard } from "./AdminDashboard";
 import { useSessionGuard } from "./useSessionGuard";
 import {
   api,
+  money,
   download,
   CopyButton,
   statusName,
@@ -144,7 +146,7 @@ export function Rules() {
         ],
         [
           "02 / 一组模拟资产",
-          "新比赛中，每位 Agent 初始拥有 10,000 DUSD、100 份 OpenAI 和 100 份 Anthropic 模拟资产。两种标的共用现金，库存分别记账，资产跨轮次保留。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
+          "新比赛默认每位 Agent 初始拥有 10,000 DUSD、100 份 OpenAI 和 100 份 Anthropic 模拟资产。组织者可在开赛前统一调整现金和每种股票数量，本场配置以市场页为准。两种标的共用现金，库存分别记账，资产跨轮次保留。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
         ],
         [
           "03 / 每种标的每轮一个决定",
@@ -156,7 +158,7 @@ export function Rules() {
         ],
         [
           "05 / 结算与奖品",
-          "新比赛净资产 = 共享现金 + OpenAI 持仓 × 对应参考价 + Anthropic 持仓 × 对应参考价，初始净资产为 30,000 DUSD。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后两种资产分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
+          "新比赛净资产 = 共享现金 + OpenAI 持仓 × 对应参考价 + Anthropic 持仓 × 对应参考价，默认初始净资产为 30,000 DUSD，调整初始配置后按实际现金和持仓计算。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后两种资产分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
         ],
         [
           "06 / 随机新闻与固定庄家",
@@ -194,6 +196,9 @@ export function Admin({
     [practice, setPractice] = useState(false),
     [capacity, setCapacity] = useState(50),
     [makerCashShare, setMakerCashShare] = useState(0.2),
+    [initialBalances, setInitialBalances] = useState<InitialBalances>(
+      startingBalances({} as Snapshot["config"]),
+    ),
     [count, setCount] = useState(10),
     [codes, setCodes] = useState<string[]>([]),
     [rotateId, setRotateId] = useState(""),
@@ -272,6 +277,7 @@ export function Admin({
                   assetMode: "ai",
                   newsEnabled: true,
                   makerCashShare,
+                  initialBalances,
                   rounds: 30,
                   roundMs: 60000,
                 });
@@ -309,6 +315,10 @@ export function Admin({
                 onChange={(e) => setCapacity(Number(e.target.value))}
               />
             </label>
+            <InitialBalanceFields
+              value={initialBalances}
+              change={setInitialBalances}
+            />
             <label className="field">
               庄家初始现金占比
               <select
@@ -349,6 +359,26 @@ export function Admin({
           </div>
           <div className="padding stack">
             <strong>{s?.config.name || "选择一场比赛"}</strong>
+            {s && (
+              <InitialBalancesEditor
+                key={id}
+                s={s}
+                busy={busy || !token}
+                save={(balances, applied) =>
+                  action(async (current) => {
+                    await api(
+                      `/api/admin/markets/${id}/initial-balances`,
+                      token,
+                      balances,
+                    );
+                    if (current()) {
+                      await changed(undefined, current);
+                      if (current()) applied();
+                    }
+                  })
+                }
+              />
+            )}
             <div className="adminActions">
               {(["start", "pause", "resume"] as const).map((v) => (
                 <button
@@ -486,5 +516,125 @@ export function Admin({
         </div>
       </details>
     </>
+  );
+}
+
+function InitialBalanceFields({
+  value,
+  change,
+  legacy = false,
+  disabled = false,
+}: {
+  value: InitialBalances;
+  change: (value: InitialBalances) => void;
+  legacy?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <fieldset className="initial-balances-fields" disabled={disabled}>
+      <legend>每位普通 Agent 初始资产</legend>
+      <label className="field">
+        初始现金（DUSD）
+        <input
+          required
+          type="number"
+          min={0}
+          max={10000000}
+          step="0.01"
+          value={value.cash / 100}
+          onChange={(e) =>
+            change({ ...value, cash: Math.round(Number(e.target.value) * 100) })
+          }
+        />
+      </label>
+      {(legacy ? (["DAT"] as const) : (["OPENAI", "ANTHROPIC"] as const)).map(
+        (symbol) => (
+          <label className="field" key={symbol}>
+            {symbol === "OPENAI"
+              ? "OpenAI"
+              : symbol === "ANTHROPIC"
+                ? "Anthropic"
+                : "DAT"}{" "}
+            初始数量（份）
+            <input
+              required
+              type="number"
+              min={0}
+              max={100000}
+              step={1}
+              value={value[symbol]}
+              onChange={(e) =>
+                change({ ...value, [symbol]: Number(e.target.value) })
+              }
+            />
+          </label>
+        ),
+      )}
+    </fieldset>
+  );
+}
+function InitialBalancesEditor({
+  s,
+  busy,
+  save,
+}: {
+  s: Snapshot;
+  busy: boolean;
+  save: (balances: InitialBalances, applied: () => void) => Promise<void>;
+}) {
+  const actual = s.initialBalances ?? startingBalances(s.config);
+  const [value, setValue] = useState(actual),
+    [saved, setSaved] = useState(false);
+  useEffect(() => {
+    setValue(actual);
+  }, [s.config.id, actual.cash, actual.DAT, actual.OPENAI, actual.ANTHROPIC]);
+  const locked = s.status !== "lobby";
+  const factor =
+    (s.participantCount * (s.config.makerCashShare ?? 0)) /
+    (1 - (s.config.makerCashShare ?? 0));
+  return (
+    <form
+      className="stack initial-balances-editor"
+      aria-label="批量调整初始资产"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setSaved(false);
+        await save(value, () => setSaved(true));
+      }}
+    >
+      <h3>开赛前调试初始资产</h3>
+      <InitialBalanceFields
+        value={value}
+        change={(v) => {
+          setValue(v);
+          setSaved(false);
+        }}
+        legacy={s.orderBookMode === "sealed"}
+        disabled={locked || busy}
+      />
+      <p className="hint">
+        统一应用到本场所有普通 Agent，包括已注册与后续加入者。
+        {locked
+          ? "本场已经开始，初始配置已锁定。"
+          : "保存会重新配置已注册 Agent 的初始现金和持仓。"}
+      </p>
+      {(s.config.makerCashShare ?? 0) > 0 && (
+        <p className="hint">
+          按当前 {s.participantCount} 名参与者预计，庄家开赛现金{" "}
+          {money(Math.round(value.cash * factor))} DUSD，OpenAI{" "}
+          {Math.floor(value.OPENAI * factor)} 份、Anthropic{" "}
+          {Math.floor(value.ANTHROPIC * factor)} 份；保持{" "}
+          {(s.config.makerCashShare! * 100).toFixed(0)}% 初始现金占比。
+        </p>
+      )}
+      <button className="secondary" disabled={locked || busy}>
+        应用到所有 Agent
+      </button>
+      {saved && (
+        <span role="status" className="hint">
+          初始资产已应用到所有 Agent。
+        </span>
+      )}
+    </form>
   );
 }

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   createState,
+  setInitialBalances,
   addAgent,
   start,
   clearRound,
@@ -217,5 +218,98 @@ describe("random public news and a single capital-funded maker", () => {
     await expect(
       createState({ ...config, assetMode: "legacy" }, "invalid", 0),
     ).rejects.toThrow();
+  });
+});
+
+describe("organizer initial balances", () => {
+  const balances = { cash: 123456, DAT: 5, OPENAI: 25, ANTHROPIC: 250 };
+  it("applies to existing and future agents and recalculates maker funding and all profit baselines", async () => {
+    const s = await setup();
+    setInitialBalances(s, balances, 1);
+    addAgent(
+      s,
+      {
+        id: "later",
+        name: "Later agent",
+        keyHash: "later-key",
+        description: "",
+      },
+      2,
+    );
+    expect(
+      s.agents.every(
+        (a) =>
+          a.cash === 123456 &&
+          a.holdings!.OPENAI === 25 &&
+          a.holdings!.ANTHROPIC === 250,
+      ),
+    ).toBe(true);
+    expect(s.totalCash).toBe(3 * 123456 + 3 * 275 * 20000);
+    start(s, 1000);
+    const view = publicState(s, 1000);
+    expect(view.initialEquity).toBe(123456 + 275 * 10000);
+    expect(view.leaderboard.every((a) => a.profit === 0)).toBe(true);
+    expect(view.maker!.initialInventory).toEqual({
+      OPENAI: 18,
+      ANTHROPIC: 187,
+    });
+    expect(view.maker!.profit).toBe(0);
+    expect(view.maker!.cashShare).toBeCloseTo(0.2, 5);
+    while (s.status === "running") clearRound(s, settlementAt(s));
+    expect(publicState(s, 99999999).maker!.profit).toBe(
+      s.agents.at(-1)!.cash - view.maker!.initialEquity,
+    );
+    audit(s);
+  });
+  it("uses configured balances at registration and cannot reset a running or paused match", async () => {
+    const s = await createState(
+      { ...config, initialBalances: balances },
+      "custom-balance",
+      0,
+    );
+    addAgent(
+      s,
+      { id: "one", name: "One agent", keyHash: "one", description: "" },
+      0,
+    );
+    expect(s.agents[0].holdings).toEqual({ OPENAI: 25, ANTHROPIC: 250 });
+    start(s, 1000);
+    const saved = JSON.stringify(s);
+    expect(() =>
+      setInitialBalances(s, { ...balances, cash: 999 }, 1001),
+    ).toThrow("开赛前");
+    expect(JSON.stringify(s)).toBe(saved);
+    pause(s, 1002);
+    expect(() => setInitialBalances(s, balances, 1003)).toThrow("开赛前");
+  });
+  it("rejects negative, fractional, oversized and zero-cash maker allocations without mutation", async () => {
+    const s = await setup();
+    const before = JSON.stringify(s);
+    for (const b of [
+      { ...balances, cash: -1 },
+      { ...balances, cash: 0 },
+      { ...balances, cash: 1.5 },
+      { ...balances, OPENAI: 0.5 },
+      { ...balances, ANTHROPIC: 100001 },
+    ]) {
+      expect(() => setInitialBalances(s, b, 1)).toThrow();
+      expect(JSON.stringify(s)).toBe(before);
+    }
+  });
+  it("supports zero stock inventory and legacy DAT funding", async () => {
+    const s = await createState(
+      { ...config, assetMode: "legacy", newsEnabled: false, makerCashShare: 0 },
+      "legacy-balance",
+      0,
+    );
+    addAgent(
+      s,
+      { id: "one", name: "One agent", keyHash: "one", description: "" },
+      0,
+    );
+    setInitialBalances(s, { ...balances, cash: 0, DAT: 0 }, 1);
+    expect(s.totalCash).toBe(0);
+    expect(s.totalDat).toBe(0);
+    audit(s);
   });
 });

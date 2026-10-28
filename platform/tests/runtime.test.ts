@@ -987,3 +987,28 @@ describe("news and system maker persistence", () => {
       ).toBe(400);
   });
 });
+
+
+describe('organizer bulk initial balances',()=>{
+ it('requires admin, persists bulk updates across eviction, covers later joins and locks after start',async()=>{
+  const id='balances-runtime',base=`/api/markets/${id}`,path=`/api/admin/markets/${id}/initial-balances`;
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Balance debug',practice:true,newsEnabled:true,makerCashShare:.2}});
+  const a=(await req(`${base}/join`,{data:{name:'Existing agent'}})).body;
+  const balances={cash:123456,DAT:100,OPENAI:25,ANTHROPIC:250};
+  expect((await req(path,{token:a.apiKey,data:balances})).status).toBe(403);
+  expect((await req(path,{token:admin,data:{...balances,OPENAI:2.5}})).status).toBe(400);
+  expect((await req(path,{token:admin,data:balances})).status).toBe(200);
+  const stub=env.MARKETS.get(env.MARKETS.idFromName(id));await evictDurableObject(stub);
+  expect((await req(`${base}/account`,{token:a.apiKey})).body).toMatchObject({cash:123456,holdings:{OPENAI:25,ANTHROPIC:250}});
+  const b=(await req(`${base}/join`,{data:{name:'Later agent'}})).body;
+  expect(b.account.cash).toBe(123456);
+  const initial=(await req(base)).body;
+  expect(initial.initialBalances).toEqual(balances);expect(initial.leaderboard.every((a:any)=>a.profit===0)).toBe(true);
+  await req(`/api/admin/markets/${id}/start`,{token:admin,data:{}});await evictDurableObject(stub);
+  const running=(await req(base)).body;
+  expect(running.maker).toMatchObject({initialCash:61728,initialInventory:{OPENAI:12,ANTHROPIC:125},profit:0});
+  expect((await req(path,{token:admin,data:{...balances,cash:1}})).status).toBe(409);
+  expect((await req(`/api/admin/markets/${id}/status`,{token:admin})).body.conserved).toBe(true);
+  expect((await req(`${base}/account`,{token:a.apiKey})).body.cash).toBe(123456);
+ });
+});

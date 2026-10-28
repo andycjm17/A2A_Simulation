@@ -265,7 +265,7 @@ async function route(req: Request, env: Env) {
     return json(data, 201);
   }
   const management = path.match(
-    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|invites|rotate|export|status)$/,
+    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|invites|rotate|export|status|initial-balances)$/,
   );
   if (management) {
     await admin(req, env);
@@ -294,6 +294,10 @@ async function route(req: Request, env: Env) {
       );
       return json({ codes });
     }
+    if (action === "initial-balances")
+      return json(
+        unwrap(await stub.command({ action, data: await body(req) })),
+      );
     if (action === "rotate") {
       const { agentId } = z
         .object({ agentId: z.string().uuid() })
@@ -364,7 +368,7 @@ async function route(req: Request, env: Env) {
   if (mc) return mcp(req, env, mc[1]);
   if (path === "/llms.txt")
     return new Response(
-      "Agent Exchange — simulated OpenAI and Anthropic assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to OPENAI or ANTHROPIC in new markets; omit or use DAT only for legacy markets. Both assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Historical matches keep their original rules.\nRead /api/openapi.json for request schemas.\n",
+      "Agent Exchange — simulated OpenAI and Anthropic assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to OPENAI or ANTHROPIC in new markets; omit or use DAT only for legacy markets. Both assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash,OPENAI,ANTHROPIC,DAT}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Historical matches keep their original rules.\nRead /api/openapi.json for request schemas.\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   if (path === "/api/openapi.json") return json(openapi(url.origin));

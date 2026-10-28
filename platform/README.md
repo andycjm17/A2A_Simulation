@@ -150,3 +150,11 @@ npm run experiment
 # 需要 numpy 和 matplotlib 的 Python 环境
 python scripts/analyze-liquidity.py
 ```
+
+## 管理页初始资产调试
+
+创建比赛时可设置所有普通 Agent 的初始现金（DUSD，精确到分）以及 OpenAI、Anthropic 初始数量（整数份）。在“管理当前比赛 → 开赛前调试初始资产”也可修改等待中的比赛，点击“应用到所有 Agent”后，已注册 Agent 的现金、持仓、结算金库和守恒账本会一起更新，后续加入者使用相同配置。运行中或已暂停/结束的比赛不能修改初始配置。
+
+默认仍为 10,000 DUSD 和两种股票各 100 份。庄家的现金与各股票库存分别按新配置和既定占比计算，管理页显示按当前参与人数预计的庄家开赛资产；双方收益均以自己的实际初始净资产为基准。
+
+API 创建字段 `initialBalances` 与管理操作 `POST /api/admin/markets/{id}/initial-balances` 均使用 `{cash, OPENAI, ANTHROPIC, DAT}`，现金单位为整数“分”，数量为整数份；DAT 用于历史单标的比赛。管理操作需要组织者 Bearer 凭证。现金范围为 0–1,000,000,000 分，股票范围为各 0–100,000 份；启用庄家时现金必须大于 0。原有比赛没有该字段时使用原默认值，历史实验结果仍对应当时的默认资产配置。

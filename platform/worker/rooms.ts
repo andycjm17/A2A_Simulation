@@ -17,6 +17,7 @@ import {
   publicState,
   accountState,
   settlementAt,
+  setInitialBalances,
 } from "./engine";
 
 export const decisionSchema = z
@@ -34,6 +35,14 @@ export const decisionSchema = z
     note: z.string().max(500).optional(),
   })
   .strict();
+export const initialBalancesSchema = z
+  .object({
+    cash: z.number().int().min(0).max(1_000_000_000),
+    DAT: z.number().int().min(0).max(100_000),
+    OPENAI: z.number().int().min(0).max(100_000),
+    ANTHROPIC: z.number().int().min(0).max(100_000),
+  })
+  .strict();
 export const configSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]{2,39}$/),
@@ -45,6 +54,7 @@ export const configSchema = z
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
     newsEnabled: z.boolean().default(false),
     makerCashShare: z.number().min(0).max(0.5).default(0),
+    initialBalances: initialBalancesSchema.optional(),
   })
   .strict()
   .refine((c) => c.practice || (c.rounds === 30 && c.roundMs === 60000), {
@@ -298,6 +308,12 @@ export class MarketRoom extends DurableObject<Env> {
               );
           });
           data = { count: hashes.length };
+          break;
+        }
+        case "initial-balances": {
+          setInitialBalances(s, initialBalancesSchema.parse(c.data), now);
+          changed = true;
+          data = publicState(s, now);
           break;
         }
         case "rotate": {
