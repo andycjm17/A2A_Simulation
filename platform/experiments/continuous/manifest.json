@@ -1,0 +1,27 @@
+{
+  "baseCommit": "c1679097389715717328225e32a9c3cbca33d788",
+  "productionWorkerChanged": false,
+  "sha256": {
+    "scripts/continuous-model.ts": "fe43ee4483a5a3cf6da0643ae4f316db91dd025e362220e79b82778240410a62",
+    "scripts/continuous-experiment.ts": "6cc3c468186939edecb93ee6d9757bb4df233b471bc29af333c4b756ddd6204c",
+    "scripts/run-continuous.mjs": "cbafb435d6277d71b65bd9550b99ac7d909694b75130f31b06635ef119947f25",
+    "scripts/analyze-continuous.py": "11bc0c60aa5d11dc7bc17452329ade0f4b4914824287d0b5051216fd8a1d5500",
+    "scripts/timing-model.ts": "c829f7641752d2552503824756ebd8b49575b1bfadd3480652d5cae6c66c7041",
+    "tests/continuous-model.test.ts": "b39c987c6db920307274f397529278c15080779a67492fed7c8043adc3ad395c",
+    "experiments/continuous/methodology.md": "76cf92bbcf619a2738e581c10f0632e1bd08067ed18ee2b553ff9ab14207e26e",
+    "experiments/continuous/raw.json": "e9f6f1dd1dd035ee5b3cfc34928ab6bf23638749198ebe7255b9f7c9fa0b5bed",
+    "experiments/continuous/summary.json": "53e0243d13dd9f614258cd28bb2d1444fef4d7d63494fd6f25043fd3a8b48aca",
+    "experiments/continuous/results.md": "d563539e561ff73a3d31853ff98a16f722c97857ecd1e05e2a0165a5b20bef21"
+  },
+  "validation": {
+    "existingEngineTests": 61,
+    "priorTimingTests": 7,
+    "continuousTests": 7,
+    "typescript": "passed",
+    "matches": 2100,
+    "noMatchingClock": true,
+    "allConserved": true,
+    "primaryCellsReplayed": 5,
+    "futureNewsPrefixReplay": "passed"
+  }
+}

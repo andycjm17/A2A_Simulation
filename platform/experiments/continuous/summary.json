@@ -1,0 +1,949 @@
+{
+  "protocol": "continuous-v2",
+  "generatedAt": "2026-10-28T23:32:45.702Z",
+  "seeds": 200,
+  "sensitivitySeeds": 50,
+  "totalMatches": 2100,
+  "groups": [
+    {
+      "trigger": "timer10",
+      "volume": 3472.31,
+      "meanCashDUSD": 29715.737292499998,
+      "excessReturnPp": -0.5304256916666668,
+      "gapPct": 0.9986761539775486,
+      "calls": 600.0,
+      "arrivedCalls": 597.875,
+      "closePendingCalls": 2.125,
+      "orders": 2453.24,
+      "cancelled": 1617.985,
+      "makerUpdates": 338.51,
+      "makerVolumeShare": 0.6918274569373395,
+      "passiveWaitSeconds": 0.776884108244225,
+      "processedEvents": 1557.59,
+      "fastMeanCashDUSD": 29715.69873,
+      "slowMeanCashDUSD": 29715.775855
+    },
+    {
+      "trigger": "timer5",
+      "volume": 6678.175,
+      "meanCashDUSD": 29592.609142499998,
+      "excessReturnPp": -0.9408528583333333,
+      "gapPct": 0.9309602367680629,
+      "calls": 1200.0,
+      "arrivedCalls": 1195.575,
+      "closePendingCalls": 4.425,
+      "orders": 4475.6,
+      "cancelled": 2853.695,
+      "makerUpdates": 571.245,
+      "makerVolumeShare": 0.6725186537628518,
+      "passiveWaitSeconds": 0.3895957615445134,
+      "processedEvents": 2988.025,
+      "fastMeanCashDUSD": 29593.351639999997,
+      "slowMeanCashDUSD": 29591.866645
+    },
+    {
+      "trigger": "targeted",
+      "volume": 20355.925,
+      "meanCashDUSD": 29171.559064999994,
+      "excessReturnPp": -2.3443531166666665,
+      "gapPct": 0.8565655912912595,
+      "calls": 3701.05,
+      "arrivedCalls": 3688.015,
+      "closePendingCalls": 13.035,
+      "orders": 11203.95,
+      "cancelled": 6132.745,
+      "makerUpdates": 1130.07,
+      "makerVolumeShare": 0.6297884591778312,
+      "passiveWaitSeconds": 0.19992391722067598,
+      "processedEvents": 12403.18,
+      "fastMeanCashDUSD": 29177.445075000003,
+      "slowMeanCashDUSD": 29165.673055
+    },
+    {
+      "trigger": "market",
+      "volume": 29240.13,
+      "meanCashDUSD": 28859.499565,
+      "excessReturnPp": -3.38455145,
+      "gapPct": 0.8884307264846416,
+      "calls": 5668.495,
+      "arrivedCalls": 5648.495,
+      "closePendingCalls": 20.0,
+      "orders": 15816.855,
+      "cancelled": 8581.18,
+      "makerUpdates": 1434.475,
+      "makerVolumeShare": 0.6528288131417489,
+      "passiveWaitSeconds": 0.09305803385053654,
+      "processedEvents": 18821.795,
+      "fastMeanCashDUSD": 28840.35134,
+      "slowMeanCashDUSD": 28878.647790000003
+    },
+    {
+      "trigger": "serial",
+      "volume": 29242.73,
+      "meanCashDUSD": 28859.310345,
+      "excessReturnPp": -3.3851821833333333,
+      "gapPct": 0.8888122528571918,
+      "calls": 5668.185,
+      "arrivedCalls": 5648.185,
+      "closePendingCalls": 20.0,
+      "orders": 15816.13,
+      "cancelled": 8579.6,
+      "makerUpdates": 1434.315,
+      "makerVolumeShare": 0.6527604810807693,
+      "passiveWaitSeconds": 0.09312829486217535,
+      "processedEvents": 12771.89,
+      "fastMeanCashDUSD": 28840.371105,
+      "slowMeanCashDUSD": 28878.249585
+    }
+  ],
+  "contrasts": [
+    {
+      "id": "timer5-v-timer10",
+      "treatment": "timer5",
+      "baseline": "timer10",
+      "metrics": {
+        "volume": {
+          "treatment": 6678.175,
+          "baseline": 3472.31,
+          "delta": 3205.865,
+          "ci95": [
+            3187.974625,
+            3224.04025
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "meanCashDUSD": {
+          "treatment": 29592.609142499998,
+          "baseline": 29715.737292499998,
+          "delta": -123.12815000000012,
+          "ci95": [
+            -143.4456583750002,
+            -102.95996206250014
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "excessReturnPp": {
+          "treatment": -0.9408528583333333,
+          "baseline": -0.5304256916666668,
+          "delta": -0.41042716666666634
+        },
+        "gapPct": {
+          "treatment": 0.9309602367680629,
+          "baseline": 0.9986761539775486,
+          "delta": -0.06771591720948585,
+          "ci95": [
+            -0.07386832781582726,
+            -0.06182184675445758
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "calls": {
+          "treatment": 1200.0,
+          "baseline": 600.0,
+          "delta": 600.0
+        },
+        "arrivedCalls": {
+          "treatment": 1195.575,
+          "baseline": 597.875,
+          "delta": 597.7
+        },
+        "closePendingCalls": {
+          "treatment": 4.425,
+          "baseline": 2.125,
+          "delta": 2.3
+        },
+        "orders": {
+          "treatment": 4475.6,
+          "baseline": 2453.24,
+          "delta": 2022.36
+        },
+        "cancelled": {
+          "treatment": 2853.695,
+          "baseline": 1617.985,
+          "delta": 1235.71
+        },
+        "makerUpdates": {
+          "treatment": 571.245,
+          "baseline": 338.51,
+          "delta": 232.735
+        },
+        "makerVolumeShare": {
+          "treatment": 0.6725186537628518,
+          "baseline": 0.6918274569373395,
+          "delta": -0.019308803174487715
+        },
+        "passiveWaitSeconds": {
+          "treatment": 0.3895957615445134,
+          "baseline": 0.776884108244225,
+          "delta": -0.3872883466997118
+        },
+        "processedEvents": {
+          "treatment": 2988.025,
+          "baseline": 1557.59,
+          "delta": 1430.435
+        },
+        "fastMeanCashDUSD": {
+          "treatment": 29593.351639999997,
+          "baseline": 29715.69873,
+          "delta": -122.3470899999999
+        },
+        "slowMeanCashDUSD": {
+          "treatment": 29591.866645,
+          "baseline": 29715.775855,
+          "delta": -123.90921000000019
+        }
+      }
+    },
+    {
+      "id": "targeted-v-timer10",
+      "treatment": "targeted",
+      "baseline": "timer10",
+      "metrics": {
+        "volume": {
+          "treatment": 20355.925,
+          "baseline": 3472.31,
+          "delta": 16883.615,
+          "ci95": [
+            16690.518125000002,
+            17072.715875
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "meanCashDUSD": {
+          "treatment": 29171.559064999994,
+          "baseline": 29715.737292499998,
+          "delta": -544.1782275,
+          "ci95": [
+            -573.2102957500001,
+            -515.5491718749996
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "excessReturnPp": {
+          "treatment": -2.3443531166666665,
+          "baseline": -0.5304256916666668,
+          "delta": -1.8139274249999997
+        },
+        "gapPct": {
+          "treatment": 0.8565655912912595,
+          "baseline": 0.9986761539775486,
+          "delta": -0.14211056268628938,
+          "ci95": [
+            -0.14879628342511927,
+            -0.13561313896547939
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "calls": {
+          "treatment": 3701.05,
+          "baseline": 600.0,
+          "delta": 3101.05
+        },
+        "arrivedCalls": {
+          "treatment": 3688.015,
+          "baseline": 597.875,
+          "delta": 3090.14
+        },
+        "closePendingCalls": {
+          "treatment": 13.035,
+          "baseline": 2.125,
+          "delta": 10.91
+        },
+        "orders": {
+          "treatment": 11203.95,
+          "baseline": 2453.24,
+          "delta": 8750.71
+        },
+        "cancelled": {
+          "treatment": 6132.745,
+          "baseline": 1617.985,
+          "delta": 4514.76
+        },
+        "makerUpdates": {
+          "treatment": 1130.07,
+          "baseline": 338.51,
+          "delta": 791.56
+        },
+        "makerVolumeShare": {
+          "treatment": 0.6297884591778312,
+          "baseline": 0.6918274569373395,
+          "delta": -0.062038997759508316
+        },
+        "passiveWaitSeconds": {
+          "treatment": 0.19992391722067598,
+          "baseline": 0.776884108244225,
+          "delta": -0.5769601910235492
+        },
+        "processedEvents": {
+          "treatment": 12403.18,
+          "baseline": 1557.59,
+          "delta": 10845.59
+        },
+        "fastMeanCashDUSD": {
+          "treatment": 29177.445075000003,
+          "baseline": 29715.69873,
+          "delta": -538.2536549999998
+        },
+        "slowMeanCashDUSD": {
+          "treatment": 29165.673055,
+          "baseline": 29715.775855,
+          "delta": -550.1027999999998
+        }
+      }
+    },
+    {
+      "id": "market-v-targeted",
+      "treatment": "market",
+      "baseline": "targeted",
+      "metrics": {
+        "volume": {
+          "treatment": 29240.13,
+          "baseline": 20355.925,
+          "delta": 8884.205,
+          "ci95": [
+            8720.161875000002,
+            9052.920125
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "meanCashDUSD": {
+          "treatment": 28859.499565,
+          "baseline": 29171.559064999994,
+          "delta": -312.0595,
+          "ci95": [
+            -334.3111883750002,
+            -290.08455918749996
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "excessReturnPp": {
+          "treatment": -3.38455145,
+          "baseline": -2.3443531166666665,
+          "delta": -1.0401983333333336
+        },
+        "gapPct": {
+          "treatment": 0.8884307264846416,
+          "baseline": 0.8565655912912595,
+          "delta": 0.03186513519338217,
+          "ci95": [
+            0.029029433948809174,
+            0.034750359617328815
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "calls": {
+          "treatment": 5668.495,
+          "baseline": 3701.05,
+          "delta": 1967.445
+        },
+        "arrivedCalls": {
+          "treatment": 5648.495,
+          "baseline": 3688.015,
+          "delta": 1960.48
+        },
+        "closePendingCalls": {
+          "treatment": 20.0,
+          "baseline": 13.035,
+          "delta": 6.965
+        },
+        "orders": {
+          "treatment": 15816.855,
+          "baseline": 11203.95,
+          "delta": 4612.905
+        },
+        "cancelled": {
+          "treatment": 8581.18,
+          "baseline": 6132.745,
+          "delta": 2448.435
+        },
+        "makerUpdates": {
+          "treatment": 1434.475,
+          "baseline": 1130.07,
+          "delta": 304.405
+        },
+        "makerVolumeShare": {
+          "treatment": 0.6528288131417489,
+          "baseline": 0.6297884591778312,
+          "delta": 0.023040353963917733
+        },
+        "passiveWaitSeconds": {
+          "treatment": 0.09305803385053654,
+          "baseline": 0.19992391722067598,
+          "delta": -0.10686588337013941
+        },
+        "processedEvents": {
+          "treatment": 18821.795,
+          "baseline": 12403.18,
+          "delta": 6418.615
+        },
+        "fastMeanCashDUSD": {
+          "treatment": 28840.35134,
+          "baseline": 29177.445075000003,
+          "delta": -337.0937350000001
+        },
+        "slowMeanCashDUSD": {
+          "treatment": 28878.647790000003,
+          "baseline": 29165.673055,
+          "delta": -287.02526500000016
+        }
+      }
+    },
+    {
+      "id": "serial-v-targeted",
+      "treatment": "serial",
+      "baseline": "targeted",
+      "metrics": {
+        "volume": {
+          "treatment": 29242.73,
+          "baseline": 20355.925,
+          "delta": 8886.805,
+          "ci95": [
+            8723.2875,
+            9054.87025
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "meanCashDUSD": {
+          "treatment": 28859.310345,
+          "baseline": 29171.559064999994,
+          "delta": -312.24871999999993,
+          "ci95": [
+            -334.4546617499997,
+            -290.36951893749983
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "excessReturnPp": {
+          "treatment": -3.3851821833333333,
+          "baseline": -2.3443531166666665,
+          "delta": -1.0408290666666666
+        },
+        "gapPct": {
+          "treatment": 0.8888122528571918,
+          "baseline": 0.8565655912912595,
+          "delta": 0.03224666156593239,
+          "ci95": [
+            0.029352719003694155,
+            0.03516539443906412
+          ],
+          "p": 5e-05,
+          "holmP": 0.0006000000000000001
+        },
+        "calls": {
+          "treatment": 5668.185,
+          "baseline": 3701.05,
+          "delta": 1967.135
+        },
+        "arrivedCalls": {
+          "treatment": 5648.185,
+          "baseline": 3688.015,
+          "delta": 1960.17
+        },
+        "closePendingCalls": {
+          "treatment": 20.0,
+          "baseline": 13.035,
+          "delta": 6.965
+        },
+        "orders": {
+          "treatment": 15816.13,
+          "baseline": 11203.95,
+          "delta": 4612.18
+        },
+        "cancelled": {
+          "treatment": 8579.6,
+          "baseline": 6132.745,
+          "delta": 2446.855
+        },
+        "makerUpdates": {
+          "treatment": 1434.315,
+          "baseline": 1130.07,
+          "delta": 304.245
+        },
+        "makerVolumeShare": {
+          "treatment": 0.6527604810807693,
+          "baseline": 0.6297884591778312,
+          "delta": 0.022972021902938206
+        },
+        "passiveWaitSeconds": {
+          "treatment": 0.09312829486217535,
+          "baseline": 0.19992391722067598,
+          "delta": -0.10679562235850064
+        },
+        "processedEvents": {
+          "treatment": 12771.89,
+          "baseline": 12403.18,
+          "delta": 368.71
+        },
+        "fastMeanCashDUSD": {
+          "treatment": 28840.371105,
+          "baseline": 29177.445075000003,
+          "delta": -337.0739700000003
+        },
+        "slowMeanCashDUSD": {
+          "treatment": 28878.249585,
+          "baseline": 29165.673055,
+          "delta": -287.42347000000007
+        }
+      }
+    }
+  ],
+  "sensitivity": [
+    {
+      "family": "heterogeneous",
+      "trigger": "timer10",
+      "seeds": 50,
+      "volume": 3458.86,
+      "meanCashDUSD": 29466.78645,
+      "excessReturnPp": -0.5599784999999997,
+      "gapPct": 1.0019303269968272,
+      "calls": 600.0,
+      "arrivedCalls": 596.48,
+      "closePendingCalls": 3.52,
+      "orders": 2446.44,
+      "cancelled": 1617.66,
+      "makerUpdates": 337.46,
+      "makerVolumeShare": 0.6971251470393227,
+      "passiveWaitSeconds": 0.7823750855696855,
+      "processedEvents": 1555.36,
+      "fastMeanCashDUSD": 29476.89918,
+      "slowMeanCashDUSD": 29456.673720000006
+    },
+    {
+      "family": "heterogeneous",
+      "trigger": "timer5",
+      "seeds": 50,
+      "volume": 6646.62,
+      "meanCashDUSD": 29334.07836,
+      "excessReturnPp": -1.0023387999999995,
+      "gapPct": 0.9331386473712115,
+      "calls": 1200.0,
+      "arrivedCalls": 1193.34,
+      "closePendingCalls": 6.66,
+      "orders": 4468.08,
+      "cancelled": 2857.14,
+      "makerUpdates": 570.54,
+      "makerVolumeShare": 0.6769364711284065,
+      "passiveWaitSeconds": 0.38977612879646967,
+      "processedEvents": 2985.3,
+      "fastMeanCashDUSD": 29314.32218,
+      "slowMeanCashDUSD": 29353.83454
+    },
+    {
+      "family": "heterogeneous",
+      "trigger": "targeted",
+      "seeds": 50,
+      "volume": 24519.86,
+      "meanCashDUSD": 28741.656559999996,
+      "excessReturnPp": -2.9770781333333334,
+      "gapPct": 0.8677163957785697,
+      "calls": 4511.34,
+      "arrivedCalls": 4499.4,
+      "closePendingCalls": 11.94,
+      "orders": 13219.66,
+      "cancelled": 7325.94,
+      "makerUpdates": 1272.88,
+      "makerVolumeShare": 0.6673930254994951,
+      "passiveWaitSeconds": 0.155588728694991,
+      "processedEvents": 14967.84,
+      "fastMeanCashDUSD": 28239.59052,
+      "slowMeanCashDUSD": 29243.722599999997
+    },
+    {
+      "family": "heterogeneous",
+      "trigger": "market",
+      "seeds": 50,
+      "volume": 51953.78,
+      "meanCashDUSD": 27831.109039999996,
+      "excessReturnPp": -6.012236533333334,
+      "gapPct": 0.8837277719136765,
+      "calls": 10662.26,
+      "arrivedCalls": 10642.26,
+      "closePendingCalls": 20.0,
+      "orders": 25833.18,
+      "cancelled": 13177.98,
+      "makerUpdates": 1840.56,
+      "makerVolumeShare": 0.67384356265886,
+      "passiveWaitSeconds": 0.05279715429623317,
+      "processedEvents": 34169.4,
+      "fastMeanCashDUSD": 26434.81784,
+      "slowMeanCashDUSD": 29227.40024
+    },
+    {
+      "family": "heterogeneous",
+      "trigger": "serial",
+      "seeds": 50,
+      "volume": 51942.76,
+      "meanCashDUSD": 27834.26457,
+      "excessReturnPp": -6.001718100000001,
+      "gapPct": 0.883149592994324,
+      "calls": 10661.8,
+      "arrivedCalls": 10641.8,
+      "closePendingCalls": 20.0,
+      "orders": 25844.96,
+      "cancelled": 13188.94,
+      "makerUpdates": 1844.52,
+      "makerVolumeShare": 0.6738429928271565,
+      "passiveWaitSeconds": 0.05269400509293159,
+      "processedEvents": 23169.54,
+      "fastMeanCashDUSD": 26434.644999999997,
+      "slowMeanCashDUSD": 29233.88414
+    },
+    {
+      "family": "market-cooldown",
+      "trigger": "market",
+      "seeds": 50,
+      "volume": 28432.68,
+      "meanCashDUSD": 28650.271699999994,
+      "excessReturnPp": -3.281694333333333,
+      "gapPct": 0.8912813630249657,
+      "calls": 5536.68,
+      "arrivedCalls": 5517.12,
+      "closePendingCalls": 19.56,
+      "orders": 15496.18,
+      "cancelled": 8451.84,
+      "makerUpdates": 1414.66,
+      "makerVolumeShare": 0.6533070228284668,
+      "passiveWaitSeconds": 0.09510959351777519,
+      "processedEvents": 19538.3,
+      "fastMeanCashDUSD": 28622.1604,
+      "slowMeanCashDUSD": 28678.382999999998
+    },
+    {
+      "family": "slow-agents",
+      "trigger": "timer10",
+      "seeds": 50,
+      "volume": 3430.42,
+      "meanCashDUSD": 29471.62766,
+      "excessReturnPp": -0.5438411333333337,
+      "gapPct": 1.0149966858913002,
+      "calls": 600.0,
+      "arrivedCalls": 593.68,
+      "closePendingCalls": 6.32,
+      "orders": 2442.24,
+      "cancelled": 1625.72,
+      "makerUpdates": 337.66,
+      "makerVolumeShare": 0.7087497973086934,
+      "passiveWaitSeconds": 0.7689525772312422,
+      "processedEvents": 1552.76,
+      "fastMeanCashDUSD": 29491.042960000002,
+      "slowMeanCashDUSD": 29452.212360000005
+    },
+    {
+      "family": "slow-agents",
+      "trigger": "timer5",
+      "seeds": 50,
+      "volume": 6587.5,
+      "meanCashDUSD": 29341.135179999994,
+      "excessReturnPp": -0.978816066666668,
+      "gapPct": 0.944484359431663,
+      "calls": 1200.0,
+      "arrivedCalls": 1187.72,
+      "closePendingCalls": 12.28,
+      "orders": 4456.24,
+      "cancelled": 2872.6,
+      "makerUpdates": 569.96,
+      "makerVolumeShare": 0.6887465605785056,
+      "passiveWaitSeconds": 0.38301878776308884,
+      "processedEvents": 2979.1,
+      "fastMeanCashDUSD": 29340.78068,
+      "slowMeanCashDUSD": 29341.48968
+    },
+    {
+      "family": "slow-agents",
+      "trigger": "targeted",
+      "seeds": 50,
+      "volume": 9359.64,
+      "meanCashDUSD": 29256.411389999994,
+      "excessReturnPp": -1.2612286999999995,
+      "gapPct": 0.9099654350915389,
+      "calls": 1702.62,
+      "arrivedCalls": 1685.48,
+      "closePendingCalls": 17.14,
+      "orders": 5969.9,
+      "cancelled": 3699.42,
+      "makerUpdates": 722.12,
+      "makerVolumeShare": 0.6729259237724134,
+      "passiveWaitSeconds": 0.3347101050820907,
+      "processedEvents": 6085.82,
+      "fastMeanCashDUSD": 29293.690759999998,
+      "slowMeanCashDUSD": 29219.13202
+    },
+    {
+      "family": "slow-agents",
+      "trigger": "market",
+      "seeds": 50,
+      "volume": 10620.3,
+      "meanCashDUSD": 29215.80622,
+      "excessReturnPp": -1.3965792666666668,
+      "gapPct": 0.9247147511242688,
+      "calls": 1969.6,
+      "arrivedCalls": 1949.6,
+      "closePendingCalls": 20.0,
+      "orders": 6783.96,
+      "cancelled": 4225.02,
+      "makerUpdates": 807.32,
+      "makerVolumeShare": 0.6827418386132643,
+      "passiveWaitSeconds": 0.23552873791384393,
+      "processedEvents": 7134.82,
+      "fastMeanCashDUSD": 29235.4453,
+      "slowMeanCashDUSD": 29196.167139999998
+    },
+    {
+      "family": "slow-agents",
+      "trigger": "serial",
+      "seeds": 50,
+      "volume": 10614.24,
+      "meanCashDUSD": 29215.68178,
+      "excessReturnPp": -1.3969940666666665,
+      "gapPct": 0.9219636870415548,
+      "calls": 1969.52,
+      "arrivedCalls": 1949.52,
+      "closePendingCalls": 20.0,
+      "orders": 6789.42,
+      "cancelled": 4231.5,
+      "makerUpdates": 808.8,
+      "makerVolumeShare": 0.6825178481068435,
+      "passiveWaitSeconds": 0.2352499192141501,
+      "processedEvents": 4749.26,
+      "fastMeanCashDUSD": 29237.093699999998,
+      "slowMeanCashDUSD": 29194.269860000004
+    },
+    {
+      "family": "slow-maker",
+      "trigger": "timer10",
+      "seeds": 50,
+      "volume": 3468.02,
+      "meanCashDUSD": 29463.87885,
+      "excessReturnPp": -0.5696705000000006,
+      "gapPct": 1.1561441622525392,
+      "calls": 600.0,
+      "arrivedCalls": 597.74,
+      "closePendingCalls": 2.26,
+      "orders": 1736.76,
+      "cancelled": 896.84,
+      "makerUpdates": 159.46,
+      "makerVolumeShare": 0.6833799102117698,
+      "passiveWaitSeconds": 0.894147154728287,
+      "processedEvents": 1378.62,
+      "fastMeanCashDUSD": 29480.188159999998,
+      "slowMeanCashDUSD": 29447.56954
+    },
+    {
+      "family": "slow-maker",
+      "trigger": "timer5",
+      "seeds": 50,
+      "volume": 6659.0,
+      "meanCashDUSD": 29328.78212,
+      "excessReturnPp": -1.0199929333333326,
+      "gapPct": 1.077529285174436,
+      "calls": 1200.0,
+      "arrivedCalls": 1195.5,
+      "closePendingCalls": 4.5,
+      "orders": 2977.22,
+      "cancelled": 1347.82,
+      "makerUpdates": 196.96,
+      "makerVolumeShare": 0.6657553005127768,
+      "passiveWaitSeconds": 0.5197925121439189,
+      "processedEvents": 2613.88,
+      "fastMeanCashDUSD": 29324.722319999993,
+      "slowMeanCashDUSD": 29332.841920000003
+    },
+    {
+      "family": "slow-maker",
+      "trigger": "targeted",
+      "seeds": 50,
+      "volume": 20564.72,
+      "meanCashDUSD": 28952.471279999994,
+      "excessReturnPp": -2.274362400000001,
+      "gapPct": 0.999333742882653,
+      "calls": 3767.16,
+      "arrivedCalls": 3754.36,
+      "closePendingCalls": 12.8,
+      "orders": 7745.96,
+      "cancelled": 2561.14,
+      "makerUpdates": 238.34,
+      "makerVolumeShare": 0.6187910054515479,
+      "passiveWaitSeconds": 0.31949217552776193,
+      "processedEvents": 11714.32,
+      "fastMeanCashDUSD": 28970.47,
+      "slowMeanCashDUSD": 28934.472560000006
+    },
+    {
+      "family": "slow-maker",
+      "trigger": "market",
+      "seeds": 50,
+      "volume": 29061.04,
+      "meanCashDUSD": 28649.26803,
+      "excessReturnPp": -3.2850398999999997,
+      "gapPct": 1.0515472398888621,
+      "calls": 5667.92,
+      "arrivedCalls": 5647.92,
+      "closePendingCalls": 20.0,
+      "orders": 11056.44,
+      "cancelled": 3756.78,
+      "makerUpdates": 248.52,
+      "makerVolumeShare": 0.6407431584226987,
+      "passiveWaitSeconds": 0.24241390113348352,
+      "processedEvents": 17624.34,
+      "fastMeanCashDUSD": 28635.881059999996,
+      "slowMeanCashDUSD": 28662.655
+    },
+    {
+      "family": "slow-maker",
+      "trigger": "serial",
+      "seeds": 50,
+      "volume": 29042.32,
+      "meanCashDUSD": 28649.472859999998,
+      "excessReturnPp": -3.2843571333333323,
+      "gapPct": 1.04996439636098,
+      "calls": 5668.02,
+      "arrivedCalls": 5648.02,
+      "closePendingCalls": 20.0,
+      "orders": 11054.9,
+      "cancelled": 3756.6,
+      "makerUpdates": 248.34,
+      "makerVolumeShare": 0.6404126052896265,
+      "passiveWaitSeconds": 0.24283044980881768,
+      "processedEvents": 11585.8,
+      "fastMeanCashDUSD": 28639.647199999996,
+      "slowMeanCashDUSD": 28659.29852
+    },
+    {
+      "family": "targeted-cancel-news",
+      "trigger": "targeted",
+      "seeds": 50,
+      "volume": 19686.26,
+      "meanCashDUSD": 29018.693129999996,
+      "excessReturnPp": -2.0536228999999997,
+      "gapPct": 0.8813268701061362,
+      "calls": 3632.46,
+      "arrivedCalls": 3620.32,
+      "closePendingCalls": 12.14,
+      "orders": 11012.78,
+      "cancelled": 6104.08,
+      "makerUpdates": 1114.28,
+      "makerVolumeShare": 0.6285316758491237,
+      "passiveWaitSeconds": 0.13558937528924703,
+      "processedEvents": 12173.32,
+      "fastMeanCashDUSD": 29049.63548,
+      "slowMeanCashDUSD": 28987.750780000002
+    },
+    {
+      "family": "ttl30",
+      "trigger": "timer10",
+      "seeds": 50,
+      "volume": 3467.58,
+      "meanCashDUSD": 29466.70304,
+      "excessReturnPp": -0.5602565333333327,
+      "gapPct": 1.0030482552037763,
+      "calls": 600.0,
+      "arrivedCalls": 597.74,
+      "closePendingCalls": 2.26,
+      "orders": 2445.26,
+      "cancelled": 1609.72,
+      "makerUpdates": 336.58,
+      "makerVolumeShare": 0.6896109858492602,
+      "passiveWaitSeconds": 0.7898125814113872,
+      "processedEvents": 3232.62,
+      "fastMeanCashDUSD": 29482.39424,
+      "slowMeanCashDUSD": 29451.011840000003
+    },
+    {
+      "family": "ttl30",
+      "trigger": "timer5",
+      "seeds": 50,
+      "volume": 6655.08,
+      "meanCashDUSD": 29333.220159999997,
+      "excessReturnPp": -1.0051994666666664,
+      "gapPct": 0.9314559884562563,
+      "calls": 1200.0,
+      "arrivedCalls": 1195.5,
+      "closePendingCalls": 4.5,
+      "orders": 4458.14,
+      "cancelled": 2836.64,
+      "makerUpdates": 567.08,
+      "makerVolumeShare": 0.6703553060179688,
+      "passiveWaitSeconds": 0.39360327826483854,
+      "processedEvents": 5960.56,
+      "fastMeanCashDUSD": 29326.085160000002,
+      "slowMeanCashDUSD": 29340.35516
+    },
+    {
+      "family": "ttl30",
+      "trigger": "targeted",
+      "seeds": 50,
+      "volume": 20293.8,
+      "meanCashDUSD": 28947.604450000003,
+      "excessReturnPp": -2.290585166666667,
+      "gapPct": 0.860956011003729,
+      "calls": 3710.22,
+      "arrivedCalls": 3697.76,
+      "closePendingCalls": 12.46,
+      "orders": 11211.48,
+      "cancelled": 6130.52,
+      "makerUpdates": 1129.68,
+      "makerVolumeShare": 0.6306884190826277,
+      "passiveWaitSeconds": 0.17481187836583484,
+      "processedEvents": 19297.94,
+      "fastMeanCashDUSD": 28964.36376,
+      "slowMeanCashDUSD": 28930.845139999994
+    },
+    {
+      "family": "ttl30",
+      "trigger": "market",
+      "seeds": 50,
+      "volume": 29104.44,
+      "meanCashDUSD": 28644.900059999996,
+      "excessReturnPp": -3.2995997999999997,
+      "gapPct": 0.8891528568523923,
+      "calls": 5668.3,
+      "arrivedCalls": 5648.3,
+      "closePendingCalls": 20.0,
+      "orders": 15793.7,
+      "cancelled": 8584.34,
+      "makerUpdates": 1432.8,
+      "makerVolumeShare": 0.6533010074383415,
+      "passiveWaitSeconds": 0.09331392515331306,
+      "processedEvents": 28314.06,
+      "fastMeanCashDUSD": 28637.723280000002,
+      "slowMeanCashDUSD": 28652.076840000005
+    },
+    {
+      "family": "ttl30",
+      "trigger": "serial",
+      "seeds": 50,
+      "volume": 29100.7,
+      "meanCashDUSD": 28647.41572,
+      "excessReturnPp": -3.2912142666666675,
+      "gapPct": 0.8888850407533248,
+      "calls": 5668.02,
+      "arrivedCalls": 5648.02,
+      "closePendingCalls": 20.0,
+      "orders": 15793.88,
+      "cancelled": 8584.88,
+      "makerUpdates": 1433.12,
+      "makerVolumeShare": 0.6530845493542797,
+      "passiveWaitSeconds": 0.09320822820373006,
+      "processedEvents": 22259.8,
+      "fastMeanCashDUSD": 28636.398220000003,
+      "slowMeanCashDUSD": 28658.433220000003
+    }
+  ],
+  "validation": {
+    "allConserved": true,
+    "noAuction": true,
+    "noMatchingClock": true,
+    "replayedPrimaryCells": 5
+  }
+}
