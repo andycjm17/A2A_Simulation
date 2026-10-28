@@ -1,0 +1,26 @@
+import {test,expect} from '@playwright/test';
+import {readFileSync} from 'node:fs';
+const snapshot=JSON.parse(readFileSync('reports/run-acceptance-1789186009126.json','utf8')).summary;
+test('trading layout exposes real price ranges, keyboard inspection and read-only account rail',async({page},info)=>{
+ const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.route('**/api/markets',r=>r.fulfill({json:{markets:[{id:snapshot.config.id,name:snapshot.config.name,practice:1}]}}));
+ await page.route(`**/api/markets/${snapshot.config.id}`,r=>r.fulfill({json:snapshot}));
+ await page.goto(`/?market=${snapshot.config.id}`);
+ const chart=page.getByRole('slider',{name:'参考价格路径'});
+ await expect(chart).toHaveAttribute('aria-valuenow','30');
+ await page.getByRole('button',{name:'5 轮',exact:true}).click();
+ await expect(chart).toHaveAttribute('aria-valuemin','25');
+ await chart.focus();await page.keyboard.press('Home');
+ await expect(chart).toHaveAttribute('aria-valuenow','25');
+ await expect(chart).toHaveAttribute('aria-valuetext',new RegExp((snapshot.history[25]/100).toFixed(2)));
+ await page.keyboard.press('ArrowRight');await expect(chart).toHaveAttribute('aria-valuenow','26');
+ await page.getByRole('button',{name:'全部',exact:true}).click();
+ await expect(chart).toHaveAttribute('aria-valuemin','0');
+ await expect(page.getByRole('heading',{name:'Agent 账户'})).toBeVisible();
+ await expect(page.getByRole('button',{name:/买入|卖出|提交订单/})).toHaveCount(0);
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+ await page.evaluate(()=>window.scrollTo(0,0));
+ await page.screenshot({path:`reports/trading-ui-${info.project.name}.png`,fullPage:true});
+ await page.screenshot({path:`reports/trading-ui-${info.project.name}-viewport.png`});
+ expect(errors).toEqual([]);
+});

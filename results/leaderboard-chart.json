@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-leaderboard",
+  "title": "10个Agent · 100轮累计收益（模拟数据）",
+  "chart": {
+    "type": "horizontalBar",
+    "x": "strategy",
+    "y": "total",
+    "xLabel": "Agent策略",
+    "yLabel": "累计收益（sUSD）",
+    "showValues": true,
+    "showLegend": false,
+    "startAtZero": true
+  },
+  "rows": [
+    {
+      "strategy": "大单快成交",
+      "total": 4864
+    },
+    {
+      "strategy": "盘口抢价",
+      "total": 4263
+    },
+    {
+      "strategy": "价值捕捉",
+      "total": 4226
+    },
+    {
+      "strategy": "均值回归",
+      "total": 4026
+    },
+    {
+      "strategy": "库存做市",
+      "total": 3701
+    },
+    {
+      "strategy": "逐步让价",
+      "total": 3466
+    },
+    {
+      "strategy": "耐心高利润",
+      "total": 2635
+    },
+    {
+      "strategy": "不交易",
+      "total": 0
+    },
+    {
+      "strategy": "随机交易",
+      "total": -3884
+    },
+    {
+      "strategy": "趋势追随",
+      "total": -9459
+    }
+  ],
+  "source": {
+    "label": "本地100轮合成市场实验",
+    "files": [
+      {
+        "label": "results/main/analysis.json"
+      },
+      {
+        "label": "results/main/rounds.jsonl"
+      },
+      {
+        "label": "simulation/agents.py"
+      }
+    ],
+    "caveats": [
+      "10个程序化Agent，不使用LLM；仅适用于本次市场规则与对手组合。",
+      "总收益为100轮重置实验的得分之和，不是真实美元或复利。"
+    ]
+  },
+  "height": 500,
+  "theme": "codex-classic"
+}

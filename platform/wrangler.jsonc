@@ -1,0 +1,41 @@
+{
+  "name": "andycui-a2a",
+  "account_id": "e1ed3db53809ba2f6761f0e2e5138b23",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-11",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "routes": [{ "pattern": "a2a.andycui.com", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "run_worker_first": true,
+  },
+  "durable_objects": {
+    "bindings": [
+      { "name": "MARKETS", "class_name": "MarketRoom" },
+      { "name": "CATALOG", "class_name": "MarketCatalog" },
+    ],
+  },
+  "migrations": [
+    { "tag": "v1", "new_sqlite_classes": ["MarketRoom", "MarketCatalog"] },
+  ],
+  "vars": { "APP_ORIGIN": "https://a2a.andycui.com" },
+  "ratelimits": [
+    {
+      "name": "IP_LIMITER",
+      "namespace_id": "1061",
+      "simple": { "limit": 3000, "period": 60 },
+    },
+    {
+      "name": "NETWORK_LIMITER",
+      "namespace_id": "1062",
+      "simple": { "limit": 6000, "period": 60 },
+    },
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": { "enabled": true, "head_sampling_rate": 0.1 },
+    "traces": { "enabled": true, "head_sampling_rate": 0.01 },
+  },
+}

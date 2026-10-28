@@ -1,0 +1,27 @@
+import {Client} from '@modelcontextprotocol/sdk/client/index.js';
+import {StreamableHTTPClientTransport} from '@modelcontextprotocol/sdk/client/streamableHttp.js';
+import {createHash} from 'node:crypto';
+import {writeFile,mkdir} from 'node:fs/promises';
+import assert from 'node:assert/strict';
+import {api} from './agent-runner.mjs';
+const base=process.env.BASE_URL,admin=process.env.ADMIN_TOKEN;
+if(base!=='https://a2a.andycui.com'||!admin)throw new Error('Use the production wrapper with the configured organizer credential.');
+const id=`mcp-acceptance-${Date.now()}`,checks=[];
+assert.equal((await api(base,'/api/health')).ok,true);checks.push('HTTPS health');
+await api(base,'/api/admin/markets',{token:admin,data:{id,name:'MCP × API · 线上撮合验收',practice:true,rounds:1,roundMs:10000,capacity:10}});
+const a=await api(base,`/api/markets/${id}/join`,{data:{name:'MCP Buyer',description:'Official MCP SDK client; external test agent.'}}),b=await api(base,`/api/markets/${id}/join`,{data:{name:'API Seller',description:'External HTTPS client.'}});
+const client=new Client({name:'production-acceptance',version:'1.0.0'});await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp/${id}`),{requestInit:{headers:{Authorization:`Bearer ${a.apiKey}`}}}));
+assert.equal((await client.listTools()).tools.length,3);checks.push('official MCP handshake and tools discovery');
+await api(base,`/api/admin/markets/${id}/start`,{token:admin,data:{}});
+const decision={round:1,side:'BUY',price:11000,quantity:5,requestId:'production-round-one'};
+const buy=await client.callTool({name:'submit_decision',arguments:decision});assert.equal(buy.isError,false);
+const retry=await api(base,`/api/markets/${id}/decision`,{token:a.apiKey,data:decision});assert.equal(JSON.parse(buy.content[0].text).id,retry.id);checks.push('MCP submission and cross-transport idempotent retry');
+await api(base,`/api/markets/${id}/decision`,{token:b.apiKey,data:{...decision,side:'SELL',price:9000}});
+await assert.rejects(api(base,`/api/admin/markets/${id}/pause`,{token:a.apiKey,data:{}}),e=>e.status===403);checks.push('agent cannot access organizer controls');
+assert.equal((await fetch(`${base}/api/health`,{headers:{Origin:'https://evil.example'}})).status,403);checks.push('hostile Origin rejected');
+// Intentionally make no requests until after the alarm deadline.
+await new Promise(r=>setTimeout(r,11000));
+const s=await api(base,`/api/markets/${id}`);assert.equal(s.status,'finished');assert.equal(s.tradeCount,1);assert.equal(s.trades[0].price,10000);assert.equal(s.trades[0].quantity,5);assert.ok(s.leaderboard.every(a=>a.dat===0));
+assert.equal(createHash('sha256').update(JSON.stringify(s.reveal)).digest('hex'),s.commitment);checks.push('scheduled settlement, midpoint fill, redemption and commitment');
+const ex=await api(base,`/api/admin/markets/${id}/export`,{token:admin});assert.equal(ex.agents.reduce((n,a)=>n+a.cash,0)+ex.audit.treasuryCash,ex.audit.totalCash);assert.equal(ex.agents.reduce((n,a)=>n+a.dat,0)+ex.audit.treasuryDat,ex.audit.totalDat);checks.push('cash and DAT supply conservation');
+await client.close();await mkdir('reports',{recursive:true});const report={at:new Date().toISOString(),base,marketId:id,checks,snapshot:s,settlementDelayMs:s.results[0].clearedAt-s.results[0].scheduledAt,explanation:'10-second accelerated production smoke, not a 30-minute endurance test. Final read also supports overdue settlement recovery; recorded clearedAt is compared against scheduledAt.'};await writeFile('reports/production-smoke.json',JSON.stringify(report,null,2));console.log(JSON.stringify({passed:checks.length,marketId:id,settlementDelayMs:report.settlementDelayMs,report:'reports/production-smoke.json'}));

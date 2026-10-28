@@ -1,0 +1,79 @@
+{
+  "mode": "rational",
+  "seed": 20260911,
+  "accelerated": true,
+  "rounds": 30,
+  "scheduled_duration_seconds": 1800,
+  "decision_interval_seconds": 60,
+  "actual_wall_seconds": null,
+  "active_rounds": 30,
+  "total_decisions": 300,
+  "total_orders": 300,
+  "total_trades": 120,
+  "min_trades_per_round": 4,
+  "min_traded_agents_per_round": 8,
+  "participant_active_rounds": {
+    "value_taker": 24,
+    "patient": 24,
+    "concession": 24,
+    "urgent": 24,
+    "book_improver": 24,
+    "market_maker": 24,
+    "momentum": 24,
+    "mean_reverter": 24,
+    "random": 24,
+    "hold": 24
+  },
+  "leaderboard": [
+    {
+      "agent": "value_taker",
+      "name": "value_taker",
+      "score": 144
+    },
+    {
+      "agent": "patient",
+      "name": "patient",
+      "score": 144
+    },
+    {
+      "agent": "concession",
+      "name": "concession",
+      "score": 144
+    },
+    {
+      "agent": "urgent",
+      "name": "urgent",
+      "score": 144
+    },
+    {
+      "agent": "book_improver",
+      "name": "book_improver",
+      "score": 144
+    },
+    {
+      "agent": "market_maker",
+      "name": "market_maker",
+      "score": 144
+    },
+    {
+      "agent": "momentum",
+      "name": "momentum",
+      "score": 144
+    },
+    {
+      "agent": "mean_reverter",
+      "name": "mean_reverter",
+      "score": 144
+    },
+    {
+      "agent": "random",
+      "name": "random",
+      "score": 144
+    },
+    {
+      "agent": "hold",
+      "name": "hold",
+      "score": 144
+    }
+  ]
+}

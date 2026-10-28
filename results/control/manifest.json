@@ -1,0 +1,63 @@
+{
+  "seed": 20260911,
+  "rounds": 100,
+  "ticks": 80,
+  "block_size": 5,
+  "homogeneous": true,
+  "python": "3.9.6 (default, May 22 2026, 11:13:45) \n[Clang 21.0.0 (clang-2100.1.1.101)]",
+  "strategies": {
+    "value_taker": [
+      "价值捕捉",
+      "先吃掉至少赚1的对手报价，否则按自身估值±1挂单；单笔3单位"
+    ],
+    "patient": [
+      "耐心高利润",
+      "始终按自身估值±3挂单；单笔3单位"
+    ],
+    "concession": [
+      "逐步让价",
+      "利润要求由3逐步降至1；单笔3单位"
+    ],
+    "urgent": [
+      "大单快成交",
+      "前75%时间要求利润1，最后25%接受零利润；单笔6单位"
+    ],
+    "book_improver": [
+      "盘口抢价",
+      "优先成交正收益机会，否则在不亏损前提下改善最优报价1；单笔3单位"
+    ],
+    "market_maker": [
+      "库存做市",
+      "结合盘口与自身估值报价，并随库存调整价格；单笔3单位"
+    ],
+    "momentum": [
+      "趋势追随",
+      "跟随最近成交价方向，允许偏离自身估值；单笔3单位"
+    ],
+    "mean_reverter": [
+      "均值回归",
+      "围绕近10笔均价低买高卖；无历史时参考10；单笔3单位"
+    ],
+    "random": [
+      "随机交易",
+      "随机选择价格中心6–14及买卖数量；不使用自身估值"
+    ],
+    "hold": [
+      "不交易",
+      "保持初始资产，零收益控制基线"
+    ]
+  },
+  "source_hashes": {
+    "run.py": "f10d55c9dac2d92f87bde88594fcef85a9e9a6aa53c619c39e161137aa7ffbc5",
+    "market.py": "a2399638b4a3b4c12cb49a28a29a98a263c2728517e49f041d86b9f933daaa83",
+    "agents.py": "5bd4299b73dec9cb316848c39332c5a0b018506f151f8560e16c22e7068bc6c6",
+    "test_market.py": "e605c39f5912bc688ed6509d5f13458a5b777c77d2e89269d0a6f57ffc482a8b"
+  },
+  "output_hashes": {
+    "rounds.jsonl": "6810863308fa8cad7ac25cc2e94b138db0f1a2f5f9ad5e663714be5eaacbc10c",
+    "trades.jsonl": "a30bcfed1b844360796b7c6069b9cb374b3d1b7cf0b319b1ae5c88f893f79304",
+    "events.jsonl": "afa7bda0c3caa6fe6a87394b9fe0a8cbe7f29c5f9817896a9730a0f4f0f25d84",
+    "market_diagnostics.jsonl": "b63ad1deb0d38325e46778652f2079ef06761d5eb6fd9d63c0655e51faeb99ea"
+  },
+  "checks": "Every operation: cash/inventory conservation and reservations. Every round: independent trade replay, score reconciliation, surplus bound. Balanced valuations verified."
+}

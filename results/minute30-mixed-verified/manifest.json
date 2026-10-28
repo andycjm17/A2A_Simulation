@@ -1,0 +1,13 @@
+{
+  "source_hashes": {
+    "minute_session.py": "527ac45a157952ae1678d57b6e26235d69142698fec318d7ee73dc09f84bdf09",
+    "agents.py": "5bd4299b73dec9cb316848c39332c5a0b018506f151f8560e16c22e7068bc6c6",
+    "run.py": "f10d55c9dac2d92f87bde88594fcef85a9e9a6aa53c619c39e161137aa7ffbc5",
+    "market.py": "a2399638b4a3b4c12cb49a28a29a98a263c2728517e49f041d86b9f933daaa83"
+  },
+  "output_hashes": {
+    "trades.json": "0a0ef8beb6f92dd2415fd2076c551d9fdc36bdeccff1892b472f5aef3eb583e1",
+    "summary.json": "f2792c0b9a9d458a39dfc9cd7da707cccd566b0cff6f85b500c25429a155546f",
+    "rounds.json": "c3db1edabcb90ec31661c384d14310bbce29643adf02a3106f4c621ef5e211af"
+  }
+}

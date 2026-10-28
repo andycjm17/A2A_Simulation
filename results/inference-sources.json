@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "items": [
+    {
+      "id": "statistical-differences",
+      "title": "策略差异与同策略对照",
+      "queries": [
+        {
+          "id": "statistical-results",
+          "source": {
+            "label": "主实验与独立对照统计",
+            "files": [
+              {
+                "label": "results/main/analysis.json"
+              },
+              {
+                "label": "results/control/analysis.json"
+              },
+              {
+                "label": "simulation/analyze.py"
+              },
+              {
+                "label": "simulation/EXPERIMENT.md"
+              }
+            ],
+            "caveats": [
+              "以20个五轮区组为独立单位；全局检验为20,000次区组内置换。",
+              "45对配对检验采用精确符号翻转和Holm校正；推断依赖零假设下可交换性。",
+              "第一名对第二、第三名均未达到校正后的显著性；不显著不代表等效。"
+            ]
+          },
+          "rows": [
+            {
+              "experiment": "10种不同策略",
+              "p": 4.999750012499375e-05,
+              "significant_pairs": 30
+            },
+            {
+              "experiment": "10个同策略账户",
+              "p": 0.39813009349532524,
+              "significant_pairs": 0
+            }
+          ],
+          "columns": [
+            "experiment",
+            "p",
+            "significant_pairs"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "static-market-limit",
+      "title": "静态市场的持续交易限制",
+      "queries": [
+        {
+          "id": "market-activity",
+          "source": {
+            "label": "主实验与对照逐轮市场日志",
+            "files": [
+              {
+                "label": "results/main/market_diagnostics.jsonl"
+              },
+              {
+                "label": "results/control/market_diagnostics.jsonl"
+              }
+            ],
+            "caveats": [
+              "离散决策时刻不等于真实秒数；对照是全部使用value_taker的一种对手组成。"
+            ]
+          },
+          "rows": [
+            {
+              "experiment": "同策略对照",
+              "median_last_tick": 6,
+              "max_last_tick": 7,
+              "ticks_per_round": 80
+            }
+          ],
+          "columns": [
+            "experiment",
+            "median_last_tick",
+            "max_last_tick",
+            "ticks_per_round"
+          ]
+        }
+      ]
+    }
+  ]
+}

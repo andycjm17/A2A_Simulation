@@ -1,0 +1,4817 @@
+[
+  {
+    "round_id": 1,
+    "scheduled_start_seconds": 0.0,
+    "scheduled_close_seconds": 60.0,
+    "settled_at_seconds": 60.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 3,
+    "participating_agents": [
+      "concession",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 10,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 10,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 12,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 9,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 9,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1033,
+        7
+      ],
+      "urgent": [
+        937,
+        16
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 1,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 1,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 1,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 1,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 1,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 1,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 1,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 1,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 1,
+        "side": "buy",
+        "price": 8,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 1,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 19
+  },
+  {
+    "round_id": 2,
+    "scheduled_start_seconds": 60.0,
+    "scheduled_close_seconds": 120.0,
+    "settled_at_seconds": 120.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 8,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "momentum",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 8,
+      "market_maker": 10,
+      "momentum": 12,
+      "mean_reverter": 8,
+      "random": 10,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 9,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 9,
+      "mean_reverter": 0,
+      "random": -2,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 12,
+      "patient": 0,
+      "concession": 15,
+      "urgent": 18,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 9,
+      "mean_reverter": 0,
+      "random": -2,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        982,
+        12
+      ],
+      "urgent": [
+        1057,
+        4
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        973,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1018,
+        8
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 2,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 2,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 2,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 2,
+        "side": "sell",
+        "price": 9,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 2,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 13
+  },
+  {
+    "round_id": 3,
+    "scheduled_start_seconds": 120.0,
+    "scheduled_close_seconds": 180.0,
+    "settled_at_seconds": 180.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 4,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "market_maker",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 12,
+      "concession": 10,
+      "urgent": 12,
+      "book_improver": 12,
+      "market_maker": 8,
+      "momentum": 10,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 5,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 16,
+      "book_improver": 7,
+      "market_maker": 4,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 4,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 17,
+      "patient": 0,
+      "concession": 15,
+      "urgent": 34,
+      "book_improver": 7,
+      "market_maker": 4,
+      "momentum": 9,
+      "mean_reverter": 0,
+      "random": 2,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1029,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        944,
+        16
+      ],
+      "book_improver": [
+        971,
+        13
+      ],
+      "market_maker": [
+        1020,
+        8
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1036,
+        6
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 3,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 3,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 3,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 3,
+        "side": "sell",
+        "price": 7,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 3,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 13
+  },
+  {
+    "round_id": 4,
+    "scheduled_start_seconds": 180.0,
+    "scheduled_close_seconds": 240.0,
+    "settled_at_seconds": 240.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "random",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 8,
+      "urgent": 10,
+      "book_improver": 8,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 10,
+      "random": 12,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 3,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 0,
+      "book_improver": 9,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 3,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 20,
+      "patient": 0,
+      "concession": 24,
+      "urgent": 34,
+      "book_improver": 16,
+      "market_maker": 4,
+      "momentum": 9,
+      "mean_reverter": 0,
+      "random": 5,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        967,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1033,
+        7
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        1033,
+        7
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        967,
+        13
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 4,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 4,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 4,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 4,
+        "side": "sell",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 4,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 4,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 4,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 4,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 4,
+        "side": "buy",
+        "price": 12,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 4,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 18
+  },
+  {
+    "round_id": 5,
+    "scheduled_start_seconds": 240.0,
+    "scheduled_close_seconds": 300.0,
+    "settled_at_seconds": 300.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 3,
+    "participating_agents": [
+      "book_improver",
+      "momentum",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 12,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 8,
+      "random": 8,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 9,
+      "book_improver": 9,
+      "market_maker": 0,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 20,
+      "patient": 0,
+      "concession": 24,
+      "urgent": 43,
+      "book_improver": 25,
+      "market_maker": 4,
+      "momentum": 15,
+      "mean_reverter": 0,
+      "random": 5,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        1057,
+        4
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 5,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 5,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 5,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 5,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 5,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 5,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 5,
+        "side": "buy",
+        "price": 12,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 5,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 5,
+        "side": "sell",
+        "price": 10,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 5,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 19
+  },
+  {
+    "round_id": 6,
+    "scheduled_start_seconds": 300.0,
+    "scheduled_close_seconds": 360.0,
+    "settled_at_seconds": 360.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 4,
+    "volume": 7,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "momentum",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 12,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 10,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 8,
+      "random": 12,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 7,
+      "patient": 0,
+      "concession": 3,
+      "urgent": 11,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 1,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 27,
+      "patient": 0,
+      "concession": 27,
+      "urgent": 54,
+      "book_improver": 25,
+      "market_maker": 4,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 6,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1031,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1011,
+        9
+      ],
+      "urgent": [
+        939,
+        16
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1030,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        989,
+        11
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 6,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 6,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 6,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 6,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 6,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 6,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 6,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 6,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 6,
+        "side": "buy",
+        "price": 13,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 6,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 14
+  },
+  {
+    "round_id": 7,
+    "scheduled_start_seconds": 360.0,
+    "scheduled_close_seconds": 420.0,
+    "settled_at_seconds": 420.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 3,
+    "participating_agents": [
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 8,
+      "momentum": 10,
+      "mean_reverter": 10,
+      "random": 8,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 12,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 33,
+      "patient": 0,
+      "concession": 27,
+      "urgent": 66,
+      "book_improver": 25,
+      "market_maker": 4,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 6,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        1060,
+        4
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 7,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 7,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 7,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 7,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 7,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 7,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 7,
+        "side": "buy",
+        "price": 12,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 7,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 7,
+        "side": "sell",
+        "price": 12,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 7,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 16
+  },
+  {
+    "round_id": 8,
+    "scheduled_start_seconds": 420.0,
+    "scheduled_close_seconds": 480.0,
+    "settled_at_seconds": 480.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 7,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "market_maker",
+      "patient",
+      "random",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 12,
+      "concession": 10,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 8,
+      "random": 8,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 3,
+      "concession": 0,
+      "urgent": 6,
+      "book_improver": 9,
+      "market_maker": 9,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 1,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 33,
+      "patient": 3,
+      "concession": 27,
+      "urgent": 72,
+      "book_improver": 34,
+      "market_maker": 13,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 7,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        991,
+        11
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        973,
+        13
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1009,
+        9
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 8,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 8,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 8,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 8,
+        "side": "sell",
+        "price": 9,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 8,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 14
+  },
+  {
+    "round_id": 9,
+    "scheduled_start_seconds": 480.0,
+    "scheduled_close_seconds": 540.0,
+    "settled_at_seconds": 540.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 1,
+    "volume": 3,
+    "traded_agents": 2,
+    "participating_agents": [
+      "market_maker",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 12,
+      "urgent": 10,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 12,
+      "random": 10,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 0,
+      "book_improver": 0,
+      "market_maker": 6,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 39,
+      "patient": 3,
+      "concession": 27,
+      "urgent": 72,
+      "book_improver": 34,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 7,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 9,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 9,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 9,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 9,
+        "side": "buy",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 9,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 9,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 9,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 9,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 9,
+        "side": "sell",
+        "price": 13,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 9,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 23
+  },
+  {
+    "round_id": 10,
+    "scheduled_start_seconds": 540.0,
+    "scheduled_close_seconds": 600.0,
+    "settled_at_seconds": 600.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 4,
+    "volume": 8,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 10,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 10,
+      "momentum": 12,
+      "mean_reverter": 12,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 10,
+      "book_improver": 6,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 4,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 45,
+      "patient": 3,
+      "concession": 33,
+      "urgent": 82,
+      "book_improver": 40,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 11,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1022,
+        8
+      ],
+      "urgent": [
+        938,
+        16
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        980,
+        12
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 10,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 10,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 10,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 10,
+        "side": "buy",
+        "price": 11,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 10,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 13
+  },
+  {
+    "round_id": 11,
+    "scheduled_start_seconds": 600.0,
+    "scheduled_close_seconds": 660.0,
+    "settled_at_seconds": 660.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 3,
+    "participating_agents": [
+      "book_improver",
+      "random",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 12,
+      "concession": 12,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 8,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 12,
+      "book_improver": 6,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 6,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 45,
+      "patient": 3,
+      "concession": 33,
+      "urgent": 94,
+      "book_improver": 46,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 17,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        940,
+        16
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1030,
+        7
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 11,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 11,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 11,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 11,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 11,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 11,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 11,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 11,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 11,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 11,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 18
+  },
+  {
+    "round_id": 12,
+    "scheduled_start_seconds": 660.0,
+    "scheduled_close_seconds": 720.0,
+    "settled_at_seconds": 720.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "patient",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 12,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 8,
+      "market_maker": 10,
+      "momentum": 8,
+      "mean_reverter": 8,
+      "random": 10,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 9,
+      "patient": 9,
+      "concession": 9,
+      "urgent": 6,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": -3,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 54,
+      "patient": 12,
+      "concession": 42,
+      "urgent": 100,
+      "book_improver": 46,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 14,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        973,
+        13
+      ],
+      "patient": [
+        973,
+        13
+      ],
+      "concession": [
+        973,
+        13
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1027,
+        7
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 12,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 12,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 12,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 12,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 12,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 13,
+    "scheduled_start_seconds": 720.0,
+    "scheduled_close_seconds": 780.0,
+    "settled_at_seconds": 780.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "random",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 8,
+      "concession": 8,
+      "urgent": 10,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 12,
+      "mean_reverter": 10,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 9,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 0,
+      "book_improver": 6,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 3,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 63,
+      "patient": 12,
+      "concession": 48,
+      "urgent": 100,
+      "book_improver": 52,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 17,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1033,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1030,
+        7
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        970,
+        13
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        967,
+        13
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 13,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 13,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 13,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 13,
+        "side": "sell",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 13,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 13,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 13,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 13,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 13,
+        "side": "buy",
+        "price": 13,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 13,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 18
+  },
+  {
+    "round_id": 14,
+    "scheduled_start_seconds": 780.0,
+    "scheduled_close_seconds": 840.0,
+    "settled_at_seconds": 840.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "momentum",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 8,
+      "urgent": 8,
+      "book_improver": 10,
+      "market_maker": 12,
+      "momentum": 10,
+      "mean_reverter": 8,
+      "random": 12,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 15,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 3,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 69,
+      "patient": 12,
+      "concession": 54,
+      "urgent": 115,
+      "book_improver": 52,
+      "market_maker": 19,
+      "momentum": 21,
+      "mean_reverter": 0,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1030,
+        7
+      ],
+      "urgent": [
+        1063,
+        4
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        967,
+        13
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 14,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 14,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 14,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 14,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 14,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 14,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 14,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 14,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 14,
+        "side": "buy",
+        "price": 13,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 14,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 15,
+    "scheduled_start_seconds": 840.0,
+    "scheduled_close_seconds": 900.0,
+    "settled_at_seconds": 900.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "market_maker",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 10,
+      "concession": 10,
+      "urgent": 12,
+      "book_improver": 12,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 6,
+      "book_improver": 0,
+      "market_maker": 6,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 75,
+      "patient": 12,
+      "concession": 54,
+      "urgent": 121,
+      "book_improver": 52,
+      "market_maker": 25,
+      "momentum": 27,
+      "mean_reverter": 0,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        970,
+        13
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 15,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 15,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 15,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 15,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 15,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 15,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 15,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 15,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 15,
+        "side": "sell",
+        "price": 13,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 15,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 17
+  },
+  {
+    "round_id": 16,
+    "scheduled_start_seconds": 900.0,
+    "scheduled_close_seconds": 960.0,
+    "settled_at_seconds": 960.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 12,
+      "concession": 12,
+      "urgent": 10,
+      "book_improver": 12,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 8,
+      "random": 8,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 3,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 0,
+      "book_improver": 6,
+      "market_maker": 6,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 78,
+      "patient": 12,
+      "concession": 63,
+      "urgent": 121,
+      "book_improver": 58,
+      "market_maker": 31,
+      "momentum": 27,
+      "mean_reverter": 0,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1027,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        973,
+        13
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        970,
+        13
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 16,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 16,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 16,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 16,
+        "side": "buy",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 16,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 16,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 16,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 16,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 16,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 16,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 18
+  },
+  {
+    "round_id": 17,
+    "scheduled_start_seconds": 960.0,
+    "scheduled_close_seconds": 1020.0,
+    "settled_at_seconds": 1020.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 4,
+    "volume": 12,
+    "traded_agents": 7,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "mean_reverter",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 10,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 10,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 3,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 6,
+      "book_improver": 9,
+      "market_maker": 9,
+      "momentum": -3,
+      "mean_reverter": 9,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 81,
+      "patient": 12,
+      "concession": 72,
+      "urgent": 127,
+      "book_improver": 67,
+      "market_maker": 40,
+      "momentum": 24,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1027,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        973,
+        13
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        973,
+        13
+      ],
+      "momentum": [
+        1027,
+        7
+      ],
+      "mean_reverter": [
+        973,
+        13
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 17,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 17,
+        "side": "buy",
+        "price": 7,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 17,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 17,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 17,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 17,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 17,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 17,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 17,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 17,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 6
+  },
+  {
+    "round_id": 18,
+    "scheduled_start_seconds": 1020.0,
+    "scheduled_close_seconds": 1080.0,
+    "settled_at_seconds": 1080.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "market_maker",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 10,
+      "urgent": 8,
+      "book_improver": 10,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 12,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 9,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 3,
+      "book_improver": 0,
+      "market_maker": 9,
+      "momentum": 3,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 90,
+      "patient": 12,
+      "concession": 72,
+      "urgent": 130,
+      "book_improver": 67,
+      "market_maker": 49,
+      "momentum": 27,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        973,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        1027,
+        7
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        973,
+        13
+      ],
+      "momentum": [
+        1027,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 18,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 18,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 18,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 18,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 18,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 18,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 18,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 18,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 18,
+        "side": "buy",
+        "price": 5,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 18,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 17
+  },
+  {
+    "round_id": 19,
+    "scheduled_start_seconds": 1080.0,
+    "scheduled_close_seconds": 1140.0,
+    "settled_at_seconds": 1140.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 8,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 10,
+      "momentum": 8,
+      "mean_reverter": 10,
+      "random": 12,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 12,
+      "book_improver": 6,
+      "market_maker": 0,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 96,
+      "patient": 12,
+      "concession": 78,
+      "urgent": 142,
+      "book_improver": 73,
+      "market_maker": 49,
+      "momentum": 33,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1030,
+        7
+      ],
+      "urgent": [
+        940,
+        16
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1030,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 19,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 19,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 19,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 19,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 19,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 20,
+    "scheduled_start_seconds": 1140.0,
+    "scheduled_close_seconds": 1200.0,
+    "settled_at_seconds": 1200.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "momentum",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 12,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 8,
+      "random": 10,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 12,
+      "book_improver": 6,
+      "market_maker": 6,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 96,
+      "patient": 12,
+      "concession": 84,
+      "urgent": 154,
+      "book_improver": 79,
+      "market_maker": 55,
+      "momentum": 39,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1030,
+        7
+      ],
+      "urgent": [
+        940,
+        16
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 20,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 20,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 20,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 20,
+        "side": "buy",
+        "price": 11,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 20,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 20,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 20,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 20,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 20,
+        "side": "sell",
+        "price": 11,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 20,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 10
+  },
+  {
+    "round_id": 21,
+    "scheduled_start_seconds": 1200.0,
+    "scheduled_close_seconds": 1260.0,
+    "settled_at_seconds": 1260.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 10,
+      "concession": 8,
+      "urgent": 10,
+      "book_improver": 8,
+      "market_maker": 12,
+      "momentum": 12,
+      "mean_reverter": 8,
+      "random": 8,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 0,
+      "book_improver": 6,
+      "market_maker": 6,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 102,
+      "patient": 12,
+      "concession": 90,
+      "urgent": 154,
+      "book_improver": 85,
+      "market_maker": 61,
+      "momentum": 39,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1030,
+        7
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        970,
+        13
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 21,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 21,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 21,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 21,
+        "side": "buy",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 21,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 21,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 21,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 21,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 21,
+        "side": "sell",
+        "price": 11,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 21,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 17
+  },
+  {
+    "round_id": 22,
+    "scheduled_start_seconds": 1260.0,
+    "scheduled_close_seconds": 1320.0,
+    "settled_at_seconds": 1320.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 8,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 10,
+      "momentum": 10,
+      "mean_reverter": 12,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 3,
+      "book_improver": 9,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 108,
+      "patient": 12,
+      "concession": 96,
+      "urgent": 157,
+      "book_improver": 94,
+      "market_maker": 61,
+      "momentum": 39,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        970,
+        13
+      ],
+      "urgent": [
+        1027,
+        7
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 22,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 22,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 22,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 22,
+        "side": "sell",
+        "price": 9,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 22,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 22,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 22,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 22,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 22,
+        "side": "buy",
+        "price": 6,
+        "quantity": 2
+      },
+      "hold": {
+        "round_id": 22,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 17
+  },
+  {
+    "round_id": 23,
+    "scheduled_start_seconds": 1320.0,
+    "scheduled_close_seconds": 1380.0,
+    "settled_at_seconds": 1380.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "market_maker",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 12,
+      "concession": 10,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 8,
+      "mean_reverter": 8,
+      "random": 10,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 9,
+      "book_improver": 6,
+      "market_maker": 9,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 114,
+      "patient": 12,
+      "concession": 96,
+      "urgent": 166,
+      "book_improver": 100,
+      "market_maker": 70,
+      "momentum": 45,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        970,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        937,
+        16
+      ],
+      "book_improver": [
+        1030,
+        7
+      ],
+      "market_maker": [
+        1033,
+        7
+      ],
+      "momentum": [
+        1030,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 23,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 23,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 23,
+        "side": "buy",
+        "price": 12,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 23,
+        "side": "sell",
+        "price": 14,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 23,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 24,
+    "scheduled_start_seconds": 1380.0,
+    "scheduled_close_seconds": 1440.0,
+    "settled_at_seconds": 1440.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "momentum",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 8,
+      "concession": 8,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 12,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 0,
+      "concession": 3,
+      "urgent": 6,
+      "book_improver": 9,
+      "market_maker": 9,
+      "momentum": 9,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 114,
+      "patient": 12,
+      "concession": 99,
+      "urgent": 172,
+      "book_improver": 109,
+      "market_maker": 79,
+      "momentum": 54,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1027,
+        7
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        973,
+        13
+      ],
+      "momentum": [
+        973,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 24,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 24,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 24,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 24,
+        "side": "sell",
+        "price": 8,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 24,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 24,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 24,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 24,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 24,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 24,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 25,
+    "scheduled_start_seconds": 1440.0,
+    "scheduled_close_seconds": 1500.0,
+    "settled_at_seconds": 1500.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "market_maker",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 12,
+      "concession": 12,
+      "urgent": 12,
+      "book_improver": 10,
+      "market_maker": 8,
+      "momentum": 8,
+      "mean_reverter": 10,
+      "random": 12,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 6,
+      "urgent": 12,
+      "book_improver": 0,
+      "market_maker": 6,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 120,
+      "patient": 12,
+      "concession": 105,
+      "urgent": 184,
+      "book_improver": 109,
+      "market_maker": 85,
+      "momentum": 60,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        970,
+        13
+      ],
+      "urgent": [
+        940,
+        16
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        1030,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 25,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 25,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 25,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 25,
+        "side": "buy",
+        "price": 12,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 25,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 25,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 25,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 25,
+        "side": "buy",
+        "price": 8,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 25,
+        "side": "buy",
+        "price": 6,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 25,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 10
+  },
+  {
+    "round_id": 26,
+    "scheduled_start_seconds": 1500.0,
+    "scheduled_close_seconds": 1560.0,
+    "settled_at_seconds": 1560.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "market_maker",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 8,
+      "concession": 10,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 12,
+      "mean_reverter": 10,
+      "random": 12,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 6,
+      "patient": 0,
+      "concession": 0,
+      "urgent": 9,
+      "book_improver": 9,
+      "market_maker": 6,
+      "momentum": 6,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 126,
+      "patient": 12,
+      "concession": 105,
+      "urgent": 193,
+      "book_improver": 118,
+      "market_maker": 91,
+      "momentum": 66,
+      "mean_reverter": 9,
+      "random": 20,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1030,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1000,
+        10
+      ],
+      "urgent": [
+        937,
+        16
+      ],
+      "book_improver": [
+        1033,
+        7
+      ],
+      "market_maker": [
+        1030,
+        7
+      ],
+      "momentum": [
+        970,
+        13
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 26,
+        "side": "buy",
+        "price": 12,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 26,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 26,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 26,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "hold": {
+        "round_id": 26,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 12
+  },
+  {
+    "round_id": 27,
+    "scheduled_start_seconds": 1560.0,
+    "scheduled_close_seconds": 1620.0,
+    "settled_at_seconds": 1620.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 6,
+    "volume": 12,
+    "traded_agents": 7,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "market_maker",
+      "mean_reverter",
+      "random",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 12,
+      "concession": 8,
+      "urgent": 12,
+      "book_improver": 8,
+      "market_maker": 8,
+      "momentum": 10,
+      "mean_reverter": 8,
+      "random": 12,
+      "hold": 10
+    },
+    "gains": {
+      "value_taker": 2,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 6,
+      "book_improver": 9,
+      "market_maker": 9,
+      "momentum": 0,
+      "mean_reverter": 9,
+      "random": 4,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 128,
+      "patient": 12,
+      "concession": 114,
+      "urgent": 199,
+      "book_improver": 127,
+      "market_maker": 100,
+      "momentum": 66,
+      "mean_reverter": 18,
+      "random": 24,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        978,
+        12
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1033,
+        7
+      ],
+      "urgent": [
+        934,
+        16
+      ],
+      "book_improver": [
+        1033,
+        7
+      ],
+      "market_maker": [
+        1033,
+        7
+      ],
+      "momentum": [
+        1000,
+        10
+      ],
+      "mean_reverter": [
+        1033,
+        7
+      ],
+      "random": [
+        956,
+        14
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 27,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 27,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 27,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 27,
+        "side": "buy",
+        "price": 12,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 27,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 27,
+        "side": "sell",
+        "price": 10,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 27,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 27,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 27,
+        "side": "buy",
+        "price": 13,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 27,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 7
+  },
+  {
+    "round_id": 28,
+    "scheduled_start_seconds": 1620.0,
+    "scheduled_close_seconds": 1680.0,
+    "settled_at_seconds": 1680.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "concession",
+      "mean_reverter",
+      "momentum",
+      "urgent",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 8,
+      "patient": 8,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 10,
+      "market_maker": 10,
+      "momentum": 12,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 12
+    },
+    "gains": {
+      "value_taker": 3,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 6,
+      "book_improver": 0,
+      "market_maker": 0,
+      "momentum": 9,
+      "mean_reverter": 9,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 131,
+      "patient": 12,
+      "concession": 123,
+      "urgent": 205,
+      "book_improver": 127,
+      "market_maker": 100,
+      "momentum": 75,
+      "mean_reverter": 27,
+      "random": 24,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1027,
+        7
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        973,
+        13
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        1000,
+        10
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        973,
+        13
+      ],
+      "mean_reverter": [
+        973,
+        13
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 11,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 28,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 8,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 28,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 28,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 28,
+        "side": "sell",
+        "price": 14,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 28,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 13
+  },
+  {
+    "round_id": 29,
+    "scheduled_start_seconds": 1680.0,
+    "scheduled_close_seconds": 1740.0,
+    "settled_at_seconds": 1740.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 2,
+    "volume": 6,
+    "traded_agents": 4,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "momentum",
+      "value_taker"
+    ],
+    "values": {
+      "value_taker": 12,
+      "patient": 12,
+      "concession": 8,
+      "urgent": 10,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 8,
+      "random": 10,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 9,
+      "patient": 0,
+      "concession": 3,
+      "urgent": 0,
+      "book_improver": 9,
+      "market_maker": 0,
+      "momentum": 3,
+      "mean_reverter": 0,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 140,
+      "patient": 12,
+      "concession": 126,
+      "urgent": 205,
+      "book_improver": 136,
+      "market_maker": 100,
+      "momentum": 78,
+      "mean_reverter": 27,
+      "random": 24,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        973,
+        13
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        1027,
+        7
+      ],
+      "urgent": [
+        1000,
+        10
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1027,
+        7
+      ],
+      "mean_reverter": [
+        1000,
+        10
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 29,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 29,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 29,
+        "side": "sell",
+        "price": 9,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 29,
+        "side": "sell",
+        "price": 10,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 29,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 29,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 29,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 29,
+        "side": "sell",
+        "price": 12,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 29,
+        "side": "sell",
+        "price": 11,
+        "quantity": 4
+      },
+      "hold": {
+        "round_id": 29,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 19
+  },
+  {
+    "round_id": 30,
+    "scheduled_start_seconds": 1740.0,
+    "scheduled_close_seconds": 1800.0,
+    "settled_at_seconds": 1800.0,
+    "decisions": 10,
+    "orders": 9,
+    "passes": 1,
+    "missed": [],
+    "trades": 3,
+    "volume": 9,
+    "traded_agents": 5,
+    "participating_agents": [
+      "book_improver",
+      "concession",
+      "mean_reverter",
+      "momentum",
+      "urgent"
+    ],
+    "values": {
+      "value_taker": 10,
+      "patient": 10,
+      "concession": 12,
+      "urgent": 8,
+      "book_improver": 12,
+      "market_maker": 12,
+      "momentum": 8,
+      "mean_reverter": 12,
+      "random": 8,
+      "hold": 8
+    },
+    "gains": {
+      "value_taker": 0,
+      "patient": 0,
+      "concession": 9,
+      "urgent": 6,
+      "book_improver": 9,
+      "market_maker": 0,
+      "momentum": 0,
+      "mean_reverter": 12,
+      "random": 0,
+      "hold": 0
+    },
+    "cumulative_scores": {
+      "value_taker": 140,
+      "patient": 12,
+      "concession": 135,
+      "urgent": 211,
+      "book_improver": 145,
+      "market_maker": 100,
+      "momentum": 78,
+      "mean_reverter": 39,
+      "random": 24,
+      "hold": 0
+    },
+    "end_balances": {
+      "value_taker": [
+        1000,
+        10
+      ],
+      "patient": [
+        1000,
+        10
+      ],
+      "concession": [
+        973,
+        13
+      ],
+      "urgent": [
+        1054,
+        4
+      ],
+      "book_improver": [
+        973,
+        13
+      ],
+      "market_maker": [
+        1000,
+        10
+      ],
+      "momentum": [
+        1024,
+        7
+      ],
+      "mean_reverter": [
+        976,
+        13
+      ],
+      "random": [
+        1000,
+        10
+      ],
+      "hold": [
+        1000,
+        10
+      ]
+    },
+    "submitted": {
+      "value_taker": {
+        "round_id": 30,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "patient": {
+        "round_id": 30,
+        "side": "sell",
+        "price": 13,
+        "quantity": 3
+      },
+      "concession": {
+        "round_id": 30,
+        "side": "buy",
+        "price": 11,
+        "quantity": 3
+      },
+      "urgent": {
+        "round_id": 30,
+        "side": "sell",
+        "price": 8,
+        "quantity": 6
+      },
+      "book_improver": {
+        "round_id": 30,
+        "side": "buy",
+        "price": 10,
+        "quantity": 3
+      },
+      "market_maker": {
+        "round_id": 30,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "momentum": {
+        "round_id": 30,
+        "side": "sell",
+        "price": 8,
+        "quantity": 3
+      },
+      "mean_reverter": {
+        "round_id": 30,
+        "side": "buy",
+        "price": 9,
+        "quantity": 3
+      },
+      "random": {
+        "round_id": 30,
+        "side": "sell",
+        "price": 15,
+        "quantity": 1
+      },
+      "hold": {
+        "round_id": 30,
+        "side": "pass",
+        "price": 0,
+        "quantity": 0
+      }
+    },
+    "expired_quantity": 10
+  }
+]

@@ -1,0 +1,17 @@
+.DS_Store
+node_modules/
+dist/
+.wrangler/
+.dev.vars*
+.env*
+!.env.example
+private/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+tmp/
+output/
+reports/
+test-results/
+playwright-report/

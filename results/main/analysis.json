@@ -1,0 +1,918 @@
+{
+  "synthetic": true,
+  "homogeneous": false,
+  "seed": 20260911,
+  "rounds": 100,
+  "independent_blocks": 20,
+  "bootstrap_samples": 20000,
+  "leaderboard": [
+    {
+      "agent": "urgent",
+      "name": "大单快成交",
+      "strategy": "前75%时间要求利润1，最后25%接受零利润；单笔6单位",
+      "total": 4864,
+      "mean": 48.64,
+      "ci95": [
+        43.549749999999996,
+        54.29999999999999
+      ],
+      "positive_rounds": 100,
+      "negative_rounds": 0,
+      "trades": 2187,
+      "volume": 5289,
+      "bootstrap_top_share": 0.853775,
+      "by_value": {
+        "8": 12.35,
+        "10": 34.1,
+        "12": 92.2
+      },
+      "rank": 1
+    },
+    {
+      "agent": "book_improver",
+      "name": "盘口抢价",
+      "strategy": "优先成交正收益机会，否则在不亏损前提下改善最优报价1；单笔3单位",
+      "total": 4263,
+      "mean": 42.63,
+      "ci95": [
+        38.28000000000001,
+        47.11
+      ],
+      "positive_rounds": 100,
+      "negative_rounds": 0,
+      "trades": 1627,
+      "volume": 3603,
+      "bootstrap_top_share": 0.06725,
+      "by_value": {
+        "8": 17.25,
+        "10": 21.15,
+        "12": 78.75
+      },
+      "rank": 2
+    },
+    {
+      "agent": "value_taker",
+      "name": "价值捕捉",
+      "strategy": "先吃掉至少赚1的对手报价，否则按自身估值±1挂单；单笔3单位",
+      "total": 4226,
+      "mean": 42.26,
+      "ci95": [
+        36.65000000000001,
+        48.14024999999999
+      ],
+      "positive_rounds": 100,
+      "negative_rounds": 0,
+      "trades": 1663,
+      "volume": 3693,
+      "bootstrap_top_share": 0.078975,
+      "by_value": {
+        "8": 16.225,
+        "10": 26.2,
+        "12": 76.325
+      },
+      "rank": 3
+    },
+    {
+      "agent": "mean_reverter",
+      "name": "均值回归",
+      "strategy": "围绕近10笔均价低买高卖；无历史时参考10；单笔3单位",
+      "total": 4026,
+      "mean": 40.26,
+      "ci95": [
+        37.58974999999999,
+        42.82
+      ],
+      "positive_rounds": 99,
+      "negative_rounds": 1,
+      "trades": 1608,
+      "volume": 3589,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": 51.625,
+        "10": 32.05,
+        "12": 33.0
+      },
+      "rank": 4
+    },
+    {
+      "agent": "market_maker",
+      "name": "库存做市",
+      "strategy": "结合盘口与自身估值报价，并随库存调整价格；单笔3单位",
+      "total": 3701,
+      "mean": 37.01,
+      "ci95": [
+        34.10999999999999,
+        40.029999999999994
+      ],
+      "positive_rounds": 100,
+      "negative_rounds": 0,
+      "trades": 1169,
+      "volume": 2516,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": 34.425,
+        "10": 43.2,
+        "12": 36.5
+      },
+      "rank": 5
+    },
+    {
+      "agent": "concession",
+      "name": "逐步让价",
+      "strategy": "利润要求由3逐步降至1；单笔3单位",
+      "total": 3466,
+      "mean": 34.66,
+      "ci95": [
+        29.5,
+        40.04
+      ],
+      "positive_rounds": 100,
+      "negative_rounds": 0,
+      "trades": 743,
+      "volume": 1649,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": 30.025,
+        "10": 24.45,
+        "12": 44.4
+      },
+      "rank": 6
+    },
+    {
+      "agent": "patient",
+      "name": "耐心高利润",
+      "strategy": "始终按自身估值±3挂单；单笔3单位",
+      "total": 2635,
+      "mean": 26.35,
+      "ci95": [
+        22.839999999999996,
+        30.599999999999994
+      ],
+      "positive_rounds": 92,
+      "negative_rounds": 0,
+      "trades": 413,
+      "volume": 877,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": 30.1,
+        "10": 25.95,
+        "12": 22.8
+      },
+      "rank": 7
+    },
+    {
+      "agent": "hold",
+      "name": "不交易",
+      "strategy": "保持初始资产，零收益控制基线",
+      "total": 0,
+      "mean": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ],
+      "positive_rounds": 0,
+      "negative_rounds": 0,
+      "trades": 0,
+      "volume": 0,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": 0.0,
+        "10": 0.0,
+        "12": 0.0
+      },
+      "rank": 8
+    },
+    {
+      "agent": "random",
+      "name": "随机交易",
+      "strategy": "随机选择价格中心6–14及买卖数量；不使用自身估值",
+      "total": -3884,
+      "mean": -38.84,
+      "ci95": [
+        -41.62,
+        -36.050000000000004
+      ],
+      "positive_rounds": 7,
+      "negative_rounds": 93,
+      "trades": 4342,
+      "volume": 8416,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": -19.375,
+        "10": -45.1,
+        "12": -55.175
+      },
+      "rank": 9
+    },
+    {
+      "agent": "momentum",
+      "name": "趋势追随",
+      "strategy": "跟随最近成交价方向，允许偏离自身估值；单笔3单位",
+      "total": -9459,
+      "mean": -94.59,
+      "ci95": [
+        -102.96999999999998,
+        -86.13975000000002
+      ],
+      "positive_rounds": 0,
+      "negative_rounds": 100,
+      "trades": 5328,
+      "volume": 12692,
+      "bootstrap_top_share": 0.0,
+      "by_value": {
+        "8": -106.35,
+        "10": -92.9,
+        "12": -83.675
+      },
+      "rank": 10
+    }
+  ],
+  "omnibus": {
+    "statistic": 136.7296150348591,
+    "p": 4.999750012499375e-05,
+    "kendall_w": 0.759608972415884,
+    "permutations": 20000
+  },
+  "excluding_baselines_exploratory": {
+    "statistic": 73.8731387730792,
+    "p": 4.999750012499375e-05,
+    "kendall_w": 0.5276652769505658,
+    "permutations": 20000
+  },
+  "pairwise": [
+    {
+      "a": "value_taker",
+      "b": "patient",
+      "mean_difference": 15.91,
+      "ci95": [
+        9.130000000000013,
+        22.78000000000001
+      ],
+      "p": 0.000293731689453125,
+      "dz": 1.000811466652255,
+      "block_win_rate": 0.85,
+      "p_holm": 0.004993438720703125,
+      "significant": true
+    },
+    {
+      "a": "value_taker",
+      "b": "concession",
+      "mean_difference": 7.6,
+      "ci95": [
+        -1.9702499999999914,
+        16.709999999999994
+      ],
+      "p": 0.13522720336914062,
+      "dz": 0.34857058476220876,
+      "block_win_rate": 0.7,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "value_taker",
+      "b": "urgent",
+      "mean_difference": -6.38,
+      "ci95": [
+        -15.689999999999998,
+        2.7800000000000082
+      ],
+      "p": 0.2029285430908203,
+      "dz": -0.2955185561754429,
+      "block_win_rate": 0.35,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "value_taker",
+      "b": "book_improver",
+      "mean_difference": -0.37,
+      "ci95": [
+        -8.579999999999998,
+        8.280249999999986
+      ],
+      "p": 0.9351692199707031,
+      "dz": -0.01870246484551751,
+      "block_win_rate": 0.45,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "value_taker",
+      "b": "market_maker",
+      "mean_difference": 5.25,
+      "ci95": [
+        -1.6702499999999942,
+        12.300249999999997
+      ],
+      "p": 0.1644439697265625,
+      "dz": 0.3240782986440432,
+      "block_win_rate": 0.65,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "value_taker",
+      "b": "momentum",
+      "mean_difference": 136.85,
+      "ci95": [
+        126.54000000000002,
+        148.28
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.330316785619817,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "value_taker",
+      "b": "mean_reverter",
+      "mean_difference": 2.0,
+      "ci95": [
+        -4.0302499999999934,
+        8.31000000000001
+      ],
+      "p": 0.5439853668212891,
+      "dz": 0.13838541509732025,
+      "block_win_rate": 0.55,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "value_taker",
+      "b": "random",
+      "mean_difference": 81.1,
+      "ci95": [
+        74.9,
+        87.35025
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.550629725570254,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "value_taker",
+      "b": "hold",
+      "mean_difference": 42.260000000000005,
+      "ci95": [
+        36.65000000000001,
+        48.14024999999999
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 3.153561266831646,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "concession",
+      "mean_difference": -8.309999999999999,
+      "ci95": [
+        -15.090000000000003,
+        -0.9297500000000147
+      ],
+      "p": 0.03965568542480469,
+      "dz": -0.4987653970288989,
+      "block_win_rate": 0.2,
+      "p_holm": 0.47586822509765625,
+      "significant": false
+    },
+    {
+      "a": "patient",
+      "b": "urgent",
+      "mean_difference": -22.29,
+      "ci95": [
+        -29.940249999999978,
+        -14.369750000000012
+      ],
+      "p": 9.1552734375e-05,
+      "dz": -1.219358858433504,
+      "block_win_rate": 0.15,
+      "p_holm": 0.0018310546875,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "book_improver",
+      "mean_difference": -16.28,
+      "ci95": [
+        -21.250000000000004,
+        -10.860000000000003
+      ],
+      "p": 6.4849853515625e-05,
+      "dz": -1.3196710745068037,
+      "block_win_rate": 0.05,
+      "p_holm": 0.001361846923828125,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "market_maker",
+      "mean_difference": -10.66,
+      "ci95": [
+        -14.599999999999998,
+        -6.309750000000021
+      ],
+      "p": 0.0002269744873046875,
+      "dz": -1.0853642666758148,
+      "block_win_rate": 0.1,
+      "p_holm": 0.004085540771484375,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "momentum",
+      "mean_difference": 120.94000000000001,
+      "ci95": [
+        111.09975,
+        130.83
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.1434676495811225,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "mean_reverter",
+      "mean_difference": -13.91,
+      "ci95": [
+        -18.190000000000005,
+        -8.93975000000002
+      ],
+      "p": 0.000133514404296875,
+      "dz": -1.2619359069264564,
+      "block_win_rate": 0.15,
+      "p_holm": 0.002536773681640625,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "random",
+      "mean_difference": 65.19,
+      "ci95": [
+        59.96975,
+        70.91
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.048311453418464,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "patient",
+      "b": "hold",
+      "mean_difference": 26.35,
+      "ci95": [
+        22.839999999999996,
+        30.599999999999994
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 2.8294447462496324,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "concession",
+      "b": "urgent",
+      "mean_difference": -13.98,
+      "ci95": [
+        -20.880250000000004,
+        -6.569750000000022
+      ],
+      "p": 0.001735687255859375,
+      "dz": -0.8327586593524529,
+      "block_win_rate": 0.15,
+      "p_holm": 0.02777099609375,
+      "significant": true
+    },
+    {
+      "a": "concession",
+      "b": "book_improver",
+      "mean_difference": -7.970000000000001,
+      "ci95": [
+        -15.229999999999997,
+        -0.7900000000000131
+      ],
+      "p": 0.04962158203125,
+      "dz": -0.47048606335252285,
+      "block_win_rate": 0.3,
+      "p_holm": 0.4962158203125,
+      "significant": false
+    },
+    {
+      "a": "concession",
+      "b": "market_maker",
+      "mean_difference": -2.35,
+      "ci95": [
+        -8.780000000000005,
+        3.8900000000000006
+      ],
+      "p": 0.48723793029785156,
+      "dz": -0.15775627244329454,
+      "block_win_rate": 0.5,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "concession",
+      "b": "momentum",
+      "mean_difference": 129.25,
+      "ci95": [
+        117.72,
+        140.90025
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 4.735924097992012,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "concession",
+      "b": "mean_reverter",
+      "mean_difference": -5.6,
+      "ci95": [
+        -10.380000000000003,
+        -0.47975000000001217
+      ],
+      "p": 0.04415321350097656,
+      "dz": -0.4840021034122079,
+      "block_win_rate": 0.3,
+      "p_holm": 0.4856853485107422,
+      "significant": false
+    },
+    {
+      "a": "concession",
+      "b": "random",
+      "mean_difference": 73.5,
+      "ci95": [
+        68.41975,
+        78.69
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 6.104906511698545,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "concession",
+      "b": "hold",
+      "mean_difference": 34.660000000000004,
+      "ci95": [
+        29.5,
+        40.04
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 2.8055869473681696,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "urgent",
+      "b": "book_improver",
+      "mean_difference": 6.01,
+      "ci95": [
+        -2.040250000000006,
+        14.459999999999994
+      ],
+      "p": 0.18274688720703125,
+      "dz": 0.3106971733369754,
+      "block_win_rate": 0.6,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "urgent",
+      "b": "market_maker",
+      "mean_difference": 11.629999999999999,
+      "ci95": [
+        5.070000000000007,
+        18.48024999999998
+      ],
+      "p": 0.0034637451171875,
+      "dz": 0.744307955784456,
+      "block_win_rate": 0.75,
+      "p_holm": 0.0519561767578125,
+      "significant": false
+    },
+    {
+      "a": "urgent",
+      "b": "momentum",
+      "mean_difference": 143.23,
+      "ci95": [
+        132.79000000000002,
+        153.59
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.72652374676945,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "urgent",
+      "b": "mean_reverter",
+      "mean_difference": 8.379999999999999,
+      "ci95": [
+        2.9100000000000037,
+        13.92024999999998
+      ],
+      "p": 0.009246826171875,
+      "dz": 0.647473723837564,
+      "block_win_rate": 0.7,
+      "p_holm": 0.12945556640625,
+      "significant": false
+    },
+    {
+      "a": "urgent",
+      "b": "random",
+      "mean_difference": 87.47999999999999,
+      "ci95": [
+        81.50999999999999,
+        94.03024999999998
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.913403082323844,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "urgent",
+      "b": "hold",
+      "mean_difference": 48.64,
+      "ci95": [
+        43.549749999999996,
+        54.29999999999999
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 3.855509443418138,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "book_improver",
+      "b": "market_maker",
+      "mean_difference": 5.62,
+      "ci95": [
+        1.2599999999999978,
+        9.92024999999998
+      ],
+      "p": 0.02524566650390625,
+      "dz": 0.548869781624815,
+      "block_win_rate": 0.6,
+      "p_holm": 0.32819366455078125,
+      "significant": false
+    },
+    {
+      "a": "book_improver",
+      "b": "momentum",
+      "mean_difference": 137.22,
+      "ci95": [
+        128.64974999999998,
+        145.69
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 6.824002857718502,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "book_improver",
+      "b": "mean_reverter",
+      "mean_difference": 2.37,
+      "ci95": [
+        -3.1602500000000107,
+        8.079999999999984
+      ],
+      "p": 0.4417552947998047,
+      "dz": 0.17799033797488278,
+      "block_win_rate": 0.55,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "book_improver",
+      "b": "random",
+      "mean_difference": 81.47,
+      "ci95": [
+        75.54000000000002,
+        87.53999999999999
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.790542725984619,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "book_improver",
+      "b": "hold",
+      "mean_difference": 42.63,
+      "ci95": [
+        38.28000000000001,
+        47.11
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 4.124056881119599,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "market_maker",
+      "b": "momentum",
+      "mean_difference": 131.6,
+      "ci95": [
+        121.92974999999998,
+        140.66024999999996
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.944264800689855,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "market_maker",
+      "b": "mean_reverter",
+      "mean_difference": -3.25,
+      "ci95": [
+        -7.189999999999998,
+        0.7999999999999972
+      ],
+      "p": 0.13988113403320312,
+      "dz": -0.3448717124657903,
+      "block_win_rate": 0.4,
+      "p_holm": 1.0,
+      "significant": false
+    },
+    {
+      "a": "market_maker",
+      "b": "random",
+      "mean_difference": 75.85,
+      "ci95": [
+        71.03,
+        80.75024999999998
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 6.693709225442671,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "market_maker",
+      "b": "hold",
+      "mean_difference": 37.010000000000005,
+      "ci95": [
+        34.10999999999999,
+        40.029999999999994
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 5.3079421663841995,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "momentum",
+      "b": "mean_reverter",
+      "mean_difference": -134.85,
+      "ci95": [
+        -144.75025,
+        -124.77000000000001
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": -5.670808132966952,
+      "block_win_rate": 0.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "momentum",
+      "b": "random",
+      "mean_difference": -55.75,
+      "ci95": [
+        -64.58025000000002,
+        -46.96999999999999
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": -2.694488052956865,
+      "block_win_rate": 0.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "momentum",
+      "b": "hold",
+      "mean_difference": -94.59,
+      "ci95": [
+        -102.96999999999998,
+        -86.13975000000002
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": -4.743966813144869,
+      "block_win_rate": 0.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "mean_reverter",
+      "b": "random",
+      "mean_difference": 79.1,
+      "ci95": [
+        74.96,
+        82.99000000000001
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 8.251939579054083,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "mean_reverter",
+      "b": "hold",
+      "mean_difference": 40.260000000000005,
+      "ci95": [
+        37.58974999999999,
+        42.82
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": 6.487652876541096,
+      "block_win_rate": 1.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    },
+    {
+      "a": "random",
+      "b": "hold",
+      "mean_difference": -38.839999999999996,
+      "ci95": [
+        -41.62,
+        -36.050000000000004
+      ],
+      "p": 1.9073486328125e-06,
+      "dz": -5.964331773543862,
+      "block_win_rate": 0.0,
+      "p_holm": 8.58306884765625e-05,
+      "significant": true
+    }
+  ],
+  "significant_pairs": 30,
+  "half_rankings": {
+    "first": [
+      "urgent",
+      "book_improver",
+      "concession",
+      "value_taker",
+      "mean_reverter",
+      "market_maker",
+      "patient",
+      "hold",
+      "random",
+      "momentum"
+    ],
+    "second": [
+      "urgent",
+      "value_taker",
+      "book_improver",
+      "mean_reverter",
+      "market_maker",
+      "concession",
+      "patient",
+      "hold",
+      "random",
+      "momentum"
+    ]
+  },
+  "market": {
+    "trades": 9540,
+    "volume": 21162,
+    "mean_surplus": 138.38,
+    "efficiency": 0.6919,
+    "late_trade_share": 0.17337526205450735,
+    "rejections": {}
+  },
+  "analysis_source_sha256": "400da66bd9a92351f110d2982e04b04bbdb0f8d60a30bd91b753ecc63d6a2d99",
+  "numpy_version": "2.3.5",
+  "assumptions": [
+    "Synthetic fixed opponent pool; no LLMs or network latency.",
+    "Independent unit is a 5-round block, not a trade or an agent-row.",
+    "Permutation tests require exchangeability under the null; sign flips require symmetric/exchangeable paired differences.",
+    "95% bootstrap intervals are pointwise; 45 pairwise p-values are Holm-corrected.",
+    "Bootstrap first-place share is resampling stability, not future winning probability."
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "mode": "mixed",
+  "seed": 20260911,
+  "accelerated": true,
+  "rounds": 30,
+  "scheduled_duration_seconds": 1800,
+  "decision_interval_seconds": 60,
+  "actual_wall_seconds": null,
+  "active_rounds": 30,
+  "total_decisions": 300,
+  "total_orders": 270,
+  "total_trades": 83,
+  "min_trades_per_round": 1,
+  "min_traded_agents_per_round": 2,
+  "participant_active_rounds": {
+    "value_taker": 24,
+    "patient": 2,
+    "concession": 20,
+    "urgent": 24,
+    "book_improver": 19,
+    "market_maker": 14,
+    "momentum": 17,
+    "mean_reverter": 4,
+    "random": 11,
+    "hold": 0
+  },
+  "leaderboard": [
+    {
+      "agent": "urgent",
+      "name": "大单快成交",
+      "score": 211
+    },
+    {
+      "agent": "book_improver",
+      "name": "盘口抢价",
+      "score": 145
+    },
+    {
+      "agent": "value_taker",
+      "name": "价值捕捉",
+      "score": 140
+    },
+    {
+      "agent": "concession",
+      "name": "逐步让价",
+      "score": 135
+    },
+    {
+      "agent": "market_maker",
+      "name": "库存做市",
+      "score": 100
+    },
+    {
+      "agent": "momentum",
+      "name": "趋势追随",
+      "score": 78
+    },
+    {
+      "agent": "mean_reverter",
+      "name": "均值回归",
+      "score": 39
+    },
+    {
+      "agent": "random",
+      "name": "随机交易",
+      "score": 24
+    },
+    {
+      "agent": "patient",
+      "name": "耐心高利润",
+      "score": 12
+    },
+    {
+      "agent": "hold",
+      "name": "不交易",
+      "score": 0
+    }
+  ]
+}
