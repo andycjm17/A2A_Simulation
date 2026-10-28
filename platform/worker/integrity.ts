@@ -1,4 +1,4 @@
-import type { State } from "./engine";
+import { pathFor, type State } from "./engine";
 
 // Review signals, not a cheating verdict. Only settled fills and already public prices.
 export function integrityReview(s: State) {
@@ -23,7 +23,7 @@ export function integrityReview(s: State) {
       offReferenceTrades: 0,
       maxDeviationBps: 0,
     };
-    const reference = s.path[t.round - 1];
+    const reference = pathFor(s, t.symbol ?? "DAT")[t.round - 1];
     const deviation = Math.abs(t.price - reference);
     p.trades++;
     p.volume += t.quantity;

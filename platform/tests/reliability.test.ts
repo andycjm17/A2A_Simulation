@@ -3,7 +3,7 @@ import {env} from 'cloudflare:workers';
 import {SELF,reset,runInDurableObject,evictDurableObject} from 'cloudflare:test';
 import {createState,addAgent,start,submit,clearRound} from '../worker/engine';
 afterEach(async()=>{await reset();});
-const config={id:'durability-check',name:'Durability',capacity:100,rounds:30,roundMs:60000,practice:true};
+const config={assetMode:'legacy' as const,id:'durability-check',name:'Durability',capacity:100,rounds:30,roundMs:60000,practice:true};
 it('SQL write failure rolls back persistent data AND cached state, then identical retry succeeds',async()=>{
  const stub=env.MARKETS.get(env.MARKETS.idFromName(config.id));await stub.command({action:'create',data:config});
  for(let i=0;i<2;i++)await stub.command({action:'join',data:{id:`agent-${i}`,name:`Agent ${i}`,keyHash:String(i).repeat(64),description:''}});

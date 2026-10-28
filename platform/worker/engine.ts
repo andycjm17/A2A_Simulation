@@ -1,4 +1,4 @@
-/** Pure deterministic market. All cash/prices are integer DUSD cents; DAT is integral. */
+/** Pure deterministic market. All cash/prices are integer DUSD cents; asset quantities are integral. */
 export const INITIAL_CASH = 1_000_000,
   INITIAL_DAT = 100,
   MIN_PRICE = 100,
@@ -21,6 +21,22 @@ export function ensure(
 ): asserts ok {
   if (!ok) throw new MarketError(code, message, status);
 }
+export type Symbol = "DAT" | "OPENAI" | "ANTHROPIC";
+export const AI_SYMBOLS = ["OPENAI", "ANTHROPIC"] as const;
+export const assetName = (symbol: Symbol) =>
+  ({ DAT: "DAT", OPENAI: "OpenAI", ANTHROPIC: "Anthropic" })[symbol];
+type AssetLedger = { path: number[]; total: number; treasury: number };
+export const symbols = (s: State): Symbol[] =>
+  s.assets ? [...AI_SYMBOLS] : ["DAT"];
+export const pathFor = (s: State, symbol: Symbol) =>
+  symbol === "DAT" ? s.path : s.assets![symbol].path;
+export const holding = (a: Agent, symbol: Symbol) =>
+  symbol === "DAT" ? a.dat : (a.holdings?.[symbol] ?? 0);
+function changeHolding(a: Agent, symbol: Symbol, delta: number) {
+  if (symbol === "DAT") a.dat += delta;
+  else a.holdings![symbol] += delta;
+}
+const orderSymbol = (o: { symbol?: Symbol }): Symbol => o.symbol ?? "DAT";
 export type Side = "BUY" | "SELL" | "PASS";
 export type MarketConfig = {
   id: string;
@@ -29,6 +45,7 @@ export type MarketConfig = {
   roundMs: number;
   capacity: number;
   practice: boolean;
+  assetMode?: "ai" | "legacy";
 };
 export type Agent = {
   id: string;
@@ -36,10 +53,12 @@ export type Agent = {
   description: string;
   cash: number;
   dat: number;
+  holdings?: Record<"OPENAI" | "ANTHROPIC", number>;
   createdAt: number;
   keyHash: string;
 };
 export type Decision = {
+  symbol?: Symbol;
   round: number;
   side: Side;
   price: number;
@@ -56,6 +75,7 @@ export type Order = Decision & {
   status: "pending" | "filled" | "partial" | "expired" | "pass";
 };
 export type Trade = {
+  symbol?: Symbol;
   id: string;
   round: number;
   buyer: string;
@@ -80,6 +100,7 @@ export type AuditEvent = {
   detail: string;
 };
 export type State = {
+  assets?: Record<"OPENAI" | "ANTHROPIC", AssetLedger>;
   config: MarketConfig;
   status: "lobby" | "running" | "paused" | "finished";
   round: number;
@@ -137,9 +158,37 @@ export async function createState(
   now: number,
 ): Promise<State> {
   const path = await generatePath(seed, config.rounds);
-  const commitment = await sha256(JSON.stringify({ seed, path }));
+  const assets =
+    config.assetMode === "ai"
+      ? {
+          OPENAI: {
+            path: await generatePath(`${seed}:OPENAI`, config.rounds),
+            total: 0,
+            treasury: 0,
+          },
+          ANTHROPIC: {
+            path: await generatePath(`${seed}:ANTHROPIC`, config.rounds),
+            total: 0,
+            treasury: 0,
+          },
+        }
+      : undefined;
+  const commitment = await sha256(
+    JSON.stringify(
+      assets
+        ? {
+            seed,
+            paths: {
+              OPENAI: assets.OPENAI.path,
+              ANTHROPIC: assets.ANTHROPIC.path,
+            },
+          }
+        : { seed, path },
+    ),
+  );
   return {
     config,
+    ...(assets ? { assets } : {}),
     status: "lobby",
     round: 0,
     openedAt: 0,
@@ -149,7 +198,7 @@ export async function createState(
     finishedAt: null,
     seed,
     commitment,
-    path,
+    path: assets?.OPENAI.path ?? path,
     agents: [],
     orders: [],
     trades: [],
@@ -195,14 +244,19 @@ export function addAgent(
     description: a.description,
     keyHash: a.keyHash,
     cash: INITIAL_CASH,
-    dat: INITIAL_DAT,
+    dat: s.assets ? 0 : INITIAL_DAT,
+    ...(s.assets
+      ? { holdings: { OPENAI: INITIAL_DAT, ANTHROPIC: INITIAL_DAT } }
+      : {}),
     createdAt: now,
   };
   s.agents.push(agent);
-  const reserve = INITIAL_DAT * MAX_PRICE;
+  const reserve = INITIAL_DAT * MAX_PRICE * symbols(s).length;
   s.treasuryCash += reserve;
   s.totalCash += INITIAL_CASH + reserve;
-  s.totalDat += INITIAL_DAT;
+  if (s.assets)
+    for (const symbol of AI_SYMBOLS) s.assets[symbol].total += INITIAL_DAT;
+  else s.totalDat += INITIAL_DAT;
   event(s, now, "agent_joined", a.id);
   audit(s);
   return agent;
@@ -258,12 +312,19 @@ export function submit(
 ): Order {
   const a = s.agents.find((x) => x.id === agentId);
   ensure(a, "UNAUTHORIZED", "找不到 Agent", 401);
+  const symbol = d.symbol ?? "DAT";
+  ensure(
+    symbols(s).includes(symbol),
+    "INVALID_SYMBOL",
+    "请选择本场标的 OPENAI 或 ANTHROPIC；历史比赛使用 DAT",
+  );
   const prior = s.orders.find(
     (x) => x.agentId === agentId && x.requestId === d.requestId,
   );
   if (prior) {
     ensure(
-      prior.round === d.round &&
+      orderSymbol(prior) === symbol &&
+        prior.round === d.round &&
         prior.side === d.side &&
         prior.price === d.price &&
         prior.quantity === d.quantity &&
@@ -288,9 +349,14 @@ export function submit(
     409,
   );
   ensure(
-    !s.orders.some((x) => x.agentId === agentId && x.round === s.round),
+    !s.orders.some(
+      (x) =>
+        x.agentId === agentId &&
+        x.round === s.round &&
+        orderSymbol(x) === symbol,
+    ),
     "ALREADY_DECIDED",
-    "每轮仅允许一个有效决定",
+    "每种标的每轮仅允许一个有效决定",
     409,
   );
   ensure(
@@ -318,22 +384,23 @@ export function submit(
     ensure(
       d.quantity >= 1 && d.quantity <= MAX_QTY,
       "INVALID_QUANTITY",
-      "每单 1–10 DAT",
+      "每单 1–10 单位",
     );
     ensure(
-      d.side !== "BUY" || a.cash >= d.price * d.quantity,
+      d.side !== "BUY" ||
+        accountState(s, a).availableCash >= d.price * d.quantity,
       "INSUFFICIENT_CASH",
       "可用现金不足",
     );
     ensure(
-      d.side !== "SELL" || a.dat >= d.quantity,
+      d.side !== "SELL" || holding(a, symbol) >= d.quantity,
       "INSUFFICIENT_DAT",
-      "可用 DAT 不足",
+      `可用 ${symbol} 不足`,
     );
   }
   const order: Order = {
     ...d,
-    id: `${s.config.id}:${s.round}:${a.id}`,
+    id: `${s.config.id}:${s.round}:${a.id}${s.assets ? `:${symbol}` : ""}`,
     agentId,
     createdAt: now,
     filled: 0,
@@ -352,47 +419,50 @@ export function clearRound(s: State, now: number) {
     hash32(`${s.seed}:${s.round}:${a.agentId}`) -
       hash32(`${s.seed}:${s.round}:${b.agentId}`) ||
     a.agentId.localeCompare(b.agentId);
-  const buys = orders
-    .filter((o) => o.side === "BUY")
-    .sort((a, b) => b.price - a.price || tie(a, b));
-  const sells = orders
-    .filter((o) => o.side === "SELL")
-    .sort((a, b) => a.price - b.price || tie(a, b));
-  const agents = new Map(s.agents.map((a) => [a.id, a]));
-  let i = 0,
-    j = 0,
-    count = 0,
+  let count = 0,
     volume = 0;
-  while (i < buys.length && j < sells.length) {
-    const b = buys[i],
-      a = sells[j];
-    if (b.price < a.price) break;
-    ensure(b.agentId !== a.agentId, "SELF_TRADE", "检测到自成交", 500);
-    const quantity = Math.min(b.quantity - b.filled, a.quantity - a.filled),
-      price = Math.floor((b.price + a.price) / 2),
-      cash = price * quantity;
-    const buyer = agents.get(b.agentId)!,
-      seller = agents.get(a.agentId)!;
-    buyer.cash -= cash;
-    buyer.dat += quantity;
-    seller.cash += cash;
-    seller.dat -= quantity;
-    b.filled += quantity;
-    b.cashFlow -= cash;
-    a.filled += quantity;
-    a.cashFlow += cash;
-    s.trades.push({
-      id: `${s.config.id}:${s.round}:${count++}`,
-      round: s.round,
-      buyer: b.agentId,
-      seller: a.agentId,
-      price,
-      quantity,
-      at: now,
-    });
-    volume += quantity;
-    if (b.filled === b.quantity) i++;
-    if (a.filled === a.quantity) j++;
+  for (const symbol of symbols(s)) {
+    const buys = orders
+      .filter((o) => o.side === "BUY" && orderSymbol(o) === symbol)
+      .sort((a, b) => b.price - a.price || tie(a, b));
+    const sells = orders
+      .filter((o) => o.side === "SELL" && orderSymbol(o) === symbol)
+      .sort((a, b) => a.price - b.price || tie(a, b));
+    const agents = new Map(s.agents.map((a) => [a.id, a]));
+    let i = 0,
+      j = 0;
+    while (i < buys.length && j < sells.length) {
+      const b = buys[i],
+        a = sells[j];
+      if (b.price < a.price) break;
+      ensure(b.agentId !== a.agentId, "SELF_TRADE", "检测到自成交", 500);
+      const quantity = Math.min(b.quantity - b.filled, a.quantity - a.filled),
+        price = Math.floor((b.price + a.price) / 2),
+        cash = price * quantity;
+      const buyer = agents.get(b.agentId)!,
+        seller = agents.get(a.agentId)!;
+      buyer.cash -= cash;
+      changeHolding(buyer, symbol, quantity);
+      seller.cash += cash;
+      changeHolding(seller, symbol, -quantity);
+      b.filled += quantity;
+      b.cashFlow -= cash;
+      a.filled += quantity;
+      a.cashFlow += cash;
+      s.trades.push({
+        ...(s.assets ? { symbol } : {}),
+        id: `${s.config.id}:${s.round}:${count++}`,
+        round: s.round,
+        buyer: b.agentId,
+        seller: a.agentId,
+        price,
+        quantity,
+        at: now,
+      });
+      volume += quantity;
+      if (b.filled === b.quantity) i++;
+      if (a.filled === a.quantity) j++;
+    }
   }
   for (const o of orders)
     if (o.side !== "PASS")
@@ -418,17 +488,26 @@ export function clearRound(s: State, now: number) {
     JSON.stringify({ round: s.round, trades: count, volume }),
   );
   if (s.round === s.config.rounds) {
-    const price = s.path[s.config.rounds];
-    for (const a of s.agents) {
-      const payout = a.dat * price;
-      s.treasuryCash -= payout;
-      s.treasuryDat += a.dat;
-      a.cash += payout;
-      a.dat = 0;
+    for (const symbol of symbols(s)) {
+      const price = pathFor(s, symbol)[s.config.rounds];
+      for (const a of s.agents) {
+        const quantity = holding(a, symbol),
+          payout = quantity * price;
+        s.treasuryCash -= payout;
+        if (symbol === "DAT") s.treasuryDat += quantity;
+        else s.assets![symbol].treasury += quantity;
+        a.cash += payout;
+        changeHolding(a, symbol, -quantity);
+      }
     }
     s.status = "finished";
     s.finishedAt = now;
-    event(s, now, "redeemed", `terminal price ${price}`);
+    event(
+      s,
+      now,
+      "redeemed",
+      "all instruments redeemed at their committed terminal prices",
+    );
   } else {
     s.round++;
     s.openedAt = scheduled;
@@ -447,6 +526,24 @@ export function advance(s: State, now: number) {
   return true;
 }
 export function audit(s: State) {
+  if (s.assets)
+    for (const symbol of AI_SYMBOLS) {
+      const asset = s.assets[symbol];
+      ensure(
+        s.agents.every(
+          (a) =>
+            Number.isSafeInteger(holding(a, symbol)) && holding(a, symbol) >= 0,
+        ) &&
+          Number.isSafeInteger(asset.treasury) &&
+          asset.treasury >= 0 &&
+          s.agents.reduce((n, a) => n + holding(a, symbol), 0) +
+            asset.treasury ===
+            asset.total,
+        "INVARIANT",
+        `${symbol} 资产不守恒`,
+        500,
+      );
+    }
   for (const a of s.agents)
     ensure(
       Number.isSafeInteger(a.cash) &&
@@ -487,24 +584,42 @@ export function publicState(s: State, now: number) {
     s.path[
       s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
     ];
-  const counts = new Map<string, { decisions: number; tradedRounds: number }>();
+  const counts = new Map<
+    string,
+    { decisions: Set<number>; tradedRounds: Set<number> }
+  >();
   for (const o of s.orders) {
-    const count = counts.get(o.agentId) || { decisions: 0, tradedRounds: 0 };
-    count.decisions++;
-    if (o.filled > 0) count.tradedRounds++;
+    const count = counts.get(o.agentId) || {
+      decisions: new Set<number>(),
+      tradedRounds: new Set<number>(),
+    };
+    count.decisions.add(o.round);
+    if (o.filled > 0) count.tradedRounds.add(o.round);
     counts.set(o.agentId, count);
   }
+  const instruments = symbols(s).map((symbol) => instrumentState(s, symbol));
+  const equity = (a: Agent) =>
+    a.cash +
+    instruments.reduce((n, i) => n + holding(a, i.symbol) * i.reference, 0);
+  const initialEquity =
+    INITIAL_CASH +
+    symbols(s).reduce(
+      (n, symbol) => n + INITIAL_DAT * pathFor(s, symbol)[0],
+      0,
+    );
   const standings = s.agents
     .map((a) => ({
       id: a.id,
       name: a.name,
       cash: a.cash,
       dat: a.dat,
-      equity: a.cash + a.dat * reference,
-      profit:
-        a.cash + a.dat * reference - (INITIAL_CASH + INITIAL_DAT * s.path[0]),
-      decisions: counts.get(a.id)?.decisions || 0,
-      tradedRounds: counts.get(a.id)?.tradedRounds || 0,
+      holdings: Object.fromEntries(
+        symbols(s).map((symbol) => [symbol, holding(a, symbol)]),
+      ),
+      equity: equity(a),
+      profit: equity(a) - initialEquity,
+      decisions: counts.get(a.id)?.decisions.size || 0,
+      tradedRounds: counts.get(a.id)?.tradedRounds.size || 0,
     }))
     .sort((a, b) => b.equity - a.equity || a.name.localeCompare(b.name));
   let rank = 0,
@@ -516,6 +631,9 @@ export function publicState(s: State, now: number) {
   });
   return {
     config: s.config,
+    instruments,
+    initialEquity,
+    orderBookMode: s.assets ? ("public-top5" as const) : ("sealed" as const),
     status: s.status,
     round: s.round,
     openedAt: s.openedAt,
@@ -539,12 +657,23 @@ export function publicState(s: State, now: number) {
     results: s.results,
     settlementMode: "simulation" as const,
     terminalPrice: s.status === "finished" ? reference : null,
-    reveal: s.status === "finished" ? { seed: s.seed, path: s.path } : null,
+    reveal:
+      s.status === "finished"
+        ? s.assets
+          ? {
+              seed: s.seed,
+              paths: {
+                OPENAI: s.assets.OPENAI.path,
+                ANTHROPIC: s.assets.ANTHROPIC.path,
+              },
+            }
+          : { seed: s.seed, path: s.path }
+        : null,
   };
 }
 export function accountState(s: State, a: Agent) {
   const orders = s.orders.filter((o) => o.agentId === a.id);
-  const pending = orders.find(
+  const pending = orders.filter(
     (o) => o.round === s.round && o.status === "pending",
   );
   return {
@@ -553,10 +682,96 @@ export function accountState(s: State, a: Agent) {
     description: a.description,
     cash: a.cash,
     dat: a.dat,
+    holdings: Object.fromEntries(
+      symbols(s).map((symbol) => [symbol, holding(a, symbol)]),
+    ),
+    availableHoldings: Object.fromEntries(
+      symbols(s).map((symbol) => [
+        symbol,
+        holding(a, symbol) -
+          pending
+            .filter((o) => o.side === "SELL" && orderSymbol(o) === symbol)
+            .reduce((n, o) => n + o.quantity - o.filled, 0),
+      ]),
+    ),
     availableCash:
-      a.cash - (pending?.side === "BUY" ? pending.price * pending.quantity : 0),
-    availableDat: a.dat - (pending?.side === "SELL" ? pending.quantity : 0),
+      a.cash -
+      pending
+        .filter((o) => o.side === "BUY")
+        .reduce((n, o) => n + o.price * (o.quantity - o.filled), 0),
+    availableDat:
+      a.dat -
+      pending
+        .filter((o) => o.side === "SELL" && orderSymbol(o) === "DAT")
+        .reduce((n, o) => n + o.quantity - o.filled, 0),
     orders,
     createdAt: a.createdAt,
+  };
+}
+
+export type Candle = {
+  round: number;
+  at: number;
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  close: number | null;
+  volume: number;
+  trades: number;
+};
+export function instrumentState(s: State, symbol: Symbol) {
+  const path = pathFor(s, symbol);
+  const trades = s.trades.filter((t) => orderSymbol(t) === symbol);
+  const candles: Candle[] = s.results.map((r) => {
+    const fills = trades.filter((t) => t.round === r.round);
+    const prices = fills.map((t) => t.price);
+    return {
+      round: r.round,
+      at: r.scheduledAt,
+      open: prices[0] ?? null,
+      high: prices.length ? Math.max(...prices) : null,
+      low: prices.length ? Math.min(...prices) : null,
+      close: prices.at(-1) ?? null,
+      volume: fills.reduce((n, t) => n + t.quantity, 0),
+      trades: fills.length,
+    };
+  });
+  const depth = (side: Side) => {
+    const levels = new Map<number, number>();
+    if (s.assets && (s.status === "running" || s.status === "paused"))
+      for (const o of s.orders)
+        if (
+          o.round === s.round &&
+          orderSymbol(o) === symbol &&
+          o.side === side &&
+          o.status === "pending" &&
+          o.quantity > o.filled
+        )
+          levels.set(
+            o.price,
+            (levels.get(o.price) ?? 0) + o.quantity - o.filled,
+          );
+    return [...levels]
+      .sort(([a], [b]) => (side === "BUY" ? b - a : a - b))
+      .slice(0, 5)
+      .map(([price, quantity]) => ({ price, quantity }));
+  };
+  const reference =
+    path[s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)];
+  return {
+    symbol,
+    name: assetName(symbol),
+    reference,
+    history: path.slice(
+      0,
+      s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
+    ),
+    terminalPrice: s.status === "finished" ? reference : null,
+    lastPrice: trades.at(-1)?.price ?? null,
+    trades: trades.slice(-100).reverse(),
+    tradeCount: trades.length,
+    volume: trades.reduce((n, t) => n + t.quantity, 0),
+    candles,
+    orderBook: { bids: depth("BUY"), asks: depth("SELL") },
   };
 }

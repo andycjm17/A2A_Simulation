@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
+import { CandlestickChart, OrderBook } from "./MarketData";
+import { assetName } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
 export type Snapshot = ReturnType<typeof publicState>;
 export type Account = ReturnType<typeof accountState>;
@@ -353,7 +355,9 @@ export default function App() {
               connect={() => setView("connect")}
             />
           )}
-          {view === "connect" && <Connect id={id} />}{" "}
+          {view === "connect" && (
+            <Connect id={id} legacy={s?.orderBookMode === "sealed"} />
+          )}{" "}
           {view === "rules" && <Rules />}
           {view === "admin" && (
             <Admin
@@ -374,8 +378,9 @@ export default function App() {
             />
           )}
           <div className="footnote">
-            DUSD / DAT
-            均为不可充值、不可提现的模拟资产。平台不托管模型、不收取真实资金；当前结算为内部账本，不代表区块链交易。
+            OpenAI / Anthropic
+            为本平台的模拟标的，与两家公司无关联，不代表真实股票、股权或报价。DUSD
+            为模拟现金，不可充值或提现。
           </div>
         </div>
       </main>
@@ -393,6 +398,9 @@ function MarketView({
   account: Account | null;
   connect: () => void;
 }) {
+  const [symbol, setSymbol] = useState(s.instruments[0].symbol);
+  const instrument =
+    s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
@@ -408,7 +416,9 @@ function MarketView({
         </div>
         <div>
           <span>最新参考价 / DUSD</span>
-          <strong>{money(s.reference)}</strong>
+          <strong>
+            {money(instrument.reference)} <small>{instrument.name}</small>
+          </strong>
         </div>
         <div>
           <span>参与 Agent</span>
@@ -419,7 +429,7 @@ function MarketView({
         <div>
           <span>累计成交量</span>
           <strong>
-            {s.volume} <small>DAT · {s.tradeCount} 笔</small>
+            {instrument.volume} <small>份 · {instrument.tradeCount} 笔</small>
           </strong>
         </div>
       </div>
@@ -427,22 +437,53 @@ function MarketView({
         <section className="price-surface">
           <div className="row between instrument-heading">
             <div>
-              <span className="instrument-symbol">DAT</span>
+              <span className="instrument-symbol">{instrument.symbol}</span>
               <h2>
-                模拟交易资产 <span className="subtle">DAT / DUSD</span>
+                {instrument.name} <span className="subtle">/ DUSD · 模拟</span>
               </h2>
             </div>
             <span className="badge">{statusName[s.status]}</span>
           </div>
-          <PriceChart values={s.history} />
+          <div className="instrument-tabs" role="group" aria-label="交易标的">
+            {s.instruments.map((i) => (
+              <button
+                key={i.symbol}
+                aria-pressed={instrument.symbol === i.symbol}
+                onClick={() => setSymbol(i.symbol)}
+              >
+                <span>{i.name}</span>
+                <small>
+                  {i.lastPrice === null ? "暂无成交" : money(i.lastPrice)}
+                </small>
+              </button>
+            ))}
+          </div>
+          <div className="last-trade">
+            <span>
+              {instrument.lastPrice === null
+                ? "—"
+                : money(instrument.lastPrice)}
+            </span>
+            <small>最新成交 / DUSD</small>
+          </div>
+          <CandlestickChart
+            key={instrument.symbol}
+            instrument={instrument}
+            roundMs={s.config.roundMs}
+          />
+          <OrderBook
+            instrument={instrument}
+            sealed={s.orderBookMode === "sealed"}
+            paused={s.status === "paused"}
+          />
           <div className="statusbar">
             {s.status === "running"
               ? `第 ${s.round} 轮 · ${secs ? `距离下单截止 ${secs} 秒` : "已锁单，等待撮合"} · 每轮 ${s.config.roundMs / 1000} 秒`
               : s.status === "finished"
-                ? "全部轮次已结算，DAT 已按最终参考价兑换。"
+                ? "全部轮次已结算，各标的已按各自最终参考价兑换。"
                 : s.status === "paused"
                   ? `计时暂停，等待组织者恢复${s.pauseReason === "scheduler_delay" ? "（调度延迟保护）" : ""}。`
-                  : "等待组织者开始。开赛后每轮只能提交一个有效决定。"}
+                  : "等待组织者开始。开赛后每种标的每轮可提交一个决定。"}
           </div>
         </section>
         <section className="panel agent-ticket">
@@ -457,7 +498,15 @@ function MarketView({
               </span>
               <div className="ticket-value">
                 {account
-                  ? money(account.cash + account.dat * s.reference)
+                  ? money(
+                      account.cash +
+                        s.instruments.reduce(
+                          (total, i) =>
+                            total +
+                            (account.holdings[i.symbol] ?? 0) * i.reference,
+                          0,
+                        ),
+                    )
                   : "—"}
                 <small>DUSD 净资产</small>
               </div>
@@ -467,10 +516,12 @@ function MarketView({
                 <dt>可用现金</dt>
                 <dd>{account ? money(account.availableCash) : "—"}</dd>
               </div>
-              <div>
-                <dt>DAT 持仓</dt>
-                <dd>{account ? account.dat : "—"}</dd>
-              </div>
+              {s.instruments.map((i) => (
+                <div key={i.symbol}>
+                  <dt>{i.name} 持仓</dt>
+                  <dd>{account ? account.holdings[i.symbol] : "—"}</dd>
+                </div>
+              ))}
               <div>
                 <dt>接入方式</dt>
                 <dd>MCP / API</dd>
@@ -496,9 +547,11 @@ function MarketView({
               <span>{(s.config.rounds * s.config.roundMs) / 60000} 分钟</span>
             </div>
             <div className="hint">
-              初始资产：10,000 DUSD + 100 DAT
+              初始资产：10,000 DUSD + 每种标的 100 份
               <br />
-              机制：每轮密封订单、批量撮合
+              机制：
+              {s.orderBookMode === "sealed" ? "历史密封订单" : "公开五档盘口"}
+              、每轮集中撮合
             </div>
             <p className="hint">
               最终余额决定排名，相同余额共享名次。奖品安排由组织者在活动前公布；练习赛不作为领奖依据。
@@ -536,7 +589,9 @@ function MarketView({
                 <th>Agent</th>
                 <th>净资产 / DUSD</th>
                 <th>收益 / DUSD</th>
-                <th>DAT</th>
+                {s.instruments.map((i) => (
+                  <th key={i.symbol}>{i.name}</th>
+                ))}
                 <th>决策轮数</th>
                 <th>成交轮数</th>
               </tr>
@@ -553,7 +608,9 @@ function MarketView({
                     {a.profit >= 0 ? "+" : ""}
                     {money(a.profit)}
                   </td>
-                  <td>{a.dat}</td>
+                  {s.instruments.map((i) => (
+                    <td key={i.symbol}>{a.holdings[i.symbol]}</td>
+                  ))}
                   <td>
                     {a.decisions} / {s.config.rounds}
                   </td>
@@ -567,7 +624,9 @@ function MarketView({
       </section>
       <section className="panel market-table">
         <div className="paneltitle">
-          <h2>最新成交</h2>
+          <h2>
+            最新成交 <span className="subtle">{instrument.name}</span>
+          </h2>
           <span className="hint">最近 100 笔 · 结算后公开</span>
         </div>
         <div className="tablewrap">
@@ -578,11 +637,11 @@ function MarketView({
                 <th>买方 Agent</th>
                 <th>卖方 Agent</th>
                 <th>价格 / DUSD</th>
-                <th>数量 / DAT</th>
+                <th>数量 / 份</th>
               </tr>
             </thead>
             <tbody>
-              {s.trades.map((t) => (
+              {instrument.trades.map((t) => (
                 <tr key={t.id}>
                   <td>R{t.round}</td>
                   <td>{names.get(t.buyer)}</td>
@@ -593,7 +652,7 @@ function MarketView({
               ))}
             </tbody>
           </table>
-          {!s.trades.length && (
+          {!instrument.tradeCount && (
             <div className="empty">
               尚无成交。只有价格相容的买卖订单才会成交。
             </div>
@@ -639,155 +698,6 @@ function Commitment({ s }: { s: Snapshot }) {
         </>
       )}
     </details>
-  );
-}
-function PriceChart({ values }: { values: number[] }) {
-  const [range, setRange] = useState(0),
-    [active, setActive] = useState<number | null>(null);
-  const start = range ? Math.max(0, values.length - range - 1) : 0;
-  const shown = values.slice(start),
-    current = Math.min(active ?? shown.length - 1, shown.length - 1);
-  const value = shown[current],
-    delta = value - shown[0],
-    pct = (delta / shown[0]) * 100;
-  const lo = Math.min(...shown) - 100,
-    hi = Math.max(...shown) + 100;
-  const x = (i: number) => 12 + (i / Math.max(1, shown.length - 1)) * 876;
-  const y = (v: number) => 230 - ((v - lo) / (hi - lo)) * 190;
-  const points = shown.map((v, i) => `${x(i)},${y(v)}`).join(" ");
-  return (
-    <>
-      <div className="quote">
-        <div className="quote-value">
-          {money(value)}
-          <span>DUSD</span>
-        </div>
-        <div className={delta >= 0 ? "positive" : "negative"}>
-          {delta >= 0 ? "+" : ""}
-          {money(delta)} ({pct >= 0 ? "+" : ""}
-          {pct.toFixed(2)}%)
-          <span className="quote-caption">
-            {active === null
-              ? range
-                ? `最近 ${range} 轮`
-                : "本场累计"
-              : `第 ${start + current} 轮`}
-          </span>
-        </div>
-      </div>
-      <div
-        className="chart"
-        role="slider"
-        tabIndex={0}
-        aria-label="参考价格路径"
-        aria-valuemin={start}
-        aria-valuemax={values.length - 1}
-        aria-valuenow={start + current}
-        aria-valuetext={`第 ${start + current} 轮，${money(value)} DUSD`}
-        onPointerMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          setActive(
-            Math.round(
-              Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) *
-                (shown.length - 1),
-            ),
-          );
-        }}
-        onPointerLeave={() => setActive(null)}
-        onBlur={() => setActive(null)}
-        onKeyDown={(e) => {
-          if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
-            e.preventDefault();
-            setActive(
-              e.key === "Home"
-                ? 0
-                : e.key === "End"
-                  ? shown.length - 1
-                  : Math.max(
-                      0,
-                      Math.min(
-                        shown.length - 1,
-                        current + (e.key === "ArrowRight" ? 1 : -1),
-                      ),
-                    ),
-            );
-          }
-        }}
-      >
-        <svg
-          viewBox="0 0 900 270"
-          preserveAspectRatio="none"
-          aria-hidden="true"
-        >
-          <line
-            x1="12"
-            x2="888"
-            y1={y(shown[0])}
-            y2={y(shown[0])}
-            stroke="#e3e5e6"
-            strokeDasharray="3 6"
-          />
-          {shown.length > 1 ? (
-            <polyline
-              points={points}
-              fill="none"
-              stroke="var(--chart-green)"
-              strokeWidth="2.5"
-              vectorEffect="non-scaling-stroke"
-            />
-          ) : (
-            <circle
-              cx={x(0)}
-              cy={y(shown[0])}
-              r="4"
-              fill="var(--chart-green)"
-            />
-          )}
-          {active !== null && (
-            <>
-              <line
-                x1={x(current)}
-                x2={x(current)}
-                y1="10"
-                y2="260"
-                stroke="#c4c8ca"
-                strokeDasharray="3 4"
-              />
-              <circle
-                cx={x(current)}
-                cy={y(value)}
-                r="4"
-                fill="var(--chart-green)"
-              />
-            </>
-          )}
-        </svg>
-      </div>
-      <div className="chart-ranges" role="group" aria-label="图表范围">
-        {[
-          [5, "5 轮"],
-          [15, "15 轮"],
-          [0, "全部"],
-        ].map(([n, label]) => (
-          <button
-            type="button"
-            key={n}
-            aria-pressed={range === n}
-            onClick={() => {
-              setRange(Number(n));
-              setActive(null);
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <div className="chartmeta">
-        <span>初始 {money(values[0])}</span>
-        <span>已结算 {values.length - 1} 轮</span>
-        <span>最新 {money(values.at(-1)!)}</span>
-      </div>
-    </>
   );
 }
 function AgentView({
@@ -846,7 +756,18 @@ function AgentView({
                 <div>
                   <span className="hint">可用库存</span>
                   <div className="metric">
-                    {account.availableDat} <small>DAT</small>
+                    {Object.entries(account.availableHoldings).map(
+                      ([symbol, quantity]) => (
+                        <div key={symbol}>
+                          {quantity}{" "}
+                          <small>
+                            {assetName(
+                              symbol as "DAT" | "OPENAI" | "ANTHROPIC",
+                            )}
+                          </small>
+                        </div>
+                      ),
+                    )}
                   </div>
                 </div>
               </div>
@@ -899,10 +820,11 @@ function AgentView({
               <thead>
                 <tr>
                   <th>轮次</th>
+                  <th>标的</th>
                   <th>决定</th>
                   <th>限价 / DUSD</th>
-                  <th>委托 DAT</th>
-                  <th>成交 DAT</th>
+                  <th>委托数量</th>
+                  <th>成交数量</th>
                   <th>状态</th>
                 </tr>
               </thead>
@@ -910,6 +832,7 @@ function AgentView({
                 {[...account.orders].reverse().map((o) => (
                   <tr key={o.id}>
                     <td>R{o.round}</td>
+                    <td>{assetName(o.symbol ?? "DAT")}</td>
                     <td>{o.side}</td>
                     <td>{o.side === "PASS" ? "—" : money(o.price)}</td>
                     <td>{o.quantity}</td>

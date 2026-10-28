@@ -394,7 +394,7 @@ async function req(
 async function create(practice = true, extra = {}) {
   const r = await req("/api/admin/markets", {
     token: admin,
-    data: { id: "runtime-market", name: "Runtime market", practice, ...extra },
+    data: { id: "runtime-market", name: "Runtime market", practice, assetMode: "legacy", ...extra },
   });
   expect(r.status).toBe(201);
   return r;
@@ -798,5 +798,65 @@ describe("official MCP client compatibility", () => {
       headers: { Authorization: `Bearer ${a.apiKey}` },
     });
     expect(r.status).toBe(405);
+  });
+});
+
+describe('dual-asset HTTP and persisted ledger', () => {
+  it('creates AI markets by default, persists both instruments, settles separately, and keeps future paths private', async () => {
+    const created=await req('/api/admin/markets',{token:admin,data:{id:'dual-runtime',name:'Dual runtime',practice:true,rounds:2}});
+    expect(created.status).toBe(201);
+    expect(created.body.instruments.map((i:any)=>i.symbol)).toEqual(['OPENAI','ANTHROPIC']);
+    const base='/api/markets/dual-runtime';
+    const a=(await req(`${base}/join`,{data:{name:'Buyer'}})).body;
+    const b=(await req(`${base}/join`,{data:{name:'Seller'}})).body;
+    await req('/api/admin/markets/dual-runtime/start',{token:admin,data:{}});
+    expect((await req(`${base}/decision`,{token:a.apiKey,data:order})).status).toBe(400);
+    for(const symbol of ['OPENAI','ANTHROPIC']) {
+      for(const [token,side] of [[a.apiKey,'BUY'],[b.apiKey,'SELL']]) {
+        expect((await req(`${base}/decision`,{token,data:{...order,symbol,side,requestId:`${symbol}-${side}-runtime`,price:symbol==='OPENAI'?10000:12000}})).status).toBe(200);
+      }
+    }
+    const stub=env.MARKETS.get(env.MARKETS.idFromName('dual-runtime'));
+    await evictDurableObject(stub);
+    const account=(await req(`${base}/account`,{token:a.apiKey})).body;
+    expect(account.orders).toHaveLength(2);expect(account.availableCash).toBe(890000);
+    const snapshot=(await req(base)).body;
+    expect(snapshot.instruments[0].orderBook.bids).toEqual([{price:10000,quantity:5}]);
+    const exported=(await req('/api/admin/markets/dual-runtime/export',{token:admin})).body;
+    expect(exported.reveal).toBeNull();expect(exported.audit.assets.OPENAI.path).toBeUndefined();
+    const settle=async()=>{
+      await runInDurableObject(stub,(_,ctx)=>{
+        const state=JSON.parse(ctx.storage.sql.exec<{state:string}>('SELECT state FROM market WHERE id=1').one().state);
+        state.openedAt=Date.now()-60001;
+        ctx.storage.sql.exec('UPDATE market SET state=? WHERE id=1',JSON.stringify(state));
+      });
+      await evictDurableObject(stub);await runDurableObjectAlarm(stub);
+    };
+    await settle();
+    const after=(await req(base)).body;
+    expect(after.tradeCount).toBe(2);
+    expect(after.instruments.map((i:any)=>i.candles[0].close)).toEqual([10000,12000]);
+    expect(after.instruments.every((i:any)=>i.orderBook.bids.length===0)).toBe(true);
+    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({OPENAI:105,ANTHROPIC:105});
+    await settle();await evictDurableObject(stub);
+    const final=(await req(base)).body;
+    expect(final.status).toBe('finished');expect(final.reveal.paths.OPENAI).toHaveLength(3);
+    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({OPENAI:0,ANTHROPIC:0});
+    expect((await req('/api/admin/markets/dual-runtime/status',{token:admin})).body.conserved).toBe(true);
+  });
+  it('concurrent requests across symbols cannot overspend shared cash',async()=>{
+    await create(true,{assetMode:'ai'});const a=(await join()).body;await join('Second Agent');
+    await req('/api/admin/markets/runtime-market/start',{token:admin,data:{}});
+    const stub=env.MARKETS.get(env.MARKETS.idFromName('runtime-market'));
+    await runInDurableObject(stub,(_,ctx)=>{
+      const state=JSON.parse(ctx.storage.sql.exec<{state:string}>('SELECT state FROM market WHERE id=1').one().state);
+      state.agents[0].cash=300000;state.treasuryCash+=700000;
+      ctx.storage.sql.exec('UPDATE market SET state=? WHERE id=1',JSON.stringify(state));
+    });await evictDurableObject(stub);
+    const results=await Promise.all(['OPENAI','ANTHROPIC'].map(symbol=>req('/api/markets/runtime-market/decision',{token:a.apiKey,data:{...order,symbol,price:20000,quantity:10,requestId:`concurrent-${symbol}`}})));
+    expect(results.map(r=>r.status).sort()).toEqual([200,400]);
+    await evictDurableObject(stub);
+    const account=(await req('/api/markets/runtime-market/account',{token:a.apiKey})).body;
+    expect(account.orders).toHaveLength(1);expect(account.availableCash).toBe(100000);
   });
 });

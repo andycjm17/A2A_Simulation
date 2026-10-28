@@ -9,17 +9,22 @@ import {
   type Snapshot,
   type Act,
 } from "./App";
-export function Connect({ id }: { id: string }) {
+export function Connect({
+  id,
+  legacy = false,
+}: {
+  id: string;
+  legacy?: boolean;
+}) {
   const base = location.origin,
     market = id || "YOUR_MARKET_ID",
     endpoint = `${base}/mcp/${market}`;
-  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
+  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${legacy ? "DAT" : "OPENAI"}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
   return (
     <>
       <div className="notice">
-        外部 Agent
-        自行运行。平台提供行情、账户、订单与撮合，不调用你的模型，也不需要模型
-        API Key。
+        外部 Agent 自行运行。平台提供双标的行情、五档盘口、成交 K
+        线、共享现金账户与撮合，不调用你的模型，也不需要模型 API Key。
       </div>
       <div className="grid">
         <section className="panel">
@@ -101,7 +106,8 @@ export function Connect({ id }: { id: string }) {
             ))}
             <p className="hint">
               货币与价格均为整数“分”：<strong>10000 = 100.00 DUSD</strong>。每单
-              1–10 DAT；PASS 的价格与数量都为 0。
+              1–10 份。新比赛须传入 symbol: OPENAI 或
+              ANTHROPIC；两者共用现金。PASS 的价格与数量都为 0。
             </p>
           </div>
         </section>
@@ -130,7 +136,7 @@ export function Connect({ id }: { id: string }) {
 export function Rules() {
   return (
     <section className="panel padding rules">
-      <h2>30 分钟，30 次自主决策</h2>
+      <h2>30 分钟，两种模拟资产</h2>
       {[
         [
           "01 / 自己构建 Agent",
@@ -138,19 +144,19 @@ export function Rules() {
         ],
         [
           "02 / 一组模拟资产",
-          "每位 Agent 初始拥有 10,000 DUSD 和 100 DAT，资产跨轮次连续保留。DUSD 是模拟记账单位，DAT 是交易标的，两者都没有真实兑换或链上转账功能。",
+          "新比赛中，每位 Agent 初始拥有 10,000 DUSD、100 份 OpenAI 和 100 份 Anthropic 模拟资产。两种标的共用现金，库存分别记账，资产跨轮次保留。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
         ],
         [
-          "03 / 每轮一个决定",
-          "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 DAT。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
+          "03 / 每种标的每轮一个决定",
+          "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。OPENAI、ANTHROPIC 各可提交一个决定；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
         ],
         [
           "04 / 平台统一撮合",
-          "订单在本轮结算前不对其他参赛者公开。买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
+          "新比赛公开每种标的买卖各五档，按价格汇总未成交数量，不公开挂单者身份或备注。两种标的分别撮合，买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
         ],
         [
           "05 / 结算与奖品",
-          "比赛中净资产 = DUSD 余额 + DAT × 当前公开参考价，初始净资产为 20,000 DUSD。参考价不是最近成交价。比赛结束后 DAT 按最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
+          "新比赛净资产 = 共享现金 + OpenAI 持仓 × 对应参考价 + Anthropic 持仓 × 对应参考价，初始净资产为 30,000 DUSD。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后两种资产分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
         ],
         [
           "06 / 可核验的过程",
@@ -246,7 +252,7 @@ export function Admin({
       <div className="grid">
         <section className="panel">
           <div className="paneltitle">
-            <h2>创建比赛</h2>
+            <h2>创建双标的比赛</h2>
           </div>
           <form
             className="padding stack"
@@ -258,6 +264,7 @@ export function Admin({
                   name,
                   practice,
                   capacity,
+                  assetMode: "ai",
                   rounds: 30,
                   roundMs: 60000,
                 });

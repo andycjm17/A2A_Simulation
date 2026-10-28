@@ -64,7 +64,7 @@ for (const n of levels) {
     data: {
       id,
       name: `负载验收 · ${n} Agents`,
-      practice: true,
+      practice: true, assetMode: "legacy",
       capacity: n,
       roundMs: 60000,
       rounds: 1,

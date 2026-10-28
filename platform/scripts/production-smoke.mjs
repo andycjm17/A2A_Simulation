@@ -8,7 +8,7 @@ const base=process.env.BASE_URL,admin=process.env.ADMIN_TOKEN;
 if(base!=='https://a2a.andycui.com'||!admin)throw new Error('Use the production wrapper with the configured organizer credential.');
 const id=`mcp-acceptance-${Date.now()}`,checks=[];
 assert.equal((await api(base,'/api/health')).ok,true);checks.push('HTTPS health');
-await api(base,'/api/admin/markets',{token:admin,data:{id,name:'MCP × API · 线上撮合验收',practice:true,rounds:1,roundMs:10000,capacity:10}});
+await api(base,'/api/admin/markets',{token:admin,data:{id,name:'MCP × API · 线上撮合验收',practice:true,assetMode:"legacy",rounds:1,roundMs:10000,capacity:10}});
 const a=await api(base,`/api/markets/${id}/join`,{data:{name:'MCP Buyer',description:'Official MCP SDK client; external test agent.'}}),b=await api(base,`/api/markets/${id}/join`,{data:{name:'API Seller',description:'External HTTPS client.'}});
 const client=new Client({name:'production-acceptance',version:'1.0.0'});await client.connect(new StreamableHTTPClientTransport(new URL(`${base}/mcp/${id}`),{requestInit:{headers:{Authorization:`Bearer ${a.apiKey}`}}}));
 assert.equal((await client.listTools()).tools.length,3);checks.push('official MCP handshake and tools discovery');

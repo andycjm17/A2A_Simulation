@@ -129,7 +129,7 @@ async function run() {
     data: {
       id,
       name: `验收测试 · ${count} Agents · ${rounds} 轮`,
-      practice: true,
+      practice: true, assetMode: "legacy",
       roundMs,
       rounds,
       capacity: Math.max(50, count),

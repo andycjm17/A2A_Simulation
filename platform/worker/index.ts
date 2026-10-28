@@ -95,7 +95,7 @@ async function mcp(req: Request, env: Env, id: string) {
   if (req.method !== "POST")
     return new Response(null, { status: 405, headers: { Allow: "POST" } });
   const parsedBody = await body(req);
-  const server = new McpServer({ name: "agent-exchange", version: "1.0.0" });
+  const server = new McpServer({ name: "agent-exchange", version: "2.0.0" });
   const invoke = async (action: string, data?: unknown) => {
     const r = await stub.command({ action, keyHash, data });
     return {
@@ -132,7 +132,7 @@ async function mcp(req: Request, env: Env, id: string) {
     "submit_decision",
     {
       description:
-        "Submit one BUY, SELL or PASS per round. price is integer cents (10000 = 100 DUSD); quantity is 1–10 DAT. PASS uses 0/0. Reuse requestId only for an identical retry. This transfers simulated assets if matched at round end.",
+        "Submit one BUY, SELL or PASS per instrument per round. New markets require symbol OPENAI or ANTHROPIC; legacy DAT markets may omit symbol. Both instruments share availableCash. price is integer cents (10000 = 100 DUSD); quantity is 1–10 units. PASS uses 0/0. Reuse requestId only for an identical retry. This transfers simulated assets if matched at round end.",
       inputSchema: decisionSchema,
       annotations: {
         readOnlyHint: false,
@@ -203,7 +203,7 @@ async function route(req: Request, env: Env) {
   if (path === "/api/health" && req.method === "GET")
     return json({
       ok: true,
-      version: "1.0.0",
+      version: "2.0.0",
       settlement: "simulation",
       serverTime: Date.now(),
     });
@@ -364,7 +364,7 @@ async function route(req: Request, env: Env) {
   if (mc) return mcp(req, env, mc[1]);
   if (path === "/llms.txt")
     return new Response(
-      "Agent Exchange — simulated DUSD/DAT matching. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per round; price in integer cents; quantity 1–10 DAT. PASS uses 0/0. requestId is idempotent.\nRead /api/openapi.json for request schemas.\n",
+      "Agent Exchange — simulated OpenAI and Anthropic assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to OPENAI or ANTHROPIC in new markets; omit or use DAT only for legacy markets. Both assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nRead /api/openapi.json for request schemas.\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   if (path === "/api/openapi.json") return json(openapi(url.origin));
@@ -377,9 +377,9 @@ function openapi(origin: string) {
     openapi: "3.1.0",
     info: {
       title: "Agent Exchange simulated matching",
-      version: "1.0.0",
+      version: "2.0.0",
       description:
-        "DUSD cents, integer DAT; no real funds. Register in lobby; protect the returned API key.",
+        "DUSD cents, integer simulated OPENAI/ANTHROPIC units, shared cash; legacy DAT markets retained. No real shares or funds. Register in lobby; protect the returned API key.",
     },
     servers: [{ url: origin }],
     components: {

@@ -1,26 +1,179 @@
-import {test,expect} from '@playwright/test';
-import {readFileSync} from 'node:fs';
-const snapshot=JSON.parse(readFileSync('reports/run-acceptance-1789186009126.json','utf8')).summary;
-test('trading layout exposes real price ranges, keyboard inspection and read-only account rail',async({page},info)=>{
- const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
- await page.route('**/api/markets',r=>r.fulfill({json:{markets:[{id:snapshot.config.id,name:snapshot.config.name,practice:1}]}}));
- await page.route(`**/api/markets/${snapshot.config.id}`,r=>r.fulfill({json:snapshot}));
- await page.goto(`/?market=${snapshot.config.id}`);
- const chart=page.getByRole('slider',{name:'参考价格路径'});
- await expect(chart).toHaveAttribute('aria-valuenow','30');
- await page.getByRole('button',{name:'5 轮',exact:true}).click();
- await expect(chart).toHaveAttribute('aria-valuemin','25');
- await chart.focus();await page.keyboard.press('Home');
- await expect(chart).toHaveAttribute('aria-valuenow','25');
- await expect(chart).toHaveAttribute('aria-valuetext',new RegExp((snapshot.history[25]/100).toFixed(2)));
- await page.keyboard.press('ArrowRight');await expect(chart).toHaveAttribute('aria-valuenow','26');
- await page.getByRole('button',{name:'全部',exact:true}).click();
- await expect(chart).toHaveAttribute('aria-valuemin','0');
- await expect(page.getByRole('heading',{name:'Agent 账户'})).toBeVisible();
- await expect(page.getByRole('button',{name:/买入|卖出|提交订单/})).toHaveCount(0);
- expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
- await page.evaluate(()=>window.scrollTo(0,0));
- await page.screenshot({path:`reports/trading-ui-${info.project.name}.png`,fullPage:true});
- await page.screenshot({path:`reports/trading-ui-${info.project.name}-viewport.png`});
- expect(errors).toEqual([]);
+import { test, expect } from "@playwright/test";
+import {
+  createState,
+  addAgent,
+  start,
+  submit,
+  clearRound,
+  pause,
+  publicState,
+} from "../../worker/engine";
+
+async function fixture(empty = false) {
+  const s = await createState(
+    {
+      id: "chart-fixture",
+      name: "OpenAI × Anthropic 模拟交易",
+      assetMode: "ai",
+      rounds: 30,
+      roundMs: 60000,
+      capacity: 50,
+      practice: true,
+    },
+    "browser-chart-seed",
+    Date.now() - 1200000,
+  );
+  for (let i = 0; i < 12; i++)
+    addAgent(
+      s,
+      {
+        id: `a${i}`,
+        name: `Agent ${i + 1}`,
+        keyHash: `key${i}`,
+        description: "",
+      },
+      s.createdAt,
+    );
+  if (empty) return publicState(s, Date.now());
+  start(s, s.createdAt);
+  for (let round = 1; round <= 20; round++) {
+    for (const symbol of ["OPENAI", "ANTHROPIC"] as const) {
+      const center =
+        10000 +
+        Math.round(Math.sin(round / 3 + (symbol === "OPENAI" ? 0 : 2)) * 1000);
+      const legs =
+        round % 2
+          ? ([
+              ["a0", "BUY", center + 1000, 4],
+              ["a1", "SELL", center - 500, 2],
+              ["a2", "SELL", center, 2],
+            ] as const)
+          : ([
+              ["a0", "BUY", center + 500, 2],
+              ["a1", "BUY", center, 2],
+              ["a2", "SELL", center - 1000, 4],
+            ] as const);
+      for (const [agent, side, price, quantity] of legs)
+        submit(
+          s,
+          `a${(Number(agent.slice(1)) + 3 * (round % 4)) % 12}`,
+          {
+            round,
+            symbol,
+            side,
+            price,
+            quantity,
+            requestId: `${agent}-${symbol}-${round}`,
+          },
+          s.openedAt + 1,
+        );
+    }
+    clearRound(s, s.openedAt + 60000);
+  }
+  for (let i = 0; i < 12; i++)
+    for (const symbol of ["OPENAI", "ANTHROPIC"] as const)
+      submit(
+        s,
+        `a${i}`,
+        {
+          round: s.round,
+          symbol,
+          side: i < 6 ? "BUY" : "SELL",
+          price:
+            (i < 6 ? 9900 - i * 100 : 10100 + (i - 6) * 100) +
+            (symbol === "ANTHROPIC" ? 1000 : 0),
+          quantity: (i % 5) + 1,
+          requestId: `depth-${i}-${symbol}`,
+        },
+        s.openedAt + 1,
+      );
+  pause(s, s.openedAt + 1000);
+  return publicState(s, Date.now());
+}
+test("two asset tabs show executed candles, five levels and keyboard inspection without overflow", async ({
+  page,
+}, info) => {
+  const snapshot = await fixture();
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.route("**/api/markets", (r) =>
+    r.fulfill({
+      json: {
+        markets: [
+          { id: snapshot.config.id, name: snapshot.config.name, practice: 1 },
+        ],
+      },
+    }),
+  );
+  await page.route(`**/api/markets/${snapshot.config.id}`, (r) =>
+    r.fulfill({ json: snapshot }),
+  );
+  await page.goto(`/?market=${snapshot.config.id}`);
+  const chart = page.getByRole("img", {
+    name: "OpenAI 成交 K 线图；价格单位 DUSD",
+  });
+  await expect(chart).toBeVisible();
+  await expect(chart.locator('g[role="button"]')).toHaveCount(20);
+  await page.getByRole("button", { name: "15 轮", exact: true }).click();
+  await expect(chart.locator('g[role="button"]')).toHaveCount(15);
+  const first = chart.locator('g[role="button"]').first();
+  await first.focus();
+  await page.keyboard.press("Enter");
+  await expect(page.locator(".ohlc")).toContainText("R6");
+  const bids = page.getByRole("table", { name: "OpenAI 买盘" });
+  await expect(bids.locator("tbody tr")).toHaveCount(5);
+  await expect(bids.locator("tbody tr").first()).toContainText("99.00");
+  await page
+    .getByRole("button", { name: /Anthropic 暂无成交|Anthropic [0-9]/ })
+    .click();
+  await expect(
+    page.getByRole("img", { name: "Anthropic 成交 K 线图；价格单位 DUSD" }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("table", { name: "Anthropic 买盘" })
+      .locator("tbody tr")
+      .first(),
+  ).toContainText("109.00");
+  await page.getByRole("button", { name: /OpenAI [0-9]/ }).click();
+  await expect(page.getByRole("heading", { name: "Agent 账户" })).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: `reports/dual-asset-${info.project.name}.png`,
+    fullPage: true,
+  });
+  expect(errors).toEqual([]);
+});
+test("a fresh market does not fabricate candles or order-book quantities", async ({
+  page,
+}) => {
+  const snapshot = await fixture(true);
+  await page.route("**/api/markets", (r) =>
+    r.fulfill({
+      json: {
+        markets: [
+          { id: snapshot.config.id, name: snapshot.config.name, practice: 1 },
+        ],
+      },
+    }),
+  );
+  await page.route(`**/api/markets/${snapshot.config.id}`, (r) =>
+    r.fulfill({ json: snapshot }),
+  );
+  await page.goto(`/?market=${snapshot.config.id}`);
+  await expect(page.getByText("尚无成交 K 线", { exact: true })).toBeVisible();
+  await expect(page.locator(".candle-chart")).toHaveCount(0);
+  await expect(
+    page.getByRole("table", { name: "OpenAI 买盘" }).locator("tbody tr"),
+  ).toHaveCount(5);
+  await expect(
+    page
+      .getByRole("table", { name: "OpenAI 买盘" })
+      .locator("tbody tr")
+      .first(),
+  ).toHaveText("买1——");
 });

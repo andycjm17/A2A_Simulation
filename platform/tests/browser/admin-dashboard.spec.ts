@@ -66,6 +66,7 @@ test("organizer dashboard manages a real match, protects credentials and locks c
     headers: { Authorization: `Bearer ${keys[0]}` },
     data: {
       round: 1,
+    symbol: "OPENAI",
       side: "PASS",
       price: 0,
       quantity: 0,

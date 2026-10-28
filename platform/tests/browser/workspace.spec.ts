@@ -63,6 +63,7 @@ test("complete participant workflow, safety and responsive UI", async ({
   ).toBe(200);
   const d = {
     round: 1,
+    symbol: "OPENAI",
     side: "BUY",
     price: 11000,
     quantity: 5,
@@ -106,7 +107,7 @@ test("complete participant workflow, safety and responsive UI", async ({
   ).toBeVisible();
   await page.getByRole("button", { name: "比赛规则", exact: true }).click();
   await expect(
-    page.getByRole("heading", { name: "30 分钟，30 次自主决策" }),
+    page.getByRole("heading", { name: "30 分钟，两种模拟资产" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "市场总览", exact: true }).click();
   await expect(

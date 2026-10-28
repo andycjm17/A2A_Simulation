@@ -858,3 +858,44 @@ button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 
   .subtle { display: inline-block; margin-left: 5px; }
   .split, .grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Instrument selection and execution-price candles. */
+.instrument-tabs { display: flex; gap: 10px; margin: 24px 0; }
+.instrument-tabs button { flex: 1; text-align: left; border: 1px solid var(--border); border-radius: 10px; background: white; padding: 12px 16px; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+.instrument-tabs button[aria-pressed="true"] { border-color: var(--green); background: #f1f9f4; color: var(--green); }
+.instrument-tabs button span { font-weight: 650; }
+.instrument-tabs button small { font-size: 12px; }
+.last-trade { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+.last-trade > span { font-size: 38px; font-weight: 600; letter-spacing: -1px; }
+.last-trade > small { color: var(--muted); }
+.candle-heading h3 { font-size: 15px; margin: 0; }
+.ohlc { display: flex; flex-wrap: wrap; gap: 12px; min-height: 40px; align-items: center; font-size: 12px; color: #646c67; font-variant-numeric: tabular-nums; }
+.ohlc b { color: #263b30; font-weight: 500; }
+.candle-chart { width: 100%; height: auto; display: block; }
+.axis-label { fill: #6b756e; font-size: 12px; }
+.candle-up { fill: #159761; stroke: #159761; }
+.candle-down { fill: #d35151; stroke: #d35151; }
+.candle-chart g[role="button"]:focus { outline: 1px solid var(--green); }
+.candle-empty { min-height: 245px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; text-align: center; color: #6b756e; font-size: 13px; border-block: 1px dashed var(--border); margin: 8px 0; }
+.empty-candle-icon { font-size: 38px; color: #9bb7a4; }
+.candle-controls { gap: 12px; margin-bottom: 26px; }
+.candle-controls .chart-ranges { flex-shrink: 0; gap: 16px; }
+.candle-controls > .hint { font-size: 11px; text-align: right; }
+.order-book { margin: 20px 0; overflow: hidden; }
+.order-book .paneltitle { padding: 16px; }
+.order-book h2 { font-size: 15px; }
+.depth-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.depth-grid > div:first-child { border-right: 1px solid var(--border); }
+.depth-grid table { width: 100%; min-width: 0; font-size: 12px; font-variant-numeric: tabular-nums; }
+.depth-grid th, .depth-grid td { padding: 10px 12px; text-align: right; white-space: nowrap; }
+.depth-grid th:first-child, .depth-grid td:first-child { text-align: left; }
+.depth-row.bid { color: #168052; background: linear-gradient(to left, #e9f6ee var(--depth), transparent var(--depth)); }
+.depth-row.ask { color: #c34747; background: linear-gradient(to left, #fcf0ee var(--depth), transparent var(--depth)); }
+.depth-note { font-size: 11px; padding: 12px 16px; margin: 0; }
+@media(max-width:600px) {
+ .depth-grid th, .depth-grid td { padding: 9px 5px; font-size: 11px; }
+ .instrument-tabs button { padding: 10px; flex-direction: column; align-items: flex-start; gap: 4px; }
+ .ohlc { gap: 8px; }
+ .candle-controls { flex-wrap: wrap; }
+ .order-book .paneltitle { gap: 8px; flex-wrap: wrap; }
+}

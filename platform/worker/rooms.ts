@@ -21,6 +21,7 @@ import {
 
 export const decisionSchema = z
   .object({
+    symbol: z.enum(["OPENAI", "ANTHROPIC", "DAT"]).optional(),
     round: z.number().int().min(1).max(100),
     side: z.enum(["BUY", "SELL", "PASS"]),
     price: z.number().int().min(0).max(20000),
@@ -41,6 +42,7 @@ export const configSchema = z
     roundMs: z.number().int().min(2000).max(60000).default(60000),
     capacity: z.number().int().min(2).max(100).default(50),
     practice: z.boolean().default(false),
+    assetMode: z.enum(["ai", "legacy"]).default("ai"),
   })
   .strict()
   .refine((c) => c.practice || (c.rounds === 30 && c.roundMs === 60000), {
@@ -321,6 +323,14 @@ export class MarketRoom extends DurableObject<Env> {
               totalDat: s.totalDat,
               treasuryCash: s.treasuryCash,
               treasuryDat: s.treasuryDat,
+              assets: s.assets
+                ? Object.fromEntries(
+                    Object.entries(s.assets).map(([symbol, a]) => [
+                      symbol,
+                      { total: a.total, treasury: a.treasury },
+                    ]),
+                  )
+                : undefined,
             },
           };
           break;
