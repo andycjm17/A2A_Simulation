@@ -1,0 +1,7 @@
+# 30-minute count extension (continuous-v2)
+
+Question: number of executed trades over a 30-minute observation window, not executed stock units or submitted orders. One matching fill against one counterparty is one trade; an order filled against three counterparties creates three trades. Each fill is counted once, not twice for buyer and seller.
+
+Before the sweep: use the existing unmodified continuous-v2 engine, the same 20 ordinary Agents, two assets, 20% maker initial tradable cash, response latency and five decision triggers. Extend duration to 1800000ms. Generate Poisson news over the entire horizon, seed `continuous-v2:0` through `49`, 50 paired seeds per condition, 250 completed 30-minute matches. Do not simply multiply five-minute counts by six; GTC orders, inventory, cash and public news evolve continuously. No outcome-based stopping or exclusions.
+
+Report mean trade count, mean trades/minute, mean executed units, and P10/P90 of the 50 modeled match counts (a descriptive 80% scenario range, not a real-world forecast interval or confidence interval for the mean). Compare means with six times the SAME first-50-seed five-minute counts as a descriptive check. Validate conservation after every event, no matching clock and no auction as in continuous-v2. Seed-0 five-minute prefix from the extended news tape must reproduce all five original five-minute conditions' trades, calls and final cash. Retain raw per-match results, code hashes and counts. These are scripted-policy scenarios, not observed LLM behavior or production throughput.
