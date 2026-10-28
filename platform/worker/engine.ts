@@ -46,8 +46,22 @@ export type MarketConfig = {
   capacity: number;
   practice: boolean;
   assetMode?: "ai" | "legacy";
+  newsEnabled?: boolean;
+  makerCashShare?: number;
+};
+export type NewsItem = {
+  id: string;
+  round: number;
+  symbol: "OPENAI" | "ANTHROPIC";
+  headline: string;
+  impactBps: number;
+  before: number;
+  after: number;
 };
 export type Agent = {
+  system?: "fundamental-maker";
+  initialCash?: number;
+  initialHoldings?: number;
   id: string;
   name: string;
   description: string;
@@ -101,6 +115,7 @@ export type AuditEvent = {
 };
 export type State = {
   assets?: Record<"OPENAI" | "ANTHROPIC", AssetLedger>;
+  news?: NewsItem[];
   config: MarketConfig;
   status: "lobby" | "running" | "paused" | "finished";
   round: number;
@@ -173,6 +188,71 @@ export async function createState(
           },
         }
       : undefined;
+  ensure(
+    !config.newsEnabled || assets,
+    "INVALID_CONFIG",
+    "随机新闻仅适用于双标的比赛",
+  );
+  const share = config.makerCashShare ?? 0;
+  ensure(
+    Number.isFinite(share) &&
+      share >= 0 &&
+      share <= 0.5 &&
+      Math.abs(share * 20 - Math.round(share * 20)) < 1e-9,
+    "INVALID_CONFIG",
+    "庄家初始现金占比须为 0 或 5%–50%，步长 5%",
+  );
+  ensure(
+    !share || (assets && config.newsEnabled),
+    "INVALID_CONFIG",
+    "庄家需要开启双标的随机新闻",
+  );
+  const news: NewsItem[] | undefined = config.newsEnabled ? [] : undefined;
+  if (news && assets) {
+    const positive = [
+      "企业客户签约增长",
+      "新模型评测取得突破",
+      "算力成本下降",
+      "开发者使用量超预期",
+    ];
+    const negative = [
+      "产品交付出现延期",
+      "算力供应趋紧",
+      "企业订单增速放缓",
+      "服务可靠性承压",
+    ];
+    for (const symbol of AI_SYMBOLS) {
+      const values = [10000];
+      for (let round = 2; round <= config.rounds; round++) {
+        const digest = await sha256(`${seed}:news:${symbol}:${round}`);
+        const draw = (offset: number) =>
+          parseInt(digest.slice(offset, offset + 8), 16);
+        const before = values.at(-1)!;
+        let after = before;
+        if (draw(0) % 100 < 35) {
+          const impactBps = (draw(8) % 2 ? 1 : -1) * (300 + (draw(16) % 901));
+          after = Math.max(
+            2500,
+            Math.min(17500, Math.round(before * (1 + impactBps / 10000))),
+          );
+          news.push({
+            id: `${symbol}:${round}`,
+            round,
+            symbol,
+            impactBps,
+            before,
+            after,
+            headline: `${assetName(symbol)}：${(impactBps > 0 ? positive : negative)[draw(24) % 4]}`,
+          });
+        }
+        values.push(after);
+      }
+      // The final redemption uses the last published fundamental: no unseen closing shock.
+      values.push(values.at(-1)!);
+      assets[symbol].path = values;
+    }
+    news.sort((a, b) => a.round - b.round || a.symbol.localeCompare(b.symbol));
+  }
   const commitment = await sha256(
     JSON.stringify(
       assets
@@ -182,6 +262,7 @@ export async function createState(
               OPENAI: assets.OPENAI.path,
               ANTHROPIC: assets.ANTHROPIC.path,
             },
+            ...(news ? { news } : {}),
           }
         : { seed, path },
     ),
@@ -189,6 +270,7 @@ export async function createState(
   return {
     config,
     ...(assets ? { assets } : {}),
+    ...(news ? { news } : {}),
     status: "lobby",
     round: 0,
     openedAt: 0,
@@ -231,6 +313,11 @@ export function addAgent(
     409,
   );
   ensure(
+    !(s.config.makerCashShare && a.name.trim() === "基本面庄家"),
+    "NAME_RESERVED",
+    "该名称保留给系统庄家",
+  );
+  ensure(
     !s.agents.some(
       (x) => x.name.toLocaleLowerCase() === a.name.toLocaleLowerCase(),
     ),
@@ -262,7 +349,7 @@ export function addAgent(
   return agent;
 }
 export function authenticate(s: State, keyHash: string) {
-  const a = s.agents.find((a) => a.keyHash === keyHash);
+  const a = s.agents.find((a) => !a.system && a.keyHash === keyHash);
   ensure(a, "UNAUTHORIZED", "无效或已失效的 Agent 凭证", 401);
   return a;
 }
@@ -278,11 +365,18 @@ export function settlementAt(s: State) {
 }
 export function start(s: State, now: number) {
   ensure(s.status === "lobby", "BAD_STATE", "只有等待中的比赛可以开始", 409);
-  ensure(s.agents.length >= 2, "NOT_ENOUGH_AGENTS", "至少需要两名 Agent", 409);
+  ensure(
+    s.agents.length >= ((s.config.makerCashShare ?? 0) > 0 ? 1 : 2),
+    "NOT_ENOUGH_AGENTS",
+    "至少需要两名 Agent；启用庄家时至少一名普通 Agent",
+    409,
+  );
+  initializeMaker(s, now);
   s.status = "running";
   s.round = 1;
   s.openedAt = now;
   event(s, now, "started", "round 1");
+  openRound(s, now);
 }
 export function pause(s: State, now: number, reason = "organizer") {
   ensure(s.status === "running", "BAD_STATE", "比赛当前没有运行", 409);
@@ -311,7 +405,7 @@ export function submit(
   now: number,
 ): Order {
   const a = s.agents.find((x) => x.id === agentId);
-  ensure(a, "UNAUTHORIZED", "找不到 Agent", 401);
+  ensure(a && !a.system, "UNAUTHORIZED", "找不到可提交决定的 Agent", 401);
   const symbol = d.symbol ?? "DAT";
   ensure(
     symbols(s).includes(symbol),
@@ -511,6 +605,7 @@ export function clearRound(s: State, now: number) {
   } else {
     s.round++;
     s.openedAt = scheduled;
+    openRound(s, now);
   }
   audit(s);
 }
@@ -608,6 +703,7 @@ export function publicState(s: State, now: number) {
       0,
     );
   const standings = s.agents
+    .filter((a) => !a.system)
     .map((a) => ({
       id: a.id,
       name: a.name,
@@ -649,7 +745,12 @@ export function publicState(s: State, now: number) {
       s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
     ),
     commitment: s.commitment,
-    participantCount: s.agents.length,
+    participantCount: s.agents.filter((a) => !a.system).length,
+    news: (s.news ?? [])
+      .filter((n) => n.round <= s.round)
+      .slice()
+      .reverse(),
+    maker: makerState(s),
     tradeCount: s.trades.length,
     volume: s.trades.reduce((n, t) => n + t.quantity, 0),
     leaderboard,
@@ -666,6 +767,7 @@ export function publicState(s: State, now: number) {
                 OPENAI: s.assets.OPENAI.path,
                 ANTHROPIC: s.assets.ANTHROPIC.path,
               },
+              ...(s.news ? { news: s.news } : {}),
             }
           : { seed: s.seed, path: s.path }
         : null,
@@ -773,5 +875,123 @@ export function instrumentState(s: State, symbol: Symbol) {
     volume: trades.reduce((n, t) => n + t.quantity, 0),
     candles,
     orderBook: { bids: depth("BUY"), asks: depth("SELL") },
+  };
+}
+
+/** One system participant is funded once at start. Treasury redemption reserves are excluded
+ * from the cash-share denominator, as they cannot trade. Ordinary endowments never change. */
+function initializeMaker(s: State, now: number) {
+  const share = s.config.makerCashShare ?? 0;
+  if (!share) return;
+  ensure(!s.agents.some((a) => a.system), "INVARIANT", "庄家重复初始化", 500);
+  const ordinaryCash = s.agents.reduce((sum, a) => sum + a.cash, 0);
+  const cash = Math.round((ordinaryCash * share) / (1 - share));
+  const quantity = Math.floor(
+    (s.agents.length * INITIAL_DAT * share) / (1 - share),
+  );
+  const maker: Agent = {
+    id: `system-maker:${s.config.id}`,
+    name: "基本面庄家",
+    system: "fundamental-maker",
+    description: "按已公布的新闻基本面双向报价，不使用未来新闻。",
+    keyHash: "",
+    cash,
+    dat: 0,
+    holdings: { OPENAI: quantity, ANTHROPIC: quantity },
+    initialCash: cash,
+    initialHoldings: quantity,
+    createdAt: now,
+  };
+  s.agents.push(maker);
+  const reserve = quantity * MAX_PRICE * 2;
+  s.treasuryCash += reserve;
+  s.totalCash += cash + reserve;
+  for (const symbol of AI_SYMBOLS) s.assets![symbol].total += quantity;
+  event(
+    s,
+    now,
+    "maker_funded",
+    JSON.stringify({ cash, quantity, cashShare: cash / (cash + ordinaryCash) }),
+  );
+  audit(s);
+}
+
+function openRound(s: State, now: number) {
+  for (const n of s.news ?? [])
+    if (n.round === s.round) event(s, now, "news_published", n.id);
+  const a = s.agents.find((a) => a.system);
+  if (!a) return;
+  // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
+  // of current cash per asset / 10% of inventory offered per round. No future reads.
+  const cashPerAsset = Math.floor(a.cash * 0.1);
+  for (const symbol of AI_SYMBOLS) {
+    const fundamental = pathFor(s, symbol)[s.round - 1];
+    const inventory = holding(a, symbol);
+    const imbalance =
+      (inventory - a.initialHoldings!) / Math.max(1, a.initialHoldings!);
+    const skew = Math.max(-0.02, Math.min(0.02, imbalance * 0.02));
+    const center = fundamental * (1 - skew);
+    const bid = Math.max(MIN_PRICE, Math.floor(center - fundamental * 0.01));
+    const ask = Math.min(MAX_PRICE, Math.ceil(center + fundamental * 0.01));
+    for (const side of ["BUY", "SELL"] as const) {
+      const price = side === "BUY" ? bid : ask;
+      const quantity =
+        side === "BUY"
+          ? Math.floor(cashPerAsset / price)
+          : Math.floor(inventory * 0.1);
+      if (quantity < 1) continue;
+      const id = `${s.config.id}:${s.round}:${a.id}:${symbol}:${side}`;
+      s.orders.push({
+        id,
+        requestId: id,
+        agentId: a.id,
+        symbol,
+        round: s.round,
+        side,
+        price,
+        quantity,
+        createdAt: now,
+        filled: 0,
+        cashFlow: 0,
+        status: "pending",
+        note: "系统庄家：已公开基本面 ±1% 点差，库存偏移上限 2%",
+      });
+    }
+  }
+}
+
+export function makerState(s: State) {
+  const a = s.agents.find((a) => a.system);
+  if (!a) return null;
+  const initialEquity = a.initialCash! + a.initialHoldings! * 20000;
+  const equity =
+    a.cash +
+    symbols(s).reduce(
+      (sum, symbol) =>
+        sum +
+        holding(a, symbol) *
+          pathFor(s, symbol)[
+            s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
+          ],
+      0,
+    );
+  const makerVolume = s.trades
+    .filter((t) => t.buyer === a.id || t.seller === a.id)
+    .reduce((sum, t) => sum + t.quantity, 0);
+  const volume = s.trades.reduce((sum, t) => sum + t.quantity, 0);
+  return {
+    id: a.id,
+    name: a.name,
+    cash: a.cash,
+    holdings: a.holdings!,
+    equity,
+    profit: equity - initialEquity,
+    initialEquity,
+    initialCash: a.initialCash!,
+    cashShare:
+      a.initialCash! / (a.initialCash! + (s.agents.length - 1) * INITIAL_CASH),
+    volume: makerVolume,
+    volumeShare: volume ? makerVolume / volume : null,
+    policy: "public-fundamentals-v1" as const,
   };
 }

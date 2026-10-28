@@ -177,3 +177,68 @@ test("a fresh market does not fabricate candles or order-book quantities", async
       .first(),
   ).toHaveText("买1——");
 });
+
+test("published simulated news and separate maker statistics render without leaking future events", async ({
+  page,
+}, info) => {
+  const s = await createState(
+    {
+      id: "news-ui",
+      name: "新闻与庄家演示",
+      assetMode: "ai",
+      newsEnabled: true,
+      makerCashShare: 0.2,
+      rounds: 30,
+      roundMs: 60000,
+      capacity: 20,
+      practice: true,
+    },
+    "news-ui-seed",
+    Date.now() - 600000,
+  );
+  for (let i = 0; i < 4; i++)
+    addAgent(
+      s,
+      {
+        id: `a${i}`,
+        name: `News Agent ${i}`,
+        description: "",
+        keyHash: `key${i}`,
+      },
+      s.createdAt,
+    );
+  start(s, s.createdAt);
+  for (let r = 0; r < 8; r++) clearRound(s, s.openedAt + 60000);
+  pause(s, s.openedAt + 1000);
+  const snapshot = publicState(s, Date.now());
+  expect(snapshot.news.length).toBeGreaterThan(0);
+  await page.route("**/api/markets", (r) =>
+    r.fulfill({
+      json: {
+        markets: [{ id: s.config.id, name: s.config.name, practice: 1 }],
+      },
+    }),
+  );
+  await page.route("**/api/markets/news-ui", (r) =>
+    r.fulfill({ json: snapshot }),
+  );
+  await page.goto("/?market=news-ui");
+  await expect(
+    page.getByRole("heading", { name: "市场新闻", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: snapshot.news[0].headline, exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".maker-card")).toContainText("20%");
+  await expect(page.locator(".maker-card")).toContainText("尚无成交");
+  await expect(page.locator(".maker-card")).toContainText("不参与排名");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: `reports/news-maker-${info.project.name}.png`,
+    fullPage: true,
+  });
+});

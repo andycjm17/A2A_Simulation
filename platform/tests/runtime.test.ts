@@ -860,3 +860,130 @@ describe('dual-asset HTTP and persisted ledger', () => {
     expect(account.orders).toHaveLength(1);expect(account.availableCash).toBe(100000);
   });
 });
+
+describe("news and system maker persistence", () => {
+  it("persists funding/quotes once, blocks credential takeover, and releases news only as rounds advance", async () => {
+    const id = "news-runtime",
+      base = `/api/markets/${id}`;
+    expect(
+      (
+        await req("/api/admin/markets", {
+          token: admin,
+          data: {
+            id,
+            name: "News runtime",
+            practice: true,
+            rounds: 3,
+            newsEnabled: true,
+            makerCashShare: 0.5,
+          },
+        })
+      ).status,
+    ).toBe(201);
+    const a = (await req(`${base}/join`, { data: { name: "News Trader" } }))
+      .body;
+    expect(
+      (await req(`/api/admin/markets/${id}/start`, { token: admin, data: {} }))
+        .status,
+    ).toBe(200);
+    const first = (await req(base)).body;
+    expect(first.participantCount).toBe(1);
+    expect(first.leaderboard).toHaveLength(1);
+    expect(first.maker.cashShare).toBe(0.5);
+    expect(first.news).toEqual([]);
+    expect(first.instruments[0].orderBook.bids.length).toBe(1);
+    expect(
+      (
+        await req(`/api/admin/markets/${id}/rotate`, {
+          token: admin,
+          data: { agentId: first.maker.id },
+        })
+      ).status,
+    ).toBe(400);
+    const stub = env.MARKETS.get(env.MARKETS.idFromName(id));
+    await evictDurableObject(stub);
+    expect((await req(base)).body.maker).toEqual(first.maker);
+    expect(
+      await stub.command({
+        action: "rotate",
+        data: { agentId: first.maker.id, keyHash: "0".repeat(64) },
+      }),
+    ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(
+      (await req(`/api/admin/markets/${id}/start`, { token: admin, data: {} }))
+        .status,
+    ).toBe(409);
+    expect(
+      (
+        await req(`${base}/decision`, {
+          token: a.apiKey,
+          data: { ...order, symbol: "OPENAI", price: 12000, quantity: 5 },
+        })
+      ).status,
+    ).toBe(200);
+    for (let round = 1; round <= 3; round++) {
+      await runInDurableObject(stub, (_, ctx) => {
+        const s = JSON.parse(
+          ctx.storage.sql
+            .exec<{ state: string }>("SELECT state FROM market WHERE id=1")
+            .one().state,
+        );
+        s.openedAt = Date.now() - 60001;
+        ctx.storage.sql.exec(
+          "UPDATE market SET state=? WHERE id=1",
+          JSON.stringify(s),
+        );
+      });
+      await evictDurableObject(stub);
+      await runDurableObjectAlarm(stub);
+      await evictDurableObject(stub);
+      const snapshot = (await req(base)).body;
+      expect(snapshot.news.every((n: any) => n.round <= snapshot.round)).toBe(
+        true,
+      );
+      const exported = (
+        await req(`/api/admin/markets/${id}/export`, { token: admin })
+      ).body;
+      expect(exported.agents.filter((a: any) => a.system)).toHaveLength(1);
+      if (round < 3) {
+        expect(exported.reveal).toBeNull();
+        expect(exported.audit.assets.OPENAI.path).toBeUndefined();
+      }
+      expect(
+        (await req(`/api/admin/markets/${id}/status`, { token: admin })).body
+          .conserved,
+      ).toBe(true);
+    }
+    const final = (await req(base)).body;
+    expect(final.status).toBe("finished");
+    expect(final.maker.volume).toBe(5);
+    const exported = (
+      await req(`/api/admin/markets/${id}/export`, { token: admin })
+    ).body;
+    const ids = exported.orders.map((o: any) => o.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(
+      exported.events.filter((e: any) => e.type === "maker_funded"),
+    ).toHaveLength(1);
+  });
+  it("rejects invalid cash fractions and incompatible legacy configuration", async () => {
+    for (const data of [
+      { makerCashShare: 0.075, newsEnabled: true },
+      { makerCashShare: 0.5, newsEnabled: false },
+      { assetMode: "legacy", newsEnabled: true },
+    ])
+      expect(
+        (
+          await req("/api/admin/markets", {
+            token: admin,
+            data: {
+              id: "invalid-news",
+              name: "Invalid config",
+              practice: true,
+              ...data,
+            },
+          })
+        ).status,
+      ).toBe(400);
+  });
+});

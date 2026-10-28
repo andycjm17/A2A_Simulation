@@ -3,7 +3,13 @@ import { integrityReview } from "./integrity";
 // Read-only projection. Never expose sealed order sides/prices, seed, or credentials.
 export function adminStatus(s: State, now: number) {
   const decided = new Set(
-    s.orders.filter((o) => o.round === s.round).map((o) => o.agentId),
+    s.orders
+      .filter(
+        (o) =>
+          o.round === s.round &&
+          !s.agents.find((a) => a.id === o.agentId)?.system,
+      )
+      .map((o) => o.agentId),
   );
   const totals = new Map<string, number>();
   for (const o of s.orders)
@@ -23,7 +29,7 @@ export function adminStatus(s: State, now: number) {
     round: s.round,
     rounds: s.config.rounds,
     capacity: s.config.capacity,
-    participants: s.agents.length,
+    participants: s.agents.filter((a) => !a.system).length,
     decisions: s.orders.length,
     currentDecisions: decided.size,
     trades: s.trades.length,
@@ -36,13 +42,15 @@ export function adminStatus(s: State, now: number) {
       ? Math.max(0, latest.clearedAt - latest.scheduledAt)
       : null,
     serverTime: now,
-    agents: s.agents.map((a) => ({
-      id: a.id,
-      name: a.name,
-      description: a.description,
-      decided: decided.has(a.id),
-      decisions: totals.get(a.id) || 0,
-    })),
+    agents: s.agents
+      .filter((a) => !a.system)
+      .map((a) => ({
+        id: a.id,
+        name: a.name,
+        description: a.description,
+        decided: decided.has(a.id),
+        decisions: totals.get(a.id) || 0,
+      })),
     results: s.results,
     events: s.events
       .slice(-20)

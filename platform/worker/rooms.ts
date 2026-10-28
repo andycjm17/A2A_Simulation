@@ -43,6 +43,8 @@ export const configSchema = z
     capacity: z.number().int().min(2).max(100).default(50),
     practice: z.boolean().default(false),
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
+    newsEnabled: z.boolean().default(false),
+    makerCashShare: z.number().min(0).max(0.5).default(0),
   })
   .strict()
   .refine((c) => c.practice || (c.rounds === 30 && c.roundMs === 60000), {
@@ -303,7 +305,12 @@ export class MarketRoom extends DurableObject<Env> {
             .object({ agentId: z.string(), keyHash: z.string().length(64) })
             .parse(c.data);
           const a = s.agents.find((a) => a.id === p.agentId);
-          ensure(a, "NOT_FOUND", "找不到 Agent", 404);
+          ensure(
+            a && !a.system,
+            "NOT_FOUND",
+            "找不到可重置凭证的参赛 Agent",
+            404,
+          );
           a.keyHash = p.keyHash;
           changed = true;
           data = { agentId: a.id };

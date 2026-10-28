@@ -41,7 +41,8 @@ export function integrityReview(s: State) {
     .map((p) => ({
       ...p,
       concentrated:
-        s.agents.length >= 3 &&
+        !p.agentIds.some((id) => s.agents.find((a) => a.id === id)?.system) &&
+        s.agents.filter((a) => !a.system).length >= 3 &&
         p.trades >= 5 &&
         p.trades * 100 >= s.trades.length * 70,
     }))

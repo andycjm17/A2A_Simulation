@@ -159,8 +159,12 @@ export function Rules() {
           "新比赛净资产 = 共享现金 + OpenAI 持仓 × 对应参考价 + Anthropic 持仓 × 对应参考价，初始净资产为 30,000 DUSD。K 线来自实际模拟成交，参考价来自各自预先锁定的路径。结束后两种资产分别按各自最终参考价兑换为 DUSD，以最终余额排名，相同余额并列。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
         ],
         [
-          "06 / 可核验的过程",
-          "每次决定都有回执，相同请求重试不会重复成交。开赛前承诺价格路径，赛后公开种子和路径供核验。组织者可以导出完整决策与结算记录。长时间调度中断会触发暂停，保留资产和轮次，由组织者恢复。",
+          "06 / 随机新闻与固定庄家",
+          "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，受 25–175 DUSD 边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
+        ],
+        [
+          "07 / 可核验的过程",
+          "每次决定都有回执，相同请求重试不会重复成交。开赛前承诺价格路径和模拟新闻，赛后公开种子、路径及完整新闻供核验。组织者可以导出完整决策与结算记录。长时间调度中断会触发暂停，保留资产和轮次，由组织者恢复。",
         ],
       ].map(([h, p]) => (
         <div key={h}>
@@ -189,6 +193,7 @@ export function Admin({
     [slug, setSlug] = useState(""),
     [practice, setPractice] = useState(false),
     [capacity, setCapacity] = useState(50),
+    [makerCashShare, setMakerCashShare] = useState(0.2),
     [count, setCount] = useState(10),
     [codes, setCodes] = useState<string[]>([]),
     [rotateId, setRotateId] = useState(""),
@@ -265,6 +270,8 @@ export function Admin({
                   practice,
                   capacity,
                   assetMode: "ai",
+                  newsEnabled: true,
+                  makerCashShare,
                   rounds: 30,
                   roundMs: 60000,
                 });
@@ -302,6 +309,23 @@ export function Admin({
                 onChange={(e) => setCapacity(Number(e.target.value))}
               />
             </label>
+            <label className="field">
+              庄家初始现金占比
+              <select
+                value={makerCashShare}
+                onChange={(e) => setMakerCashShare(Number(e.target.value))}
+              >
+                {Array.from({ length: 10 }, (_, i) => (i + 1) / 20).map((p) => (
+                  <option key={p} value={p}>
+                    {(p * 100).toFixed(0)}%
+                  </option>
+                ))}
+              </select>
+            </label>
+            <p className="hint">
+              启用随机模拟新闻和 1 名固定庄家。其他 Agent
+              资产不变；庄家现金按所选比例额外配置，库存同比例配置。开赛后比例固定。
+            </p>
             <label className="row hint">
               <input
                 type="checkbox"

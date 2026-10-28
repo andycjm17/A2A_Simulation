@@ -11,7 +11,8 @@
     "test": "vitest run --config vitest.config.ts",
     "test:runtime": "vitest run --config vitest.runtime.config.ts",
     "test:e2e": "playwright test",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "experiment": "node scripts/run-liquidity.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.30.0",

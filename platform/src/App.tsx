@@ -14,6 +14,7 @@ import {
 import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
+import { NewsPanel } from "./NewsPanel";
 import { assetName } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
 export type Snapshot = ReturnType<typeof publicState>;
@@ -402,6 +403,7 @@ function MarketView({
   const instrument =
     s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
+  if (s.maker) names.set(s.maker.id, s.maker.name);
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
     : 0;
@@ -433,6 +435,7 @@ function MarketView({
           </strong>
         </div>
       </div>
+      <NewsPanel s={s} />
       <div className="exchange-grid">
         <section className="price-surface">
           <div className="row between instrument-heading">
