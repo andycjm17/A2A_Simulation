@@ -151,6 +151,10 @@ npm run experiment
 python scripts/analyze-liquidity.py
 ```
 
+## 交易轮次与频次实验
+
+[轮次与频次实验](experiments/timing/results.md)包含 4,750 场脚本模拟，区分现有引擎的 5/10/60 秒轮次与尚未上线的连续撮合候选机制。[固定实验设计](experiments/timing/methodology.md)、[逐场数据](experiments/timing/raw.json)和[统计汇总](experiments/timing/summary.json)保留复现依据。运行 `node scripts/run-timing.mjs`、`python scripts/analyze-timing.py`；实验模型单测运行 `npx vitest run --config vitest.timing.config.ts`。这项实验不修改线上撮合规则，不是实际 LLM 延迟测量。
+
 ## 管理页初始资产调试
 
 创建比赛时可设置所有普通 Agent 的初始现金（DUSD，精确到分）以及各标的初始数量（整数份）。在“管理当前比赛 → 开赛前调试初始资产”也可修改等待中的比赛，点击“应用到所有 Agent”后，已注册 Agent 的现金、持仓、结算金库和守恒账本会一起更新，后续加入者使用相同配置。运行中或已暂停/结束的比赛不能修改初始配置。

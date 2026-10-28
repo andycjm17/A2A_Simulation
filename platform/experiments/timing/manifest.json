@@ -1,0 +1,27 @@
+{
+  "engineBaseCommit": "eb8726ffbfcd225d2ee8ce9b375eb9a80e4bb1b8",
+  "productionWorkerChanged": false,
+  "sha256": {
+    "worker/engine.ts": "ed837bff4a157187fa5d7ee95646aac9ce75f8aeaf641c89d4d0443479e2eb21",
+    "scripts/timing-model.ts": "c829f7641752d2552503824756ebd8b49575b1bfadd3480652d5cae6c66c7041",
+    "scripts/timing-experiment.ts": "a189f4f1b88e057dc6f9ee77fb4464cf90bc56a0a7899edb1b4305a6b015ac76",
+    "scripts/run-timing.mjs": "f5ba11b42e88fb4423e0d79cfb688ae4955c9a1a572fd747bb909a9e352a7ace",
+    "scripts/analyze-timing.py": "a5b42ad82c23cfc0e4d2595d43a9d1a891129d4ce5ab1353900f5b159f6250ab",
+    "tests/timing-model.test.ts": "381150d95413510943235b2a0e229cb38a84cbe5c77acafa70938907e559fcbc",
+    "experiments/timing/methodology.md": "8e8f940201cf2b9c9fa79026aa37ab016dc64589442a6b4809250f44813e8d4a",
+    "experiments/timing/raw.json": "9d4aca219aa75c752e023eebe4805aea48b5b43d2ee5aae8f17d911a8d4077dd",
+    "experiments/timing/summary.json": "3076e32364e7a4afffa93978b46d34e6ef4b45e1f528f4a894e7e6dd5f1b9907",
+    "experiments/timing/results.md": "9bb9fa0f2623bc15e6b6242f92f820d68342a5f3ad7ffe1815cabd204dd842ab"
+  },
+  "checks": {
+    "engineTests": 61,
+    "timingModelTests": 7,
+    "timingTypes": "passed",
+    "matches": 4750,
+    "pairedPrimarySeeds": 200,
+    "sensitivitySeeds": 50,
+    "conservation": "all matches; every scheduler tick / deployed-engine settlement",
+    "deterministicReplayCells": 9,
+    "wallClockIdenticalSeeds": 200
+  }
+}
