@@ -504,18 +504,8 @@ function MarketView({
                 {account ? account.name : "尚未连接 Agent"}
               </span>
               <div className="ticket-value">
-                {account
-                  ? money(
-                      account.cash +
-                        s.instruments.reduce(
-                          (total, i) =>
-                            total +
-                            (account.holdings[i.symbol] ?? 0) * i.reference,
-                          0,
-                        ),
-                    )
-                  : "—"}
-                <small>DUSD 净资产</small>
+                {account ? money(account.cash) : "—"}
+                <small>DUSD 现金余额</small>
               </div>
             </div>
             <dl className="ticket-facts">
@@ -573,7 +563,7 @@ function MarketView({
               、每轮集中撮合
             </div>
             <p className="hint">
-              最终余额决定排名，相同余额共享名次。奖品安排由组织者在活动前公布；练习赛不作为领奖依据。
+              现金余额决定排名，现金相同共享名次，持仓估值不计分。奖品安排由组织者在活动前公布；练习赛不作为领奖依据。
             </p>
           </div>
         </section>
@@ -583,7 +573,7 @@ function MarketView({
           <h2>
             Leaderboard{" "}
             <span className="subtle">
-              {s.status === "finished" ? "最终结果" : "实时净资产"}
+              {s.status === "finished" ? "最终现金排名" : "实时现金排名"}
             </span>
           </h2>
           <button
@@ -592,6 +582,7 @@ function MarketView({
               download(`${s.config.id}-leaderboard.json`, {
                 market: s.config,
                 final: s.status === "finished",
+                rankingBasis: s.rankingBasis,
                 leaderboard: s.leaderboard,
               })
             }
@@ -601,13 +592,16 @@ function MarketView({
           </button>
         </div>
         <div className="tablewrap">
-          <table>
+          <table aria-label="现金排行榜">
+            <caption className="ranking-caption">
+              按现金余额排名，包含挂单冻结的现金。持仓估值不计分；现金变化包含股票买卖和最终兑付。
+            </caption>
             <thead>
               <tr>
                 <th>排名</th>
                 <th>Agent</th>
-                <th>净资产 / DUSD</th>
-                <th>收益 / DUSD</th>
+                <th>现金余额 / DUSD</th>
+                <th>现金变化 / DUSD</th>
                 {s.instruments.map((i) => (
                   <th key={i.symbol}>{i.name}</th>
                 ))}
@@ -622,10 +616,10 @@ function MarketView({
                     <span className="pill">{a.rank}</span>
                   </td>
                   <td>{a.name}</td>
-                  <td>{money(a.equity)}</td>
-                  <td className={a.profit >= 0 ? "positive" : "negative"}>
-                    {a.profit >= 0 ? "+" : ""}
-                    {money(a.profit)}
+                  <td>{money(a.cash)}</td>
+                  <td className={a.cashChange >= 0 ? "positive" : "negative"}>
+                    {a.cashChange >= 0 ? "+" : ""}
+                    {money(a.cashChange)}
                   </td>
                   {s.instruments.map((i) => (
                     <td key={i.symbol}>{a.holdings[i.symbol]}</td>

@@ -932,6 +932,7 @@ export function publicState(s: State, now: number) {
       id: a.id,
       name: a.name,
       cash: a.cash,
+      cashChange: a.cash - balances.cash,
       dat: a.dat,
       holdings: Object.fromEntries(
         symbols(s).map((symbol) => [symbol, holding(a, symbol)]),
@@ -941,12 +942,12 @@ export function publicState(s: State, now: number) {
       decisions: counts.get(a.id)?.decisions.size || 0,
       tradedRounds: counts.get(a.id)?.tradedRounds.size || 0,
     }))
-    .sort((a, b) => b.equity - a.equity || a.name.localeCompare(b.name));
+    .sort((a, b) => b.cash - a.cash || a.name.localeCompare(b.name));
   let rank = 0,
     prev = -Infinity;
   const leaderboard = standings.map((a, i) => {
-    if (a.equity !== prev) rank = i + 1;
-    prev = a.equity;
+    if (a.cash !== prev) rank = i + 1;
+    prev = a.cash;
     return { ...a, rank };
   });
   return {
@@ -978,6 +979,7 @@ export function publicState(s: State, now: number) {
     maker: makerState(s),
     tradeCount: s.trades.length,
     volume: s.trades.reduce((n, t) => n + t.quantity, 0),
+    rankingBasis: "cash" as const,
     leaderboard,
     trades: s.trades.slice(-100).reverse(),
     results: s.results,

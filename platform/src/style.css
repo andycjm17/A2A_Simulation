@@ -986,3 +986,5 @@ button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 
 .instrument-tabs { display: grid; grid-template-columns: repeat(auto-fit,minmax(125px,1fr)); }
 .capital-preview { background: #f5f8f5; padding: 14px; border-radius: 8px; min-width: 0; }
 .capital-preview strong { font-size: 13px; }
+
+.ranking-caption { text-align: left; caption-side: top; white-space: normal; color: var(--muted); font-size: 12px; line-height: 1.7; padding: 12px 20px; background: #f5f8f5; }

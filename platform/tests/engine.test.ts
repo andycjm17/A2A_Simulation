@@ -357,3 +357,46 @@ describe("clock, lifecycle and secrecy", () => {
     }
   }, 60000);
 });
+
+describe('cash-only leaderboard',()=>{
+ it('ranks by owned cash and shares ties even when inventories and reference valuations differ',async()=>{
+  const s=await setup(3);
+  s.agents[0].dat=250;s.agents[1].dat=25;s.agents[2].dat=25;
+  expect(publicState(s,2000).leaderboard.map(a=>a.rank)).toEqual([1,1,1]);
+  s.agents[0].cash=100000;s.agents[1].cash=1900000;
+  const view=publicState(s,2000);
+  expect(view.rankingBasis).toBe('cash');
+  expect(view.leaderboard.map(a=>[a.id,a.rank,a.cash])).toEqual([['a1',1,1900000],['a2',2,1000000],['a0',3,100000]]);
+  // The last-ranked agent still has the highest reference equity.
+  expect(view.leaderboard[2].equity).toBeGreaterThan(view.leaderboard[0].equity);
+  const before=view.leaderboard.map(a=>[a.id,a.rank]);
+  s.path[1]=17500;clearRound(s,end(s));
+  expect(publicState(s,999999).leaderboard.map(a=>[a.id,a.rank])).toEqual(before);
+  expect(view.leaderboard[0].cashChange).toBe(900000);audit(s);
+ });
+ it('does not subtract reserved buy cash or count unfilled sell proceeds',async()=>{
+  const s=await setup();
+  submit(s,'a0',{...buy,price:20000,quantity:10},2000);
+  expect(accountState(s,s.agents[0]).availableCash).toBe(800000);
+  const view=publicState(s,2000);
+  expect(view.leaderboard.map(a=>[a.cash,a.rank])).toEqual([[1000000,1],[1000000,1]]);
+  const sell={...buy,side:'SELL' as const,price:20000,quantity:1,requestId:'cash-rank-sell'};
+  submit(s,'a1',sell,2000);
+  expect(publicState(s,2000).leaderboard[0].cash).toBe(1000000);
+  clearRound(s,end(s));
+  expect(publicState(s,999999).leaderboard.map(a=>[a.id,a.cash,a.rank])).toEqual([['a1',1020000,1],['a0',980000,2]]);audit(s);
+ });
+ it('uses the committed fundamental for final cash redemption rather than an inflated last trade',async()=>{
+  const s=await setup();
+  submit(s,'a0',{...buy,price:20000,quantity:1},2000);
+  submit(s,'a1',{...buy,side:'SELL',price:20000,quantity:1,requestId:'bubble-sell'},2000);
+  clearRound(s,end(s));
+  const expected=s.agents[0].cash+s.agents[0].dat*s.path[s.config.rounds];
+  expect(publicState(s,999999).instruments[0].lastPrice).toBe(20000);
+  while(s.status==='running')clearRound(s,end(s));
+  expect(s.agents[0].cash).toBe(expected);
+  const final=publicState(s,99999999);
+  expect(final.leaderboard.every(a=>a.equity===a.cash)).toBe(true);
+  expect(final.leaderboard.map(a=>a.cash)).toEqual(final.leaderboard.map(a=>a.cash).sort((a,b)=>b-a));audit(s);
+ });
+});

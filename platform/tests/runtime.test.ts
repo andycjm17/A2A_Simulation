@@ -84,7 +84,9 @@ describe("participant red team", () => {
     });
     expect(status.body.conserved).toBe(true);
     const snapshot = (await req("/api/markets/runtime-market")).body;
-    expect(snapshot.leaderboard[0].id).toBe(a.account.id);
+    expect(snapshot.rankingBasis).toBe("cash");
+    expect(snapshot.leaderboard[0].id).toBe(b.account.id);
+    expect(snapshot.leaderboard[0].cash).toBeGreaterThan(snapshot.leaderboard[1].cash);
     expect(snapshot.integrity).toBeUndefined();
     expect(JSON.stringify(status.body)).not.toContain(order.requestId);
   });

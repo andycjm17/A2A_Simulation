@@ -242,3 +242,23 @@ test("published simulated news and separate maker statistics render without leak
     fullPage: true,
   });
 });
+
+test('cash leaderboard shows cash-only scores and ignores higher inventory valuation',async({page})=>{
+ const s=await createState({id:'cash-board',name:'现金排名测试',rounds:3,roundMs:60000,capacity:10,practice:true,assetMode:'legacy'},'cash-board',0);
+ for(let i=0;i<2;i++)addAgent(s,{id:`c${i}`,name:i?'现金更多':'持仓更多',description:'',keyHash:`key${i}`},0);
+ s.agents[0].cash=900000;s.agents[1].cash=1100000;s.agents[0].dat=150;s.agents[1].dat=50;
+ start(s,Date.now());const snapshot=publicState(s,Date.now());
+ await page.route('**/api/markets',r=>r.fulfill({json:{markets:[{id:s.config.id,name:s.config.name,practice:1}]}}));
+ await page.route('**/api/markets/cash-board',r=>r.fulfill({json:snapshot}));
+ await page.goto('/?market=cash-board');
+ const table=page.getByRole('table',{name:'现金排行榜'});
+ await expect(table.getByRole('columnheader',{name:'现金余额 / DUSD',exact:true})).toBeVisible();
+ await expect(table.getByRole('columnheader',{name:'净资产 / DUSD',exact:true})).toHaveCount(0);
+ await expect(table.locator('tbody tr').first()).toContainText('现金更多');
+ await expect(table.locator('tbody tr').first().locator('td').nth(2)).toHaveText('11,000.00');
+ await expect(table.locator('tbody tr').nth(1).locator('td').nth(2)).toHaveText('9,000.00');
+ await expect(table.locator('caption')).toContainText('持仓估值不计分');
+ const download=page.waitForEvent('download');await page.getByRole('button',{name:'导出排名',exact:true}).click();
+ const exported=await download;const stream=await exported.createReadStream();const chunks:Buffer[]=[];for await(const chunk of stream!)chunks.push(chunk as Buffer);
+ const result=JSON.parse(Buffer.concat(chunks).toString());expect(result.rankingBasis).toBe('cash');expect(result.leaderboard[0].cash).toBe(1100000);
+});

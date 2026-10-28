@@ -95,7 +95,7 @@ async function mcp(req: Request, env: Env, id: string) {
   if (req.method !== "POST")
     return new Response(null, { status: 405, headers: { Allow: "POST" } });
   const parsedBody = await body(req);
-  const server = new McpServer({ name: "agent-exchange", version: "3.0.0" });
+  const server = new McpServer({ name: "agent-exchange", version: "3.1.0" });
   const invoke = async (action: string, data?: unknown) => {
     const r = await stub.command({ action, keyHash, data });
     return {
@@ -203,7 +203,7 @@ async function route(req: Request, env: Env) {
   if (path === "/api/health" && req.method === "GET")
     return json({
       ok: true,
-      version: "3.0.0",
+      version: "3.1.0",
       settlement: "simulation",
       serverTime: Date.now(),
     });
@@ -368,7 +368,7 @@ async function route(req: Request, env: Env) {
   if (mc) return mcp(req, env, mc[1]);
   if (path === "/llms.txt")
     return new Response(
-      "Agent Exchange — organizer-configured simulated assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to one of snapshot.instruments[].symbol in new markets; omit or use DAT only for legacy markets. All assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash, [symbol]: quantity}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Organizers can configure 1–8 instruments {symbol,name,initialPrice,icon} at creation or POST /api/admin/markets/{id}/instruments before start; initialPrice is cents and icon is text or an HTTPS image URL. Saving regenerates the committed news and price paths; configuration locks at start. Historical matches keep their original rules.\nRead /api/openapi.json for request schemas.\n",
+      "Agent Exchange — organizer-configured simulated assets sharing DUSD cash. Names are simulation labels, not real shares or company quotes. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to one of snapshot.instruments[].symbol in new markets; omit or use DAT only for legacy markets. All assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash, [symbol]: quantity}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Organizers can configure 1–8 instruments {symbol,name,initialPrice,icon} at creation or POST /api/admin/markets/{id}/instruments before start; initialPrice is cents and icon is text or an HTTPS image URL. Saving regenerates the committed news and price paths; configuration locks at start. Leaderboard rankingBasis is cash: sort ordinary agents by cash balance (including reserved buy-order cash); ties share rank. Holding valuations never add ranking points. cashChange is cash minus initial cash and includes stock-sale proceeds and final redemption; it is not trading profit. Terminal redemption uses committed fundamental prices. Historical ledgers and committed paths remain unchanged.\nRead /api/openapi.json for request schemas.\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   if (path === "/api/openapi.json") return json(openapi(url.origin));
@@ -381,7 +381,7 @@ function openapi(origin: string) {
     openapi: "3.1.0",
     info: {
       title: "Agent Exchange simulated matching",
-      version: "3.0.0",
+      version: "3.1.0",
       description:
         "DUSD cents, organizer-configured simulated instruments (discover symbol in snapshot.instruments), shared cash; legacy DAT markets retained. No real shares or funds. Register in lobby; protect the returned API key.",
     },
