@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import {
   ArrowUpRight,
   Bot,
-  Braces,
   ChartNoAxesCombined,
   CircleHelp,
   Settings2,
@@ -28,10 +27,10 @@ export const money = (n: number) =>
     maximumFractionDigits: 2,
   }).format(n / 100);
 export const statusName = localizedLabels({
-  lobby: "等待开始",
-  running: "交易进行中",
-  paused: "比赛已暂停",
-  finished: "已完成结算",
+  lobby: "绛夊緟寮€濮�",
+  running: "浜ゆ槗杩涜涓�",
+  paused: "姣旇禌宸叉殏鍋�",
+  finished: "宸插畬鎴愮粨绠�",
 });
 export async function api(path: string, token = "", data?: unknown) {
   const r = await fetch(path, {
@@ -43,7 +42,10 @@ export async function api(path: string, token = "", data?: unknown) {
     body: data === undefined ? undefined : JSON.stringify(data),
   });
   const j: any = await r.json();
-  if (!r.ok) throw new Error(apiError(j.error,r.status));
+  if (!r.ok)
+    throw Object.assign(new Error(apiError(j.error, r.status)), {
+      code: j.error?.code,
+    });
   return j;
 }
 export function download(name: string, data: unknown) {
@@ -87,11 +89,13 @@ export function CopyButton({ text }: { text: string }) {
 export type Act = (fn: () => Promise<void>) => Promise<void>;
 export default function App() {
   useLocale();
-  const [view, setView] = useState(
-      new URLSearchParams(location.search).get("view") === "admin"
-        ? "admin"
-        : "market",
-    ),
+  const [view, setView] = useState(() => {
+      const query = new URLSearchParams(location.search);
+      if (query.get("view") === "admin") return "admin";
+      if (query.get("view") === "agent")
+        return query.get("section") === "connect" ? "connect" : "agent";
+      return "market";
+    }),
     [markets, setMarkets] = useState<
       { id: string; name: string; practice: number }[]
     >([]),
@@ -152,6 +156,8 @@ export default function App() {
     const q = new URLSearchParams();
     if (id) q.set("market", id);
     if (view === "admin") q.set("view", "admin");
+    if (view === "agent" || view === "connect") q.set("view", "agent");
+    if (view === "connect") q.set("section", "connect");
     history.replaceState(null, "", `/?${q}`);
   }, [id, view]);
   useEffect(() => {
@@ -208,7 +214,6 @@ export default function App() {
   const nav = [
     ["market", t("m4ba4ba1f53"), ChartNoAxesCombined],
     ["agent", t("m037c361523"), Bot],
-    ["connect", t("mec89dad379"), Braces],
     ["rules", t("m8737071d4f"), CircleHelp],
   ] as const;
   return (
@@ -219,7 +224,7 @@ export default function App() {
           {nav.map(([v, label, Icon]) => (
             <button
               key={v}
-              className={view === v ? "active" : ""}
+              className={view === v || (v === "agent" && view === "connect") ? "active" : ""}
               onClick={() => setView(v)}
             >
               <Icon size={19} />
@@ -235,7 +240,11 @@ export default function App() {
       </aside>
       <main>
         <header>
-          <span>{rich("mf26c47df5c", [<span className="slash">/</span>, nav.find((n) => n[0] === view)?.[1] || t("m1e17af1aee")])}</span>
+          <span>{rich("mf26c47df5c", [<span className="slash">/</span>,
+            view === "connect"
+              ? `${t("m037c361523")} / ${t("mec89dad379")}`
+              : nav.find((n) => n[0] === view)?.[1] || t("m1e17af1aee"),
+          ])}</span>
           <span className="environment-label">SIMULATED MARKETS</span>
         </header>
         <div className="content">
@@ -249,7 +258,7 @@ export default function App() {
                   : view === "agent"
                     ? t("m8d4a63b3c9")
                     : view === "connect"
-                      ? t("mef1e45687a")
+                      ? t("mec89dad379")
                       : view === "admin"
                         ? t("m8fffc04ec9")
                         : t("m82b821f3a2")}
@@ -260,7 +269,7 @@ export default function App() {
                   : t("mb1b34812f6")}
               </p>
             </div>
-            {view !== "admin" && (
+            {view !== "admin" && view !== "connect" && (
               <button className="primary" onClick={() => setView("agent")}>
                 <Bot size={17} />
                 {account ? t("m6fddf0abd0") : t("mf6fce42efe")}
@@ -315,27 +324,36 @@ export default function App() {
                 >{rich("me38460edac")}</button>
               </section>
             ))}
-          {view === "agent" && (
-            <AgentView
-              key={id}
-              id={id}
-              s={s}
-              account={account}
-              apiKey={key}
-              busy={busy}
-              action={action}
-              saveKey={saveKey}
-              logout={() => {
-                sessionStorage.removeItem(`agent-key:${id}`);
-                setKey("");
-                setAccount(null);
-              }}
-              connect={() => setView("connect")}
-            />
+          {(view === "agent" || view === "connect") && (
+            <div hidden={view === "connect"}>
+              <AgentView
+                key={id}
+                id={id}
+                s={s}
+                account={account}
+                apiKey={key}
+                busy={busy}
+                action={action}
+                saveKey={saveKey}
+                logout={() => {
+                  sessionStorage.removeItem(`agent-key:${id}`);
+                  setKey("");
+                  setAccount(null);
+                }}
+                connect={() => setView("connect")}
+              />
+            </div>
           )}
           {view === "connect" && (
-            <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
-          )}{" "}
+            <div className="stack">
+              <div>
+                <button className="secondary" onClick={() => setView("agent")}>
+                  鈫� Back to My Agent
+                </button>
+              </div>
+              <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
+            </div>
+          )}
           {view === "rules" && <Rules />}
           {view === "admin" && (
             <Admin
@@ -388,7 +406,7 @@ function MarketView({
         <div>
           <span>{rich("m2ac8d3648a")}</span>
           <strong>
-            {s.round || "—"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
+            {s.round || "鈥�"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
           </strong>
         </div>
         <div>
@@ -443,7 +461,7 @@ function MarketView({
           <div className="last-trade">
             <span>
               {instrument.lastPrice === null
-                ? "—"
+                ? "鈥�"
                 : money(instrument.lastPrice)}
             </span>
             <small>{rich("m590070958a")}</small>
@@ -479,19 +497,19 @@ function MarketView({
                 {account ? account.name : t("m1c7ce7a7a0")}
               </span>
               <div className="ticket-value">
-                {account ? money(account.cash) : "—"}
+                {account ? money(account.cash) : "鈥�"}
                 <small>{rich("m2462a87986")}</small>
               </div>
             </div>
             <dl className="ticket-facts">
               <div>
                 <dt>{rich("mc3ee29d0be")}</dt>
-                <dd>{account ? money(account.availableCash) : "—"}</dd>
+                <dd>{account ? money(account.availableCash) : "鈥�"}</dd>
               </div>
               {s.instruments.map((i) => (
                 <div key={i.symbol}>
                   <dt>{rich("m0ca151f9e9", [displayName(i.name)])}</dt>
-                  <dd>{account ? account.holdings[i.symbol] : "—"}</dd>
+                  <dd>{account ? account.holdings[i.symbol] : "鈥�"}</dd>
                 </div>
               ))}
               <div>
@@ -680,12 +698,18 @@ function AgentView({
 }) {
   useLocale();
   const [name, setName] = useState(""),
+    [duplicateName, setDuplicateName] = useState(""),
     [description, setDescription] = useState(""),
     [invite, setInvite] = useState(""),
     [restore, setRestore] = useState(""),
     [show, setShow] = useState(false),
     [fresh, setFresh] = useState(false);
   const captureSession = useSessionGuard([id]);
+  const normalizedName = name.trim().toLocaleLowerCase();
+  const nameTaken = !!normalizedName && (
+    duplicateName === normalizedName ||
+    s?.leaderboard.some((agent) => agent.name.toLocaleLowerCase() === normalizedName)
+  );
   if (!id) return <div className="notice">{rich("m43afb021d7")}</div>;
   if (account)
     return (
@@ -772,7 +796,7 @@ function AgentView({
                     <td>R{o.round}</td>
                     <td>{assetName(o.symbol ?? "DAT", s?.config)}</td>
                     <td>{o.side}</td>
-                    <td>{o.side === "PASS" ? "—" : money(o.price)}</td>
+                    <td>{o.side === "PASS" ? "鈥�" : money(o.price)}</td>
                     <td>{o.quantity}</td>
                     <td>{o.filled}</td>
                     <td>
@@ -807,26 +831,46 @@ function AgentView({
           className="padding stack"
           onSubmit={(e) => {
             e.preventDefault();
+            if (nameTaken) return;
             action(async () => {
               const current = captureSession();
-              const r = await api(`/api/markets/${id}/join`, "", {
-                name,
-                description,
-                ...(invite ? { invite } : {}),
-              });
-              if (!current()) return;
-              setFresh(true);
-              saveKey(r.apiKey);
+              try {
+                const r = await api(`/api/markets/${id}/join`, "", {
+                  name,
+                  description,
+                  ...(invite ? { invite } : {}),
+                });
+                if (!current()) return;
+                setFresh(true);
+                saveKey(r.apiKey);
+              } catch (error) {
+                if (error instanceof Error && "code" in error && error.code === "NAME_TAKEN") {
+                  if (current()) setDuplicateName(normalizedName);
+                  return;
+                }
+                throw error;
+              }
             });
           }}
         >
-          <label className="field">{rich("m57f5dfe100", [<input
+          <div className="field">
+            <label htmlFor="registration-name">{t("m57f5dfe100").trim()}</label>
+            <input
+              id="registration-name"
               required
               minLength={2}
               maxLength={40}
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />])}</label>
+              aria-invalid={nameTaken || undefined}
+              aria-describedby={nameTaken ? "registration-name-error" : undefined}
+            />
+            {nameTaken && (
+              <span className="negative" id="registration-name-error" role="alert">
+                This Agent name is already registered.
+              </span>
+            )}
+          </div>
           <label className="field">{rich("m8cd5316585", [<textarea
               maxLength={500}
               value={description}
@@ -842,8 +886,11 @@ function AgentView({
               />])}</label>
           )}
           <span className="hint">{rich("mb30a71ae36")}</span>
-          <button className="primary" disabled={busy || s?.status !== "lobby"}>
+          <button className="primary" disabled={busy || nameTaken || s?.status !== "lobby"}>
             {busy ? t("m7c0305bc0c") : t("m831fa1cf5e")}
+          </button>
+          <button type="button" className="secondary" onClick={connect}>
+            {t("mf327b4a048")}
           </button>
         </form>
       </section>
