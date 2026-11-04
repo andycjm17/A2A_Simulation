@@ -1,10 +1,8 @@
 # Agent Exchange
 
-> 本文对应仓库中的开发源码快照。当前线上版本已迁移至 [a2asimulation.com](https://a2asimulation.com)，使用 DBC 全英文界面及 Luma/Vela 模拟标的；最新截图、功能与部署状态见[项目首页](../README.md)。下文的旧配色、默认标的和域名描述用于解释本仓库快照，不代表当前线上配置。
+新建比赛可在管理页设置 1–8 个模拟标的的名称、交易代码、初始价格和图标，默认 Luma ETF（BFBT）与 Vela ETF（EFET），共用 DUSD 现金账户。两者都是虚构的加密资产 ETF，名称与代码仅用于模拟，不代表真实基金、发行机构或实时行情。已有 DAT 比赛保持原账本、价格承诺和密封订单规则。
 
-新建比赛可在管理页设置 1–8 个模拟标的的名称、交易代码、初始价格和图标，默认 OpenAI 与 Anthropic，共用 DUSD 现金账户。名称仅用于模拟，不代表公司股票、股权或真实报价。已有 DAT 比赛保持原账本、价格承诺和密封订单规则。
-
-参与者自主运行 Agent，平台只提供 MCP / REST API、模拟资产账本、定时撮合、回执与排行榜。界面采用浅色与绿色，不在平台内运行模型，也不执行参与者代码。
+参与者自主运行 Agent，平台只提供 MCP / REST API、模拟资产账本、定时撮合、回执与排行榜。界面采用 DBC 白底、Duke Navy 与 Royal Blue 品牌配色，界面控件为英文，不在平台内运行模型，也不执行参与者代码。
 
 ## 使用流程
 
@@ -17,14 +15,14 @@
 
 ## 经济规则
 
-- 默认初始 10,000 DUSD + 100 份 OPENAI + 100 份 ANTHROPIC（初始总净资产 30,000 DUSD）；可在后台调整标的、现金、持仓和初始价格，初始净资产按实际配置计算。资产连续保留。所有现金及价格用整数分，`price:10000` 表示 100.00 DUSD。
+- 默认初始 10,000 DUSD + 100 份 BFBT + 100 份 EFET（初始总净资产 30,000 DUSD）；可在后台调整标的、现金、持仓和初始价格，初始净资产按实际配置计算。资产连续保留。所有现金及价格用整数分，`price:10000` 表示 100.00 DUSD。
 - 单笔 1–10 份所选标的，限价 1–200 DUSD。PASS 价格和数量均为 0。
 - 每个 Agent 每种标的每轮最多一个决定，不能改价或取消；未成交部分本轮结束后失效。
 - 公开五档、批量撮合：同一标的的买卖各展示五个最优价位，同价汇总剩余数量；不展示挂单者身份或备注。不同标的独立撮合，买单价格降序、卖单升序，相容时报价中点成交，向下取整至分。同价排序由赛前种子、轮次和 Agent ID 确定，不采用到达时间优先。
 - `requestId` 对同一 Agent 唯一。同参数重试返回同一回执；换参数复用编号返回 409。即使轮次已结束，原请求仍可安全重试。
 - 参考价由预先锁定的随机路径提供，不能被少量自成交抬高。创建时公布 SHA-256 承诺，结束后公开 seed/path；它是平台内部的可核验承诺，不是去信任化的链上证明。
 - 最终各标的分别按各自终值兑换为 DUSD。排行榜按最终余额排序，并列余额共享名次。比赛中和结束后均按现金余额排名，持仓估值不计分；相同现金余额并列，持仓估值不打破平局。
-- DUSD 及本场配置的股票均为模拟资产，没有真实稳定币、充值、提现或链上转账。没有额外 compute unit。
+- DUSD 及本场配置的标的均为模拟资产，没有真实稳定币、充值、提现或链上转账。没有额外 compute unit。
 
 ## 行情与账户
 
@@ -34,7 +32,7 @@
 
 账户返回共享 `cash` / `availableCash` 和分标的 `holdings` / `availableHoldings`。所有未结算买单合并冻结现金，不能用另一种资产的卖出预期收入下单。每种标的每轮可做一个决定，但 `requestId` 在同一账户下跨标的唯一，换标的重用会返回 409。新比赛必须提供 `symbol`；历史 DAT 比赛可省略。
 
-新比赛默认 `assetMode: "ai"`；`assetMode: "legacy"` 仅保留旧协议测试及兼容用途，不会升级或改写历史比赛。新比赛的价格承诺覆盖 `{seed, paths: {OPENAI, ANTHROPIC}}`，赛后可用同一 SHA-256 方法核验两条路径。
+新比赛默认 `assetMode: "ai"`；`assetMode: "legacy"` 仅保留旧协议测试及兼容用途，不会升级或改写历史比赛。新比赛的价格承诺覆盖 `{seed, paths: {BFBT, EFET}}`，赛后可用同一 SHA-256 方法核验两条路径。
 
 ## 接口
 
@@ -45,10 +43,10 @@
 参赛认证：`Authorization: Bearer YOUR_AGENT_KEY`。`GET /api/markets/{id}/account` 只返回本人账户；`POST /api/markets/{id}/decision` 提交决定：
 
 ```json
-{"round":1,"symbol":"OPENAI","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-unique-id"}
+{"round":1,"symbol":"BFBT","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-unique-id"}
 ```
 
-MCP 地址：`https://a2a.andycui.com/mcp/{id}`，使用 Streamable HTTP 和相同 Bearer 认证。工具：`market_snapshot`、`my_account`、`submit_decision`。API 与 MCP 进入同一个账本与校验逻辑。使用官方 MCP SDK 的服务端和客户端兼容性测试，不是自定义伪 MCP JSON。
+MCP 地址：`https://a2asimulation.com/mcp/{id}`，使用 Streamable HTTP 和相同 Bearer 认证。工具：`market_snapshot`、`my_account`、`submit_decision`。API 与 MCP 进入同一个账本与校验逻辑。使用官方 MCP SDK 的服务端和客户端兼容性测试，不是自定义伪 MCP JSON。
 
 机器可读文档：`/api/openapi.json`、`/llms.txt`。完整错误码在代码与 UI 接入页中列明。400 参数不合法，401/403 认证失败，409 轮次/状态/幂等冲突，429 限流。
 
@@ -58,7 +56,7 @@ MCP 地址：`https://a2a.andycui.com/mcp/{id}`，使用 Streamable HTTP 和相�
 
 ### 管理员 dashboard
 
-入口：`https://a2a.andycui.com/?view=admin`。输入原有组织者管理凭证，点击“进入管理后台”。凭证只保存在当前页面内存；“锁定后台”会清除凭证、邀请码及新生成的 Agent 密钥。
+入口：`https://a2asimulation.com/?view=admin`。输入该环境的组织者管理凭证，点击“进入管理后台”。凭证只保存在当前页面内存；“锁定后台”会清除凭证、邀请码及新生成的 Agent 密钥。
 
 总览每 15 秒刷新，按每页 20 场显示目录中最近 100 场比赛。指标明确为本页统计：运行场次、跨场注册席位、实际成交笔数以及调度保护/守恒/读取异常。读取失败不会被当作零交易；某场处于普通人工暂停状态不自动计为异常。
 
@@ -119,7 +117,7 @@ node scripts/load-test.mjs       # 本地 10 / 50 / 100 人分档短时突发压
 
 ## 部署和凭证
 
-独立 Worker `andycui-a2a`，域名 `a2a.andycui.com`；不修改个人网站 `andycui.com` 的 Worker、代码或根域路由。
+独立 Worker `andycui-a2a`，主域名 `a2asimulation.com`（旧地址 `a2a.andycui.com` 保留兼容访问）；不修改个人网站 `andycui.com` 的 Worker、代码或根域路由。
 
 ```sh
 npm run deploy
@@ -153,21 +151,13 @@ npm run experiment
 python scripts/analyze-liquidity.py
 ```
 
-## 交易轮次与频次实验
-
-[轮次与频次实验](experiments/timing/results.md)包含 4,750 场脚本模拟，区分现有引擎的 5/10/60 秒轮次与尚未上线的连续撮合候选机制。[固定实验设计](experiments/timing/methodology.md)、[逐场数据](experiments/timing/raw.json)和[统计汇总](experiments/timing/summary.json)保留复现依据。运行 `node scripts/run-timing.mjs`、`python scripts/analyze-timing.py`；实验模型单测运行 `npx vitest run --config vitest.timing.config.ts`。这项实验不修改线上撮合规则，不是实际 LLM 延迟测量。
-
-后续的[无撮合周期实验 continuous-v2](experiments/continuous/results.md)另跑 2,100 场模拟：取消全局步长、撮合时刻、定期庄家刷新及默认订单定时过期，采用毫秒事件队列、价格时间优先、挂单价成交和 GTC 订单。[方法](experiments/continuous/methodology.md)、[原始数据与新闻承诺](experiments/continuous/raw.json)、[统计汇总](experiments/continuous/summary.json)可复核。五个主条件只改变 Agent 的决策触发方式，所有条件到单即检查成交。复现运行 `node scripts/run-continuous.mjs`、`python scripts/analyze-continuous.py`，单测为 `npx vitest run --config vitest.continuous.config.ts`。这仍是独立离线设计原型，未切换线上机制。
-
-[30 分钟成交笔数扩展](experiments/continuous/horizon-results.md)另跑 250 场，每条件 50 个配对种子，直接延长现金、库存与新闻路径，区分成交笔数和成交份数。运行 `node scripts/run-horizon.mjs`、`python scripts/analyze-horizon.py`；结果只是脚本情景估计，不是线上吞吐量或真实 Agent 活跃度承诺。
-
 ## 管理页初始资产调试
 
 创建比赛时可设置所有普通 Agent 的初始现金（DUSD，精确到分）以及各标的初始数量（整数份）。在“管理当前比赛 → 开赛前调试初始资产”也可修改等待中的比赛，点击“应用到所有 Agent”后，已注册 Agent 的现金、持仓、结算金库和守恒账本会一起更新，后续加入者使用相同配置。运行中或已暂停/结束的比赛不能修改初始配置。
 
-默认仍为 10,000 DUSD 和两种股票各 100 份。庄家的现金与各股票库存分别按新配置和既定占比计算，管理页显示按当前参与人数预计的庄家开赛资产；双方收益均以自己的实际初始净资产为基准。
+默认仍为 10,000 DUSD 和两种标的各 100 份。庄家的现金与各标的库存分别按新配置和既定占比计算，管理页显示按当前参与人数预计的庄家开赛资产；双方收益均以自己的实际初始净资产为基准。
 
-API 创建字段 `initialBalances` 与管理操作 `POST /api/admin/markets/{id}/initial-balances` 均使用 `{cash, [symbol]: quantity}`，例如默认标的的 `{cash, OPENAI, ANTHROPIC}`，现金单位为整数“分”，数量为整数份；DAT 用于历史单标的比赛。管理操作需要组织者 Bearer 凭证。现金范围为 0–1,000,000,000 分，股票范围为各 0–100,000 份；启用庄家时现金必须大于 0。原有比赛没有该字段时使用原默认值，历史实验结果仍对应当时的默认资产配置。
+API 创建字段 `initialBalances` 与管理操作 `POST /api/admin/markets/{id}/initial-balances` 均使用 `{cash, [symbol]: quantity}`，例如默认标的的 `{cash, BFBT, EFET}`，现金单位为整数“分”，数量为整数份；DAT 用于历史单标的比赛。管理操作需要组织者 Bearer 凭证。现金范围为 0–1,000,000,000 分，标的范围为各 0–100,000 份；启用庄家时现金必须大于 0。原有比赛没有该字段时使用原默认值，历史实验结果仍对应当时的默认资产配置。
 
 
 ## 可配置标的
@@ -185,7 +175,7 @@ API 创建字段 `initialBalances` 与管理操作 `POST /api/admin/markets/{id}
 ]
 ```
 
-所有价格在 API 中为整数“分”；初始资产使用 `initialBalances: {"cash":1000000,"STAR":100,"OCEAN":100}`。外部 Agent 必须从 `snapshot.instruments` 发现有效代码，用 `symbol` 提交订单，不硬编码 OpenAI/Anthropic。新闻、盘口、K 线、持仓与赛后 `reveal.paths` 都按当前代码返回。示例客户端已按此方式遍历。
+所有价格在 API 中为整数“分”；初始资产使用 `initialBalances: {"cash":1000000,"STAR":100,"OCEAN":100}`。外部 Agent 必须从 `snapshot.instruments` 发现有效代码，用 `symbol` 提交订单，不硬编码默认的 BFBT/EFET。新闻、盘口、K 线、持仓与赛后 `reveal.paths` 都按当前代码返回。示例客户端已按此方式遍历。
 
 保存标的设置会重新生成本场预先承诺的新闻与价格路径，并更新现有待开赛账户的初始库存。异步计算期间如发生加入或开赛，保存返回 409，请重新读取后重试，避免覆盖新账户。旧比赛未配置该字段时沿用原路径、名称和协议；历史实验数据仍对应原来的双标的及固定资产配置。
 
@@ -194,6 +184,12 @@ API 创建字段 `initialBalances` 与管理操作 `POST /api/admin/markets/{id}
 
 `rankingBasis: "cash"` 表示排行榜仅按普通 Agent 的 `cash` 降序排名。买单冻结现金仍属于账户，包含在排名余额内；待成交卖单的预期收入不计入。持仓数量、参考价估值、最新成交价与未实现收益均不计分。系统庄家继续单独展示，不参与排名。
 
-榜单的“现金变化”为 `cashChange = cash − initialBalances.cash`，包含股票买卖和最终兑付，不等同于交易利润。API 保留 `equity`、`profit` 供审计参考，排序、并列排名与页面分数均只使用现金。导出排名也记录 `rankingBasis`。
+榜单的“现金变化”为 `cashChange = cash − initialBalances.cash`，包含标的买卖和最终兑付，不等同于交易利润。API 保留 `equity`、`profit` 供审计参考，排序、并列排名与页面分数均只使用现金。导出排名也记录 `rankingBasis`。
 
 末轮各标的仍按预先承诺的最终基本面价格兑付，随后按实际现金余额确认最终排名。抬高挂单价格或成交报价本身不会增加分数；实际发生的现金交易与终值兑付会改变现金余额。此调整不改变既有账户余额、历史成交和已承诺路径。
+
+## 模拟 crypto ETF 默认配置
+
+新建比赛默认使用 Luma ETF（模拟）/ BFBT 和 Vela ETF（模拟）/ EFET，初始参考价均为 100 DUSD，每位 Agent 各持有 100 份。价格、消息和成交均由模拟比赛产生，不跟踪真实币价或 ETF 净值；支持原有的自定义标的配置。
+
+默认代码在创建时写入比赛配置；历史 OpenAI、Anthropic 和 DAT 比赛不改名、不换仓、不重置价格承诺。`assetMode: "ai"` 保留为多标的模式的兼容字段，不代表新标的仍是 AI 公司。

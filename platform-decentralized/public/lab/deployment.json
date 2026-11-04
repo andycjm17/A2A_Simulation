@@ -1,0 +1,7 @@
+{
+  "testnetDeployer": "0x7b36EEb55f8b63F96ec9F5063816bD6a804d882e",
+  "auditAttestor": "0xE92fF7c3c8B28e3620abD3f4c77e2D8389e3B111",
+  "network": "Base Sepolia",
+  "chainId": 84532,
+  "status": "awaiting-testnet-funding"
+}

@@ -98,7 +98,7 @@ test("security: settled collusion evidence appears in organizer review", async (
           headers: { Authorization: `Bearer ${a.apiKey}` },
           data: {
             round: 1,
-    symbol: "OPENAI",
+    symbol: "BFBT",
             side: i ? "SELL" : "BUY",
             price: 100,
             quantity: 10,

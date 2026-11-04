@@ -52,7 +52,7 @@ a {
   display: flex;
   min-height: 100vh;
 }
-aside {
+.appnav {
   width: 246px;
   flex-shrink: 0;
   background: #fff;
@@ -531,7 +531,7 @@ pre {
   clip: rect(0, 0, 0, 0);
 }
 @media (max-width: 1050px) {
-  aside {
+  .appnav {
     width: 205px;
     padding: 30px 14px;
   }
@@ -556,7 +556,7 @@ pre {
   }
 }
 @media (max-width: 700px) {
-  aside {
+  .appnav {
     position: relative;
     height: auto;
     width: 100%;
@@ -988,3 +988,4 @@ button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 
 .capital-preview strong { font-size: 13px; }
 
 .ranking-caption { text-align: left; caption-side: top; white-space: normal; color: var(--muted); font-size: 12px; line-height: 1.7; padding: 12px 20px; background: #f5f8f5; }
+

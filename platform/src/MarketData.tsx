@@ -1,3 +1,4 @@
+import { t, rich, useLocale, localizedLabels, localeTag, message, displayName } from "./i18n";
 import { useState } from "react";
 import type { Snapshot } from "./App";
 import { money } from "./App";
@@ -10,6 +11,7 @@ export function CandlestickChart({
   instrument: Instrument;
   roundMs: number;
 }) {
+  useLocale();
   const [range, setRange] = useState(30);
   const [active, setActive] = useState<number | null>(null);
   const candles = range ? instrument.candles.slice(-range) : instrument.candles;
@@ -33,11 +35,11 @@ export function CandlestickChart({
   return (
     <section
       className="candle-panel"
-      aria-label={`${instrument.name} 成交 K 线`}
+      aria-label={t("m14d8aee602", [displayName(instrument.name)])}
     >
       <div className="row between candle-heading">
-        <h3>成交 K 线</h3>
-        <span className="hint">每根 {roundMs / 1000} 秒 · DUSD</span>
+        <h3>{rich("mda98e645e0")}</h3>
+        <span className="hint">{rich("m1d21eeff81", [roundMs / 1000])}</span>
       </div>
       <div className="ohlc" aria-live="polite">
         {selected ? (
@@ -45,22 +47,20 @@ export function CandlestickChart({
             <span>R{selected.round}</span>
             {(
               [
-                ["开", selected.open],
-                ["高", selected.high],
-                ["低", selected.low],
-                ["收", selected.close],
+                [t("m39eae64cfc"), selected.open],
+                [t("mb1c27820fe"), selected.high],
+                [t("maa9e366f68"), selected.low],
+                [t("m339bacf403"), selected.close],
               ] as const
             ).map(([label, value]) => (
               <span key={label}>
                 {label} <b>{value === null ? "—" : money(value)}</b>
               </span>
             ))}
-            <span>
-              量 <b>{selected.volume}</b>
-            </span>
+            <span>{rich("m3d785d4480", [<b>{selected.volume}</b>])}</span>
           </>
         ) : (
-          <span>等待本场首轮成交</span>
+          <span>{rich("mc665b31b8f")}</span>
         )}
       </div>
       {traded.length ? (
@@ -68,7 +68,7 @@ export function CandlestickChart({
           className="candle-chart"
           viewBox={`0 0 ${W} ${H}`}
           role="img"
-          aria-label={`${instrument.name} 成交 K 线图；价格单位 DUSD`}
+          aria-label={t("mfa10286d30", [displayName(instrument.name)])}
         >
           {[0, 1, 2, 3, 4].map((n) => {
             const price = max - ((max - min) * n) / 4;
@@ -97,7 +97,7 @@ export function CandlestickChart({
               key={c.round}
               tabIndex={0}
               role="button"
-              aria-label={`第 ${c.round} 轮${c.close === null ? "无成交" : `，开 ${money(c.open!)}，高 ${money(c.high!)}，低 ${money(c.low!)}，收 ${money(c.close)}，量 ${c.volume}`}`}
+              aria-label={t("m7624a3beef", [c.round, c.close === null ? t("m25ea58282e") : t("m111b7ff770", [money(c.open!), money(c.high!), money(c.low!), money(c.close), c.volume])])}
               onFocus={() => setActive(c.round)}
               onMouseEnter={() => setActive(c.round)}
               onClick={() => setActive(c.round)}
@@ -153,8 +153,8 @@ export function CandlestickChart({
               )}
               <title>
                 {c.close === null
-                  ? `R${c.round} 无成交`
-                  : `R${c.round} 开 ${money(c.open!)} 高 ${money(c.high!)} 低 ${money(c.low!)} 收 ${money(c.close)} 量 ${c.volume}`}
+                  ? t("ma42f10a227", [c.round])
+                  : t("m1229d1ccec", [c.round, money(c.open!), money(c.high!), money(c.low!), money(c.close), c.volume])}
               </title>
             </g>
           ))}
@@ -162,16 +162,16 @@ export function CandlestickChart({
       ) : (
         <div className="candle-empty">
           <span className="empty-candle-icon">▥</span>
-          <strong>尚无成交 K 线</strong>
-          <span>买卖订单撮合后，按每轮成交生成开、高、低、收。</span>
+          <strong>{rich("mca615a872b")}</strong>
+          <span>{rich("mf8bb263b61")}</span>
         </div>
       )}
       <div className="row between candle-controls">
-        <div className="chart-ranges" role="group" aria-label="K 线范围">
+        <div className="chart-ranges" role="group" aria-label={t("md9de9efdc6")}>
           {[
-            [15, "15 轮"],
-            [30, "30 轮"],
-            [0, "全部"],
+            [15, t("m3f7a6dedd8")],
+            [30, t("m40a2de30f9")],
+            [0, t("m5c55a67935")],
           ].map(([n, label]) => (
             <button
               key={n}
@@ -185,7 +185,7 @@ export function CandlestickChart({
             </button>
           ))}
         </div>
-        <span className="hint">绿涨 · 红跌 · 无成交轮次留空</span>
+        <span className="hint">{rich("m6e18f88518")}</span>
       </div>
     </section>
   );
@@ -200,40 +200,37 @@ export function OrderBook({
   sealed: boolean;
   paused: boolean;
 }) {
+  useLocale();
   return (
     <section
       className="panel order-book"
-      aria-label={`${instrument.name} 五档盘口`}
+      aria-label={t("m721e9c9b88", [displayName(instrument.name)])}
     >
       <div className="paneltitle">
-        <h2>
-          五档盘口 <span className="subtle">{instrument.name}</span>
-        </h2>
-        <span className="hint">同价合量 · 单位：份</span>
+        <h2>{rich("m8d2403220d", [<span className="subtle">{displayName(instrument.name)}</span>])}</h2>
+        <span className="hint">{rich("m08739d6d60")}</span>
       </div>
       {sealed ? (
-        <div className="empty">
-          历史 DAT 比赛采用密封订单，不公开未结算挂单。
-        </div>
+        <div className="empty">{rich("m8f28be5508")}</div>
       ) : (
         <>
           {paused && (
-            <p className="hint padding">比赛已暂停，以下挂单等待恢复后撮合。</p>
+            <p className="hint padding">{rich("ma78e0832d7")}</p>
           )}
           <div className="depth-grid">
             {(
               [
-                ["bids", "买盘", "bid"],
-                ["asks", "卖盘", "ask"],
+                ["bids", t("m381ba9a55f"), "bid"],
+                ["asks", t("md416fc2cdd"), "ask"],
               ] as const
             ).map(([side, title, color]) => (
               <div key={side}>
-                <table aria-label={`${instrument.name} ${title}`}>
+                <table aria-label={`${displayName(instrument.name)} ${title}`}>
                   <thead>
                     <tr>
                       <th>{title}</th>
-                      <th>价格 / DUSD</th>
-                      <th>数量</th>
+                      <th>{rich("m1d83c362e2")}</th>
+                      <th>{rich("m5e29d121dd")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -254,8 +251,8 @@ export function OrderBook({
                           }
                         >
                           <td>
-                            {side === "bids" ? "买" : "卖"}
-                            {i + 1}
+                            {side === "bids" ? t("m2cd2507d65") : t("md998fc91a1")}
+                            {" "}{i + 1}
                           </td>
                           <td>{level ? money(level.price) : "—"}</td>
                           <td>{level ? level.quantity : "—"}</td>
@@ -267,9 +264,7 @@ export function OrderBook({
               </div>
             ))}
           </div>
-          <p className="hint depth-note">
-            仅显示当前轮次未成交的挂单。每轮结束集中撮合，未成交部分到期；买价与卖价交叉时仍需等待本轮结算。
-          </p>
+          <p className="hint depth-note">{rich("m017f7d0653")}</p>
         </>
       )}
     </section>

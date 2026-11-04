@@ -11,6 +11,7 @@ import {
   sha256,
   reconfigureInstruments,
   accountState,
+  DEFAULT_INSTRUMENTS,
 } from "../worker/engine";
 const instruments = [
   { symbol: "ALPHA", name: "星河科技", initialPrice: 2500, icon: "🚀" },
@@ -38,6 +39,29 @@ function join(s: any, i: number) {
   );
 }
 describe("configurable instruments", () => {
+  it('crypto ETF preset persists its names, inventory and simulated crypto news', async () => {
+    const s = await createState({ ...config, rounds: 30, instruments: DEFAULT_INSTRUMENTS, initialBalances: undefined }, 'crypto-preset', 0);
+    join(s, 0); join(s, 1);
+    expect(publicState(s, 0).instruments.map(i => [i.symbol, i.name, i.icon])).toEqual(DEFAULT_INSTRUMENTS.map(i => [i.symbol, i.name, i.icon]));
+    expect(accountState(s, s.agents[0]).holdings).toEqual({ BFBT: 100, EFET: 100 });
+    expect(s.news!.length).toBeGreaterThan(0);
+    expect(s.news!.every(n => n.headline.includes('模拟'))).toBe(true);
+    expect(s.news!.every(n => !/客户|订单增速|研发|收入/.test(n.headline))).toBe(true);
+    start(s, 1000);
+    submit(s, 'a0', { symbol: 'BFBT', round: 1, side: 'BUY', price: 10000, quantity: 1, requestId: 'crypto-buy' }, 1001);
+    submit(s, 'a1', { symbol: 'BFBT', round: 1, side: 'SELL', price: 10000, quantity: 1, requestId: 'crypto-sell' }, 1001);
+    while (s.status === 'running') { clearRound(s, settlementAt(s)); audit(s); }
+    expect(await sha256(JSON.stringify(publicState(s, 9999999).reveal))).toBe(s.commitment);
+  });
+  it('does not reinterpret historical implicit AI instruments or their commitments', async () => {
+    const old = await createState({ ...config, instruments: undefined, initialBalances: undefined }, 'historical-unchanged', 0);
+    join(old, 0);
+    const saved = JSON.stringify(old);
+    const loaded = JSON.parse(saved);
+    expect(publicState(loaded, 0).instruments.map(i => [i.symbol, i.name])).toEqual([['OPENAI', 'OpenAI'], ['ANTHROPIC', 'Anthropic']]);
+    expect(accountState(loaded, loaded.agents[0]).holdings).toEqual({ OPENAI: 100, ANTHROPIC: 100 });
+    expect(JSON.stringify(loaded)).toBe(saved);
+  });
   it("supports names, icons, independent initial prices, news, reserves and final redemption for three custom symbols", async () => {
     const s = await createState(config, "generic-seed", 0);
     join(s, 0);

@@ -1,0 +1,47 @@
+{
+  "name": "a2a-decentralization-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "types": "wrangler types",
+    "worker:dev": "wrangler dev --ip 127.0.0.1 --port 8788",
+    "test": "vitest run --config vitest.config.ts",
+    "test:runtime": "vitest run --config vitest.runtime.config.ts",
+    "test:e2e": "playwright test",
+    "deploy": "npm run build && wrangler deploy",
+    "experiment": "node scripts/run-liquidity.mjs",
+    "contracts:build": "node scripts/compile-contracts.mjs",
+    "test:chain": "node scripts/test-chain.mjs",
+    "chain:dev": "node scripts/chain-dev.mjs",
+    "chain:deploy": "node scripts/deploy-contracts.mjs",
+    "verify:audit": "tsx scripts/verify-audit.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "ethers": "^6.17.0",
+    "lucide-react": "^0.468.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "1.1.8",
+    "@openzeppelin/contracts": "^5.4.0",
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "ganache": "^7.9.2",
+    "prettier": "3.9.6",
+    "solc": "^0.8.30",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.0",
+    "vite": "^6.4.3",
+    "vitest": "^4.1.0",
+    "wrangler": "4.131.1"
+  }
+}

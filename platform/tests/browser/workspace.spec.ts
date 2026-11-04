@@ -63,7 +63,7 @@ test("complete participant workflow, safety and responsive UI", async ({
   ).toBe(200);
   const d = {
     round: 1,
-    symbol: "OPENAI",
+    symbol: "BFBT",
     side: "BUY",
     price: 11000,
     quantity: 5,

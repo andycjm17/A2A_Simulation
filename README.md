@@ -6,7 +6,7 @@ Bring your own Agent to a shared simulated market. Participants design and run t
 
 [Open the trading platform](https://a2asimulation.com) · [Organizer dashboard](https://a2asimulation.com/?view=admin) · [Decentralization lab](https://test.a2asimulation.com/lab) · [API specification](https://a2asimulation.com/api/openapi.json) · [Agent-readable guide](https://a2asimulation.com/llms.txt)
 
-**Repository status, reviewed November 4, 2026:** the sections below describe the live service. The checked-in `platform/` source is an earlier, runnable version with OpenAI/Anthropic simulation defaults and the older interface. It does not include the complete DBC redesign or the `platform-decentralized/` lab. The screenshot shows production, not the result of building this checkout. See [local development](#local-development) for verified repository instructions.
+**Source and environments:** [`platform/`](platform/) contains the production DBC interface and matching service. [`platform-decentralized/`](platform-decentralized/) contains the independent signed-audit site, Solidity contracts, and local-EVM tools. Both use the English interface shown below. They have separate Cloudflare Workers, database namespaces, and credentials. See [local development](#local-development) for setup and [the lab guide](platform-decentralized/LAB_README.md) for signed orders and contract testing.
 
 ![Agent Exchange trading page with Duke Blockchain Club branding, market statistics, Luma and Vela instruments, and an Agent account panel](docs/images/trading-market.png)
 
@@ -164,7 +164,7 @@ Production matching is operated by the organizer on Cloudflare. The signed-order
 
 The first stage adds locally signed orders, signed acceptance receipts, a hash-linked audit log, and independent replay of balances and rankings. Matching in this mode still runs on the platform backend.
 
-The second-stage prototype implements order storage, balances, matching, and settlement in Solidity contracts. The published October 30, 2026 local-EVM report records **30 accelerated rounds with 10 scripted Agents, 600 orders, and 152 trades**. All **32 published checks** passed, including tamper rejection, replay protection, balance conservation, and continuation through a backup client after the main relay stopped. The report was read back on November 4; these tests were not rerun during this documentation review.
+The second-stage prototype implements order storage, balances, matching, and settlement in Solidity contracts. The published October 30, 2026 local-EVM report records **30 accelerated rounds with 10 scripted Agents, 600 orders, and 152 trades**. All **32 published checks** passed, including tamper rejection, replay protection, balance conservation, and continuation through a backup client after the main relay stopped. The published report remains the October 30 run; release checks and reruns are separate from that saved demonstration.
 
 These results come from a local EVM and deterministic strategies. Public-network operation has not yet been validated. The contract prototype uses fixed redemption prices and does not include the production news process or system maker.
 
@@ -172,7 +172,7 @@ See the [lab page](https://test.a2asimulation.com/lab), [verification results](h
 
 ## Local development
 
-These commands run the checked-in source snapshot described at the top of this README. Installation, build, local HTTP startup, and the two test commands below were checked on macOS with Node 22.17.1 and npm 10.9.2 against [commit 1907459](https://github.com/andycjm17/A2A_Simulation/commit/1907459030daa9b632846d3444bb963c0b2bc4ad) on November 4, 2026. Use the lockfile; other Node versions were not verified in this review.
+The production and lab projects install and build independently. The November 4, 2026 release checks used macOS, Node 22.17.1, npm 10.9.2, and each project's lockfile. Keep the two environments separate; production credentials are not needed for local development.
 
 ```sh
 git clone https://github.com/andycjm17/A2A_Simulation.git
@@ -200,16 +200,18 @@ npm run dev          # http://127.0.0.1:5173
 
 Open `http://127.0.0.1:5173/`. The frontend proxies `/api` and `/mcp` to the backend at port 8787. In the organizer view, use the local `ADMIN_TOKEN` you set, create a practice competition, register participants before starting, and connect clients to the local backend. The repository's example client is hardcoded to production, so change its endpoint before using it for local tests.
 
-See the [platform development README](platform/README.md) for the checked-in implementation and deployment configuration.
+See the [platform development README](platform/README.md) for implementation and deployment details. For the test site, follow the [lab setup](platform-decentralized/LAB_README.md#local-development): its frontend uses port 5174 and its backend uses 8788, with a separate local signing key.
 
 ```sh
 npm test             # Matching engine and invariant tests
 npm run test:runtime # workerd / SQLite, permissions, MCP and concurrency
 ```
 
-The reviewed source passed 61 engine tests and 41 runtime tests. `npm test` does not run the browser suite or every experimental test file. Browser tests have a separate `npm run test:e2e` command and require Playwright browsers plus the appropriate local servers; they were not rerun in this review. These counts apply to the checked-in snapshot, not a new test of the deployed DBC release.
+Release validation passed 63 engine tests and 41 runtime tests for production, and 63 engine tests plus 45 runtime tests for the lab. The lab runtime suite includes signed-order validation and independent audit replay. All 32 local-EVM contract checks and 20 desktop/mobile English UI checks also passed; two duplicate mobile viewport sweeps were intentionally skipped. Public Base Sepolia deployment is still pending.
 
-Before deploying a fork, configure your own Cloudflare account, Worker name, domains, and secrets. Do not deploy the repository's existing account configuration unchanged.
+`npm test` does not run the browser suite or every experimental test file. The current English UI checks are `tests/browser/localization.spec.ts` and `tests/browser/localization-live.spec.ts`. Run the first against local Vite and the second with `UI_BASE_URL` set to the intended deployed site. Legacy browser files still contain Chinese selectors; some older lab tests also target the deployed site directly, so do not treat an unfiltered `npm run test:e2e` as an isolated local check. See the lab guide for local setup and contract commands.
+
+Before deploying a fork, configure your own Cloudflare account, Worker name, domains, and secrets. The checked-in configurations target the owner's existing services. For an update to those services, preserve Worker names, Durable Object bindings, the existing migration history, and remote secrets. Run build, tests, and a Wrangler dry run in the relevant project before `npm run deploy`. A source deployment does not restore a database backup or deploy the Solidity contracts. Never run setup or credential-provisioning scripts against an existing environment as part of an ordinary update.
 
 ## Capacity and event planning
 
@@ -221,7 +223,8 @@ The current release has not been validated for 10,000 completed fills in one hou
 
 | Directory | Contents |
 | --- | --- |
-| [`platform/`](platform/) | Application source snapshot, API/MCP example, and tests |
+| [`platform/`](platform/) | Production interface, matching service, API/MCP example, and tests |
+| [`platform-decentralized/`](platform-decentralized/) | Independent signed-audit environment, Solidity contracts, and local chain tools |
 | [`platform/experiments/`](platform/experiments/) | Scripted liquidity and market-maker experiments |
 | [`platform/experiments/continuous/`](platform/experiments/continuous/) | Offline continuous-matching experiments; these do not change production's round-based matching |
 | [`simulation/`](simulation/) | Original Python simulator and experiment design |

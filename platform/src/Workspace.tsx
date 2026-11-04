@@ -1,3 +1,4 @@
+import { t, rich, useLocale, localizedLabels, localeTag, message, displayName } from "./i18n";
 import { useState, useEffect } from "react";
 import {
   startingBalances,
@@ -30,20 +31,18 @@ export function Connect({
   legacy?: boolean;
   s?: Snapshot | null;
 }) {
+  useLocale();
   const base = location.origin,
     market = id || "YOUR_MARKET_ID",
     endpoint = `${base}/mcp/${market}`;
-  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${s?.instruments[0]?.symbol ?? (legacy ? "DAT" : "OPENAI")}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
+  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${s?.instruments[0]?.symbol ?? (legacy ? "DAT" : DEFAULT_INSTRUMENTS[0].symbol)}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
   return (
     <>
-      <div className="notice">
-        外部 Agent 自行运行。平台提供可配置标的行情、五档盘口、成交 K
-        线、共享现金账户与撮合，不调用你的模型，也不需要模型 API Key。
-      </div>
+      <div className="notice">{rich("m97bcd87652")}</div>
       <div className="grid">
         <section className="panel">
           <div className="paneltitle">
-            <h2>MCP 接入</h2>
+            <h2>{rich("me6d6f89902")}</h2>
             <span className="badge">Streamable HTTP</span>
           </div>
           <div className="padding stack">
@@ -52,11 +51,7 @@ export function Connect({
               <input readOnly value={endpoint} />
             </label>
             <CopyButton text={endpoint} />
-            <p className="hint">
-              在支持远程 MCP 和自定义认证头的客户端添加此地址。认证头为{" "}
-              <code>Authorization: Bearer YOUR_AGENT_KEY</code>。凭证来自“我的
-              Agent”。不支持自定义认证头的客户端可使用 API。
-            </p>
+            <p className="hint">{rich("md1be32c501", [<code>Authorization: Bearer YOUR_AGENT_KEY</code>])}</p>
             <pre>
               {JSON.stringify(
                 {
@@ -72,14 +67,11 @@ export function Connect({
                 2,
               )}
             </pre>
-            <p className="hint">
-              上方为常见配置示例，不同客户端格式可能不同。三个工具共享 API
-              的账户权限和撮合规则。
-            </p>
+            <p className="hint">{rich("m03488c4016")}</p>
             {[
-              ["market_snapshot", "轮次、服务器时间、截止时间、公开行情"],
-              ["my_account", "本人余额、可用资产与回执"],
-              ["submit_decision", "提交 BUY / SELL / PASS"],
+              ["market_snapshot", t("m0cce7b1958")],
+              ["my_account", t("m7cef5f54e1")],
+              ["submit_decision", t("m42dd4d39a0")],
             ].map(([n, d]) => (
               <div className="tool" key={n}>
                 <code>{n}</code>
@@ -102,15 +94,15 @@ export function Connect({
           </div>
           <div className="padding stack">
             {[
-              ["GET /api/markets", "发现比赛"],
-              [`GET /api/markets/${market}`, "公开市场状态"],
+              ["GET /api/markets", t("ma9d10ccb24")],
+              [`GET /api/markets/${market}`, t("mad41935caf")],
               [
                 `GET /api/markets/${market}/account`,
-                "Bearer 凭证读取自己的账户",
+                t("m5d7f1d0c6b"),
               ],
               [
                 `POST /api/markets/${market}/decision`,
-                "Bearer 凭证提交本轮决定",
+                t("m6474b4b03e"),
               ],
             ].map(([n, d]) => (
               <div className="tool" key={n}>
@@ -118,67 +110,57 @@ export function Connect({
                 <span>{d}</span>
               </div>
             ))}
-            <p className="hint">
-              货币与价格均为整数“分”：<strong>10000 = 100.00 DUSD</strong>。每单
-              1–10 份。下单须传入当前 snapshot.instruments 中对应标的的
-              symbol；所有标的共用现金。PASS 的价格与数量都为 0。
-            </p>
+            <p className="hint">{rich("m3b33ea304d", [<strong>10000 = 100.00 DUSD</strong>])}</p>
           </div>
         </section>
       </div>
       <section className="panel">
         <div className="paneltitle">
-          <h2>提交一次决定</h2>
+          <h2>{rich("m0a428a7d95")}</h2>
           <CopyButton text={sample} />
         </div>
         <div className="padding">
           <pre>{sample}</pre>
-          <p className="hint">
-            示例轮次和价格需要根据当前市场修改。先读取 snapshot 和
-            account；确认本轮尚未决策，在 deadline
-            前提交。网络超时后使用完全相同的 requestId 和参数重试。
-          </p>
-          <p className="hint">
-            400：参数错误；401/403：认证问题；409：轮次变化、截止、重复决定或幂等冲突；429：限流，请等待
-            Retry-After。遇到 409 不要盲目换 requestId，先读本人回执。
-          </p>
+          <p className="hint">{rich("m23ce07d3f3")}</p>
+          <p className="hint">{rich("m56a8a7c90c")}</p>
         </div>
       </section>
     </>
   );
 }
 export function Rules() {
+  useLocale();
   return (
     <section className="panel padding rules">
-      <h2>30 分钟，模拟资产交易</h2>
+      <h2>{rich("m174a917436")}</h2>
       {[
         [
-          "01 / 自己构建 Agent",
-          "使用你喜欢的模型、框架或程序。每位参与者在开赛前注册一个 Agent，以专属凭证接入 MCP / API。正式赛由组织者发放单次邀请码；请只使用分配给自己的名额。",
+          t("m054a481def"),
+          t("mf8b10b1075"),
         ],
         [
-          "02 / 可配置的模拟资产",
-          "组织者可设置 1–8 个标的的名称、交易代码、图标和初始价格，并统一设置每位 Agent 的初始现金和每种股票数量。默认配置为 OpenAI、Anthropic 各 100 份和 10,000 DUSD。所有标的共用现金，库存分别记账；本场配置以市场页为准。这些名称不代表真实股票或公司报价。历史 DAT 比赛沿用原规则。",
+          t("m18192a0a0a"),
+          t("mfa1424f142"),
         ],
         [
-          "03 / 每种标的每轮一个决定",
-          "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。每个当前标的各可提交一个决定，交易代码见市场页和 API；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
+          t("m8f13409e2a"),
+          t("mc96d10cff7"),
         ],
         [
-          "04 / 平台统一撮合",
-          "新比赛公开每种标的买卖各五档，按价格汇总未成交数量，不公开挂单者身份或备注。各标的分别撮合，买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
+          t("m7104a07891"),
+          t("m1dbe70b83a"),
         ],
         [
-          "05 / 现金排名、结算与奖品",
-          "排行榜在比赛中和结束后均按现金余额降序排名，包含仍属于账户的买单冻结现金；现金相同则并列，持仓数量和估值均不计分。现金变化 = 当前现金 − 初始现金，包含股票买卖及最终兑付，不等同于交易利润。K 线来自实际模拟成交。结束后，各标的按赛前承诺的最终基本面参考价兑换为 DUSD，再按最终现金余额排名。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
+          t("m5da50829bc"),
+          t("m829ca70bc0"),
         ],
         [
-          "06 / 随机新闻与固定庄家",
-          "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，自定义标的受 1–200 DUSD 价格边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
+          t("maf9b3107cb"),
+          t("mf327aef1a9"),
         ],
         [
-          "07 / 可核验的过程",
-          "每次决定都有回执，相同请求重试不会重复成交。开赛前承诺价格路径和模拟新闻，赛后公开种子、路径及完整新闻供核验。组织者可以导出完整决策与结算记录。长时间调度中断会触发暂停，保留资产和轮次，由组织者恢复。",
+          t("me8cf1e93f2"),
+          t("me31b4a34b1"),
         ],
       ].map(([h, p]) => (
         <div key={h}>
@@ -202,6 +184,7 @@ export function Admin({
   action: Act;
   changed: (newId?: string, current?: () => boolean) => Promise<void>;
 }) {
+  useLocale();
   const [token, setToken] = useState(""),
     [name, setName] = useState(""),
     [slug, setSlug] = useState(""),
@@ -209,10 +192,10 @@ export function Admin({
     [capacity, setCapacity] = useState(50),
     [makerCashShare, setMakerCashShare] = useState(0.2),
     [instruments, setInstruments] = useState<InstrumentConfig[]>(
-      DEFAULT_INSTRUMENTS.map((i) => ({ ...i })),
+      DEFAULT_INSTRUMENTS.map((i) => ({ ...i, name: displayName(i.name) })),
     ),
     [initialBalances, setInitialBalances] = useState<InitialBalances>(
-      startingBalances({} as Snapshot["config"]),
+      startingBalances({ instruments: DEFAULT_INSTRUMENTS } as Snapshot["config"]),
     ),
     [count, setCount] = useState(10),
     [codes, setCodes] = useState<string[]>([]),
@@ -248,20 +231,14 @@ export function Admin({
   return (
     <>
       <section className="panel padding">
-        <label className="field">
-          组织者管理凭证
-          <input
+        <label className="field">{rich("m12fbf3c530", [<input
             type="password"
             autoComplete="off"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            placeholder="仅组织者持有，不保存到浏览器存储"
-          />
-        </label>
-        <p className="hint">
-          与参赛 Agent 的 API Key
-          不同。所有操作在服务端校验；仅输入凭证不会触发操作。
-        </p>
+            placeholder={t("md92993521d")}
+          />])}</label>
+        <p className="hint">{rich("m4741d25b25")}</p>
       </section>
       <AdminDashboard
         token={token}
@@ -271,13 +248,13 @@ export function Admin({
         lock={() => setToken("")}
       />
       <div className="admin-section-title" id="admin-management">
-        <h2>赛事操作</h2>
-        <p className="hint">先选择目标赛事。开始比赛和重置凭证前会再次确认。</p>
+        <h2>{rich("m5ac5a8e510")}</h2>
+        <p className="hint">{rich("m8357491e2b")}</p>
       </div>
       <div className="grid">
         <section className="panel">
           <div className="paneltitle">
-            <h2>创建多标的比赛</h2>
+            <h2>{rich("m59c9f32baf")}</h2>
           </div>
           <form
             className="padding stack"
@@ -301,45 +278,34 @@ export function Admin({
               }, "credential");
             }}
           >
-            <label className="field">
-              比赛名称
-              <input
+            <label className="field">{rich("m9dea12fa93", [<input
                 required
                 minLength={2}
                 maxLength={80}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-              />
-            </label>
-            <label className="field">
-              比赛编号
-              <input
+              />])}</label>
+            <label className="field">{rich("m8fd0c0c078", [<input
                 required
                 pattern="[a-z0-9][a-z0-9-]{2,39}"
                 value={slug}
                 onChange={(e) => setSlug(e.target.value)}
-                placeholder="例如 duke-fall-01"
-              />
-            </label>
-            <label className="field">
-              参赛名额
-              <input
+                placeholder={t("ma0a96eecd4")}
+              />])}</label>
+            <label className="field">{rich("m4fbbcde919", [<input
                 type="number"
                 min={2}
                 max={100}
                 value={capacity}
                 onChange={(e) => setCapacity(Number(e.target.value))}
-              />
-            </label>
+              />])}</label>
             <InstrumentFields value={instruments} change={setInstruments} />
             <InitialBalanceFields
               instruments={instruments}
               value={initialBalances}
               change={setInitialBalances}
             />
-            <label className="field">
-              庄家初始现金占比
-              <select
+            <label className="field">{rich("m48cc27fb59", [<select
                 value={makerCashShare}
                 onChange={(e) => setMakerCashShare(Number(e.target.value))}
               >
@@ -348,35 +314,26 @@ export function Admin({
                     {(p * 100).toFixed(0)}%
                   </option>
                 ))}
-              </select>
-            </label>
-            <p className="hint">
-              启用随机模拟新闻和 1 名固定庄家。其他 Agent
-              资产不变；庄家现金按所选比例额外配置，库存同比例配置。开赛后比例固定。
-            </p>
-            <label className="row hint">
-              <input
+              </select>])}</label>
+            <p className="hint">{rich("m06a4831e5e")}</p>
+            <label className="row hint">{rich("m8f6a46ecb1", [<input
                 type="checkbox"
                 checked={practice}
                 onChange={(e) => setPractice(e.target.checked)}
-              />
-              练习赛（开放注册；不用于发奖）
-            </label>
-            <span className="hint">30 轮 × 60 秒 · 正式赛须邀请码</span>
-            <button className="primary" disabled={busy || !token}>
-              创建比赛
-            </button>
+              />])}</label>
+            <span className="hint">{rich("mf66e5d2ead")}</span>
+            <button className="primary" disabled={busy || !token}>{rich("m392db785de")}</button>
           </form>
         </section>
         <section className="panel">
           <div className="paneltitle">
-            <h2>管理当前比赛</h2>
+            <h2>{rich("ma8798c778a")}</h2>
             <span className="badge">
-              {s ? statusName[s.status] : "尚未选择"}
+              {s ? statusName[s.status] : t("mc5768ca972")}
             </span>
           </div>
           <div className="padding stack">
-            <strong>{s?.config.name || "选择一场比赛"}</strong>
+            <strong>{s?.config.name || t("md7ca35df16")}</strong>
             {s && (
               <InstrumentsEditor
                 s={s}
@@ -432,7 +389,7 @@ export function Admin({
                     if (
                       v === "start" &&
                       !confirm(
-                        "开始后关闭注册并立即进入第 1 轮，确认参赛 Agent 已就绪？",
+                        t("m1d7ed6fb69"),
                       )
                     )
                       return;
@@ -444,9 +401,9 @@ export function Admin({
                 >
                   {
                     {
-                      start: "开始比赛",
-                      pause: "暂停计时",
-                      resume: "恢复比赛",
+                      start: t("m4453aaf22b"),
+                      pause: t("m971f2f4487"),
+                      resume: t("mc2a1969691"),
                     }[v]
                   }
                 </button>
@@ -464,20 +421,15 @@ export function Admin({
                   if (current()) download(`${id}-audit.json`, data);
                 })
               }
-            >
-              导出审计记录
-            </button>
+            >{rich("m95fb743d26")}</button>
             <hr />
-            <label className="field">
-              生成邀请码数量
-              <input
+            <label className="field">{rich("m813565f7cd", [<input
                 type="number"
                 min={1}
                 max={100}
                 value={count}
                 onChange={(e) => setCount(Number(e.target.value))}
-              />
-            </label>
+              />])}</label>
             <button
               className="secondary"
               disabled={busy || !token || s?.status !== "lobby"}
@@ -491,14 +443,10 @@ export function Admin({
                   if (current()) setCodes(data.codes);
                 })
               }
-            >
-              生成单次邀请码
-            </button>
+            >{rich("m0e0d3c019a")}</button>
             {codes.length > 0 && (
               <>
-                <div className="notice">
-                  立即保存并分别发送给参与者。原始码只返回一次。
-                </div>
+                <div className="notice">{rich("m82f99d736a")}</div>
                 <pre>{codes.join("\n")}</pre>
                 <CopyButton text={codes.join("\n")} />
               </>
@@ -507,31 +455,26 @@ export function Admin({
         </section>
       </div>
       <details className="panel padding">
-        <summary>重置 Agent 凭证</summary>
+        <summary>{rich("m617360819f")}</summary>
         <div className="stack">
-          <p className="hint">
-            仅用于丢失或泄露。旧凭证立即失效，请安全交付新凭证。
-          </p>
-          <label className="field">
-            选择 Agent
-            <select
-              aria-label="选择 Agent"
+          <p className="hint">{rich("m978bd7b5a6")}</p>
+          <label className="field">{rich("mfe56f69842", [<select
+              aria-label={t("m76837845cc")}
               value={rotateId}
               onChange={(e) => setRotateId(e.target.value)}
             >
-              <option value="">请选择</option>
+              <option value="">{rich("mda590a8fe3")}</option>
               {s?.leaderboard.map((a) => (
                 <option value={a.id} key={a.id}>
                   {a.name}
                 </option>
               ))}
-            </select>
-          </label>
+            </select>])}</label>
           <button
             className="secondary danger"
             disabled={busy || !token || !rotateId}
             onClick={() => {
-              if (confirm("确认重置凭证？旧连接会失效。"))
+              if (confirm(t("mb001381d8b")))
                 action(async (current) => {
                   const data = await api(
                     `/api/admin/markets/${id}/rotate`,
@@ -541,9 +484,7 @@ export function Admin({
                   if (current()) setNewKey(data.apiKey);
                 });
             }}
-          >
-            重置凭证
-          </button>
+          >{rich("m97d7b31286")}</button>
           {newKey && (
             <div className="keybox">
               {newKey}
@@ -569,12 +510,11 @@ function InitialBalanceFields({
   legacy?: boolean;
   disabled?: boolean;
 }) {
+  useLocale();
   return (
     <fieldset className="initial-balances-fields" disabled={disabled}>
-      <legend>每位普通 Agent 初始资产</legend>
-      <label className="field">
-        初始现金（DUSD）
-        <input
+      <legend>{rich("m715061b8e0")}</legend>
+      <label className="field">{rich("m191812ef9f", [<input
           required
           type="number"
           min={0}
@@ -584,13 +524,10 @@ function InitialBalanceFields({
           onChange={(e) =>
             change({ ...value, cash: Math.round(Number(e.target.value) * 100) })
           }
-        />
-      </label>
+        />])}</label>
       {(legacy ? [{ symbol: "DAT", name: "DAT" }] : instruments).map(
         ({ symbol, name }) => (
-          <label className="field" key={symbol}>
-            {name} 初始数量（份）
-            <input
+          <label className="field" key={symbol}>{rich("me527fc57c5", [displayName(name), <input
               required
               type="number"
               min={0}
@@ -600,8 +537,7 @@ function InitialBalanceFields({
               onChange={(e) =>
                 change({ ...value, [symbol]: Number(e.target.value) })
               }
-            />
-          </label>
+            />])}</label>
         ),
       )}
     </fieldset>
@@ -616,6 +552,7 @@ function InitialBalancesEditor({
   busy: boolean;
   save: (balances: InitialBalances, applied: () => void) => Promise<void>;
 }) {
+  useLocale();
   const actual = s.initialBalances ?? startingBalances(s.config);
   const [value, setValue] = useState(actual),
     [saved, setSaved] = useState(false);
@@ -626,14 +563,14 @@ function InitialBalancesEditor({
   return (
     <form
       className="stack initial-balances-editor"
-      aria-label="批量调整初始资产"
+      aria-label={t("md0f3d0ded5")}
       onSubmit={async (e) => {
         e.preventDefault();
         setSaved(false);
         await save(value, () => setSaved(true));
       }}
     >
-      <h3>开赛前调试初始资产</h3>
+      <h3>{rich("m01a4b5c51c")}</h3>
       <InitialBalanceFields
         value={value}
         change={(v) => {
@@ -644,25 +581,18 @@ function InitialBalancesEditor({
         legacy={s.orderBookMode === "sealed"}
         disabled={locked || busy}
       />
-      <p className="hint">
-        统一应用到本场所有普通 Agent，包括已注册与后续加入者。
-        {locked
-          ? "本场已经开始，初始配置已锁定。"
-          : "保存会重新配置已注册 Agent 的初始现金和持仓。"}
-      </p>
+      <p className="hint">{rich("m542b05c93b", [locked
+          ? t("me606c6eea4")
+          : t("m4ece98f84d")])}</p>
       <CapitalPreview
         instruments={s.instruments}
         balances={value}
         count={s.participantCount}
         share={s.config.makerCashShare ?? 0}
       />
-      <button className="secondary" disabled={locked || busy}>
-        应用到所有 Agent
-      </button>
+      <button className="secondary" disabled={locked || busy}>{rich("md23e0e863a")}</button>
       {saved && (
-        <span role="status" className="hint">
-          初始资产已应用到所有 Agent。
-        </span>
+        <span role="status" className="hint">{rich("mca67cdb105")}</span>
       )}
     </form>
   );

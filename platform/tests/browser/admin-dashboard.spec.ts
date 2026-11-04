@@ -66,7 +66,7 @@ test("organizer dashboard manages a real match, protects credentials and locks c
     headers: { Authorization: `Bearer ${keys[0]}` },
     data: {
       round: 1,
-    symbol: "OPENAI",
+    symbol: "BFBT",
       side: "PASS",
       price: 0,
       quantity: 0,
@@ -176,22 +176,22 @@ test('organizer configures creation balances and updates all registered agents b
   await create.getByLabel('比赛名称',{exact:true}).fill('初始资产调试测试');
   await create.getByLabel('比赛编号',{exact:true}).fill(id);
   await create.getByLabel('初始现金（DUSD）',{exact:true}).fill('1234.56');
-  await create.getByLabel('OpenAI 初始数量（份）',{exact:true}).fill('25');
-  await create.getByLabel('Anthropic 初始数量（份）',{exact:true}).fill('250');
+  await create.getByLabel('Luma ETF（模拟） 初始数量（份）',{exact:true}).fill('25');
+  await create.getByLabel('Vela ETF（模拟） 初始数量（份）',{exact:true}).fill('250');
   await create.getByLabel('练习赛',{exact:false}).check();
   await create.getByRole('button',{name:'创建比赛',exact:true}).click();
   await expect(page.getByLabel('当前比赛')).toHaveValue(id);
   const a=await (await request.post(`${backend}/api/markets/${id}/join`,{data:{name:'Initial UI agent'}})).json();
-  expect(a.account.cash).toBe(123456);expect(a.account.holdings).toEqual({OPENAI:25,ANTHROPIC:250});
+  expect(a.account.cash).toBe(123456);expect(a.account.holdings).toEqual({BFBT:25,EFET:250});
   const editor=page.getByRole('form',{name:'批量调整初始资产'});
   await editor.getByLabel('初始现金（DUSD）',{exact:true}).fill('2000.01');
-  await editor.getByLabel('OpenAI 初始数量（份）',{exact:true}).fill('50');
-  await editor.getByLabel('Anthropic 初始数量（份）',{exact:true}).fill('0');
+  await editor.getByLabel('Luma ETF（模拟） 初始数量（份）',{exact:true}).fill('50');
+  await editor.getByLabel('Vela ETF（模拟） 初始数量（份）',{exact:true}).fill('0');
   await editor.getByRole('button',{name:'应用到所有 Agent',exact:true}).click();
   await expect(editor.getByRole('status')).toHaveText('初始资产已应用到所有 Agent。');
   await editor.screenshot({path:`reports/initial-balances-debug-${info.project.name}.png`});
   const account=await (await request.get(`${backend}/api/markets/${id}/account`,{headers:{Authorization:`Bearer ${a.apiKey}`}})).json();
-  expect(account.cash).toBe(200001);expect(account.holdings).toEqual({OPENAI:50,ANTHROPIC:0});
+  expect(account.cash).toBe(200001);expect(account.holdings).toEqual({BFBT:50,EFET:0});
   await request.post(`${backend}/api/admin/markets/${id}/start`,{headers:{Authorization:`Bearer ${admin}`},data:{}});
   await expect(editor.getByRole('button',{name:'应用到所有 Agent',exact:true})).toBeDisabled({timeout:10000});
   await expect(editor.getByLabel('初始现金（DUSD）',{exact:true})).toBeDisabled();

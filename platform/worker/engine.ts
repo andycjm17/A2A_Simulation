@@ -29,13 +29,18 @@ export type InstrumentConfig = {
   icon: string;
 };
 export const DEFAULT_INSTRUMENTS: InstrumentConfig[] = [
+  { symbol: "BFBT", name: "Luma ETF（模拟）", initialPrice: 10000, icon: "₿" },
+  { symbol: "EFET", name: "Vela ETF（模拟）", initialPrice: 10000, icon: "Ξ" },
+];
+// Stored early multi-asset matches omitted instruments. Keep their original identity.
+export const HISTORICAL_AI_INSTRUMENTS: InstrumentConfig[] = [
   { symbol: "OPENAI", name: "OpenAI", initialPrice: 10000, icon: "◉" },
   { symbol: "ANTHROPIC", name: "Anthropic", initialPrice: 10000, icon: "✳" },
 ];
 export const instrumentConfigs = (config: MarketConfig): InstrumentConfig[] =>
   config.assetMode === "legacy"
     ? [{ symbol: "DAT", name: "DAT", initialPrice: 10000, icon: "◈" }]
-    : (config.instruments ?? DEFAULT_INSTRUMENTS);
+    : (config.instruments ?? HISTORICAL_AI_INSTRUMENTS);
 export function validIcon(icon: string) {
   if (!icon.startsWith("https://"))
     return (
@@ -373,6 +378,9 @@ export async function createState(
           "服务可靠性承压",
         ];
     for (const symbol of Object.keys(assets)) {
+      const cryptoTheme = config.instruments?.some(i => i.symbol === symbol && ['BFBT', 'EFET'].includes(symbol));
+      const positiveHeadlines = cryptoTheme ? ['模拟 ETF 净申购增加', '模拟市场流动性改善', '模拟链上活跃度上升', '模拟托管成本下降'] : positive;
+      const negativeHeadlines = cryptoTheme ? ['模拟 ETF 净赎回增加', '模拟市场流动性收紧', '模拟链上拥堵加剧', '模拟托管成本上升'] : negative;
       const values = [assets[symbol].path[0]];
       for (let round = 2; round <= config.rounds; round++) {
         const digest = await sha256(`${seed}:news:${symbol}:${round}`);
@@ -396,7 +404,7 @@ export async function createState(
             impactBps,
             before,
             after,
-            headline: `${assetName(symbol, config)}：${(impactBps > 0 ? positive : negative)[draw(24) % 4]}`,
+            headline: `${assetName(symbol, config)}：${(impactBps > 0 ? positiveHeadlines : negativeHeadlines)[draw(24) % 4]}`,
           });
         }
         values.push(after);

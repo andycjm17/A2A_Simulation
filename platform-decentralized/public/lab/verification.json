@@ -1,0 +1,259 @@
+{
+  "environment": "local-evm",
+  "chainId": 31337,
+  "acceleratedTime": true,
+  "publicTestnetDeployed": false,
+  "checkedAt": "2026-10-30T17:04:00.965Z",
+  "checks": [
+    {
+      "name": "拒绝提前结算",
+      "passed": true
+    },
+    {
+      "name": "拒绝提前下单",
+      "passed": true
+    },
+    {
+      "name": "拒绝被篡改的签名订单",
+      "passed": true
+    },
+    {
+      "name": "拒绝跨链重放",
+      "passed": true
+    },
+    {
+      "name": "拒绝跨合约重放",
+      "passed": true
+    },
+    {
+      "name": "拒绝未报名地址",
+      "passed": true
+    },
+    {
+      "name": "拒绝超限数量",
+      "passed": true
+    },
+    {
+      "name": "拒绝带价格的 PASS",
+      "passed": true
+    },
+    {
+      "name": "拒绝旧授权 epoch",
+      "passed": true
+    },
+    {
+      "name": "接受限定比赛的会话密钥签名",
+      "passed": true
+    },
+    {
+      "name": "撤销会话密钥后拒绝下单",
+      "passed": true
+    },
+    {
+      "name": "拒绝会话授权重放",
+      "passed": true
+    },
+    {
+      "name": "链上 MCP 使用官方客户端读取合约",
+      "passed": true
+    },
+    {
+      "name": "主 HTTP 中继关闭后不可用",
+      "passed": true
+    },
+    {
+      "name": "相同签名订单重试不重复入账",
+      "passed": true
+    },
+    {
+      "name": "拒绝 nonce 冲突",
+      "passed": true
+    },
+    {
+      "name": "同轮同资产只能提交一次",
+      "passed": true
+    },
+    {
+      "name": "拒绝截止后的新订单",
+      "passed": true
+    },
+    {
+      "name": "备用客户端直接提交并完成剩余全部轮次",
+      "passed": true
+    },
+    {
+      "name": "30 轮成交及余额与独立算法逐轮一致",
+      "passed": true
+    },
+    {
+      "name": "最终持仓兑付及现金排名可复算",
+      "passed": true
+    },
+    {
+      "name": "现金与固定兑付守恒",
+      "passed": true
+    },
+    {
+      "name": "拒绝重复最终结算",
+      "passed": true
+    },
+    {
+      "name": "合约无管理员改账入口",
+      "passed": true
+    },
+    {
+      "name": "多标的共享现金不能重复花费",
+      "passed": true
+    },
+    {
+      "name": "拒绝卖出不存在的持仓",
+      "passed": true
+    },
+    {
+      "name": "未成交订单过期并释放现金",
+      "passed": true
+    },
+    {
+      "name": "拒绝超过每轮 128 张订单的配置",
+      "passed": true
+    },
+    {
+      "name": "64 个账户 128 张订单单轮结算",
+      "passed": true
+    },
+    {
+      "name": "第三方可提交签名审计锚点",
+      "passed": true
+    },
+    {
+      "name": "拒绝锚点覆盖",
+      "passed": true
+    },
+    {
+      "name": "拒绝伪造锚点",
+      "passed": true
+    }
+  ],
+  "simulation": {
+    "agents": 10,
+    "rounds": 30,
+    "assets": 2,
+    "orders": 600,
+    "trades": 152,
+    "policies": [
+      "deterministic-parameterized-agent-0",
+      "deterministic-parameterized-agent-1",
+      "deterministic-parameterized-agent-2",
+      "deterministic-parameterized-agent-3",
+      "deterministic-parameterized-agent-4",
+      "deterministic-parameterized-agent-5",
+      "deterministic-parameterized-agent-6",
+      "deterministic-parameterized-agent-7",
+      "deterministic-parameterized-agent-8",
+      "deterministic-parameterized-agent-9"
+    ],
+    "leaderboard": [
+      {
+        "address": "0xCA6A1bFE6D84658d05101F6aB346A33591786C2D",
+        "cash": 3001135,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 1
+      },
+      {
+        "address": "0x449eE29F51db10954Be43134d1557AEFb0DAC12E",
+        "cash": 3000713,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 2
+      },
+      {
+        "address": "0xca9D188eC843Ed277CA7D25882b22702a9e62748",
+        "cash": 3000656,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 3
+      },
+      {
+        "address": "0xE0d4D0340E1051cA9976F9568EE4f5afb1264800",
+        "cash": 3000403,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 4
+      },
+      {
+        "address": "0x85bCD999BA36f735b5AaACc115e7c6435e5A998b",
+        "cash": 3000374,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 5
+      },
+      {
+        "address": "0x0161dfD77c93ec2daFd2a563C5d23b8b2C350a12",
+        "cash": 3000125,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 6
+      },
+      {
+        "address": "0x6cC0EbAa2eEB871189B7dF2606c1D61ea013e8E8",
+        "cash": 3000064,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 7
+      },
+      {
+        "address": "0x57c22932947076843667DFCE4F95Ffa287e7dEc0",
+        "cash": 2999974,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 8
+      },
+      {
+        "address": "0x5d6688AF4b13032Dbc410f1d5E6eab9F360f3b4C",
+        "cash": 2998844,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 9
+      },
+      {
+        "address": "0xbC074BAd2289a4E25e9265e517649E8bE4b0a7b7",
+        "cash": 2997712,
+        "holdings": [
+          0,
+          0
+        ],
+        "rank": 10
+      }
+    ]
+  },
+  "gas": {
+    "settleMin": 643716,
+    "settleMax": 1070557,
+    "capacity64Orders128": 12222543
+  },
+  "elapsedSeconds": 45.345,
+  "limitations": [
+    "Fixed redemption; no simulated news or system maker in contract profile.",
+    "Local EVM results are not public-network throughput measurements.",
+    "Contract accepts up to 64 participants and 8 assets; tested load is 64 participants and 2 assets."
+  ]
+}

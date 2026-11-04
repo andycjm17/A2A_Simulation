@@ -15,3 +15,7 @@ output/
 reports/
 test-results/
 playwright-report/
+
+# Local contract build output and participant signing configurations
+artifacts/
+*.private.json

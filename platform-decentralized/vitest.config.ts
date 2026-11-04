@@ -1,0 +1,13 @@
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+  test: {
+    include: [
+      "tests/engine.test.ts",
+      "tests/multi-asset.test.ts",
+      "tests/news-maker.test.ts",
+      "tests/configurable-assets.test.ts",
+    ],
+    reporters: ["default", "json"],
+    outputFile: { json: "reports/unit.json" },
+  },
+});

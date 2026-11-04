@@ -1,3 +1,4 @@
+import { t, rich, useLocale, localizedLabels, localeTag, message, displayName, displayMarketName } from "./i18n";
 import { useEffect, useRef, useState } from "react";
 import {
   Activity,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 import { api, statusName } from "./App";
 import type { AdminStatus, DashboardPage } from "../worker/admin-status";
-const events: Record<string, string> = {
+const events: Record<string, string> = localizedLabels({
   created: "创建比赛",
   joined: "Agent 注册",
   agent_joined: "Agent 注册",
@@ -18,7 +19,7 @@ const events: Record<string, string> = {
   resumed: "比赛恢复",
   round_settled: "轮次结算",
   redeemed: "终值兑换",
-};
+});
 export function AdminDashboard({
   token,
   id,
@@ -32,6 +33,7 @@ export function AdminDashboard({
   select: (id: string) => Promise<void>;
   lock: () => void;
 }) {
+  useLocale();
   const [enabled, setEnabled] = useState(false),
     [page, setPage] = useState<DashboardPage | null>(null),
     [detail, setDetail] = useState<AdminStatus | null>(null),
@@ -106,7 +108,7 @@ export function AdminDashboard({
       <div className="admin-session row between">
         <div className="row">
           <ShieldCheck size={19} />
-          <span>{page ? "管理员已验证" : "验证凭证后加载后台数据"}</span>
+          <span>{page ? t("md0cb2c79bc") : t("mc166de5220")}</span>
         </div>
         <div className="row">
           {enabled ? (
@@ -117,7 +119,7 @@ export function AdminDashboard({
                 onClick={() => setTick((n) => n + 1)}
               >
                 <RefreshCw size={15} />
-                {loading ? "正在更新" : "刷新数据"}
+                {loading ? t("m2336147a7f") : t("m0468ee76ee")}
               </button>
               <button
                 className="textbutton"
@@ -127,72 +129,60 @@ export function AdminDashboard({
                   setDetail(null);
                   lock();
                 }}
-              >
-                <LockKeyhole size={15} />
-                锁定后台
-              </button>
+              >{rich("m9fa3d8d528", [<LockKeyhole size={15} />])}</button>
             </>
           ) : (
             <button
               className="primary"
               disabled={!token}
               onClick={() => setEnabled(true)}
-            >
-              进入管理后台
-            </button>
+            >{rich("mbde5e6fb16")}</button>
           )}
         </div>
       </div>
       {error && (
-        <div role="alert" className="notice error">
-          {error}。请检查凭证或刷新重试。
-        </div>
+        <div role="alert" className="notice error">{rich("m2a186148b5", [message(error)])}</div>
       )}
       {!page && (
         <section className="admin-locked panel padding">
           <LockKeyhole size={25} />
           <div>
-            <h2>{loading ? "正在读取赛事账本…" : "赛事运行，一处掌握"}</h2>
-            <p className="hint">
-              验证后查看赛事总览、决策参与情况、结算状态和运行事件。管理凭证只保留在当前页面内存。
-            </p>
+            <h2>{loading ? t("m81b8821774") : t("m7c89ce963c")}</h2>
+            <p className="hint">{rich("md9308fb17d")}</p>
           </div>
         </section>
       )}
       {page && (
         <>
           <div className="admin-section-title row between">
-            <h2>赛事总览</h2>
-            <span className="hint">
-              本页统计 · 每 15 秒更新 ·{" "}
-              {new Date(page.serverTime).toLocaleTimeString("zh-CN")}
-            </span>
+            <h2>{rich("md8429aafda")}</h2>
+            <span className="hint">{rich("mb2f1b27595", [new Date(page.serverTime).toLocaleTimeString(localeTag())])}</span>
           </div>
           <div className="admin-kpis">
             {[
               [
                 Activity,
-                "进行中的比赛",
+                t("m74b37be9ed"),
                 rows.filter((m) => m.status === "running").length,
-                "当前页",
+                t("mc71a069dc5"),
               ],
               [
                 Users,
-                "参赛席位",
+                t("m85b636dce3"),
                 rows.reduce((n, m) => n + m.participants, 0),
-                "跨场注册分别计数",
+                t("mae12fe63ae"),
               ],
               [
                 ArrowLeftRight,
-                "累计成交",
+                t("m31369dffb9"),
                 rows.reduce((n, m) => n + m.trades, 0),
-                "撮合成功笔数",
+                t("m9a8c2de300"),
               ],
               [
                 ShieldCheck,
-                "需处理异常",
+                t("mb194df33e0"),
                 issues.length + page.failures.length,
-                "调度 / 守恒 / 成交复核 / 读取异常",
+                t("m7afdfcb3fa"),
               ],
             ].map(([Icon, label, value, caption]) => {
               const I = Icon as typeof Activity;
@@ -212,50 +202,47 @@ export function AdminDashboard({
             <div className="notice" role="status">
               {issues.map((m) => (
                 <p key={m.id}>
-                  {m.name}：
+                  {displayMarketName(m.name)}{localeTag()==='en-US'?': ':'：'}
                   {!m.conserved
-                    ? "资产守恒校验异常，请暂停并导出审计。"
+                    ? t("mdd0157e4f6")
                     : m.pauseReason === "scheduler_delay"
-                      ? "调度延迟保护暂停，请检查后恢复。"
-                      : "发现成交复核信号，请在发奖前核查。"}
+                      ? t("m85380d5d6e")
+                      : t("mbcc2a20bb6")}
                 </p>
               ))}
               {page.failures.map((m) => (
-                <p key={m.id}>{m.name}：读取失败，本页汇总不包含此场比赛。</p>
+                <p key={m.id}>{rich("m9c39667958", [m.name])}</p>
               ))}
             </div>
           )}
           <section className="panel admin-market-list">
             <div className="paneltitle">
-              <h2>比赛列表</h2>
-              <label className="row hint">
-                状态
-                <select
+              <h2>{rich("m6641c5b3e7")}</h2>
+              <label className="row hint">{rich("m1bd0855b9a", [<select
                   className="select"
-                  aria-label="筛选赛事状态"
+                  aria-label={t("m293fbf6a30")}
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                 >
-                  <option value="all">全部</option>
+                  <option value="all">{rich("m5c55a67935")}</option>
                   {Object.entries(statusName).map(([v, n]) => (
                     <option key={v} value={v}>
                       {n}
                     </option>
                   ))}
-                </select>
-              </label>
+                </select>])}</label>
             </div>
             <div className="tablewrap">
               <table>
                 <thead>
                   <tr>
-                    <th>比赛</th>
-                    <th>状态</th>
-                    <th>轮次</th>
-                    <th>参赛席位</th>
-                    <th>本轮决定</th>
-                    <th>成交笔数</th>
-                    <th>管理</th>
+                    <th>{rich("m7595b4b87e")}</th>
+                    <th>{rich("m6320b4a872")}</th>
+                    <th>{rich("m4890584bb5")}</th>
+                    <th>{rich("m85b636dce3")}</th>
+                    <th>{rich("m5337e2b6db")}</th>
+                    <th>{rich("m29889f8cc9")}</th>
+                    <th>{rich("mbb6d995724")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -265,9 +252,9 @@ export function AdminDashboard({
                       className={id === m.id ? "admin-selected" : ""}
                     >
                       <td>
-                        <strong>{m.name}</strong>
+                        <strong>{displayMarketName(m.name)}</strong>
                         <small className="admin-row-id">
-                          {m.id} · {m.practice ? "练习赛" : "正式赛"}
+                          {m.id} · {m.practice ? t("maec9fca791") : t("md1cf34ca68")}
                         </small>
                       </td>
                       <td>
@@ -293,43 +280,32 @@ export function AdminDashboard({
                               setError((e as Error).message),
                             )
                           }
-                          aria-label={`管理 ${m.name}`}
-                        >
-                          查看赛事 ↗
-                        </button>
+                          aria-label={t("m443cb3b17b", [m.name])}
+                        >{rich("mf26f11ae4f")}</button>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
               {!shown.length && (
-                <div className="empty">本页没有符合条件的比赛。</div>
+                <div className="empty">{rich("mb73df6fbc6")}</div>
               )}
             </div>
             <div className="admin-pagination row between">
-              <span className="hint">
-                最近 {page.catalogCount} 场中的第{" "}
-                {page.catalogCount
+              <span className="hint">{rich("mca00a4c911", [page.catalogCount, page.catalogCount
                   ? Math.min(offset + 1, page.catalogCount)
-                  : 0}
-                –{Math.min(offset + 20, page.catalogCount)} 场（目录最多展示最近
-                100 场索引）
-              </span>
+                  : 0, Math.min(offset + 20, page.catalogCount)])}</span>
               <div className="row">
                 <button
                   className="secondary"
                   disabled={!offset || loading}
                   onClick={() => setOffset((n) => Math.max(0, n - 20))}
-                >
-                  上一页
-                </button>
+                >{rich("mec97570fa9")}</button>
                 <button
                   className="secondary"
                   disabled={page.nextOffset === null || loading}
                   onClick={() => setOffset(page.nextOffset!)}
-                >
-                  下一页
-                </button>
+                >{rich("m66a455c41f")}</button>
               </div>
             </div>
           </section>
@@ -340,62 +316,58 @@ export function AdminDashboard({
                   <span className="eyebrow">SELECTED COMPETITION</span>
                   <h2>{detail.name}</h2>
                 </div>
-                <a className="secondary admin-anchor" href="#admin-management">
-                  赛事操作 ↓
-                </a>
+                <a className="secondary admin-anchor" href="#admin-management">{rich("m9308ca8ef1")}</a>
               </div>
               <div className="admin-detail-grid">
                 <section className="panel padding">
                   <div className="row between">
-                    <h2>结算进度</h2>
+                    <h2>{rich("mdd5caa6040")}</h2>
                     <span className="badge">{statusName[detail.status]}</span>
                   </div>
                   <div className="admin-progress-number">
                     {detail.completedRounds}
-                    <small> / {detail.rounds} 轮已结算</small>
+                    <small>{rich("m2039dfcf33", [detail.rounds])}</small>
                   </div>
                   <progress
                     max={detail.rounds}
                     value={detail.completedRounds}
-                    aria-label="已结算轮次"
+                    aria-label={t("mef0c8e2bef")}
                   />
                   <div className="ticket-facts admin-health">
                     <div>
-                      <dt>资产守恒</dt>
+                      <dt>{rich("m9284612832")}</dt>
                       <dd
                         className={detail.conserved ? "positive" : "negative"}
                       >
-                        {detail.conserved ? "校验通过" : "校验异常"}
+                        {detail.conserved ? t("m3051a776ea") : t("mc5bc81e882")}
                       </dd>
                     </div>
                     <div>
-                      <dt>最近结算延迟</dt>
+                      <dt>{rich("m812446b0ac")}</dt>
                       <dd>
                         {detail.settlementDelayMs === null
-                          ? "尚未结算"
+                          ? t("m0ea2010511")
                           : `${detail.settlementDelayMs} ms`}
                       </dd>
                     </div>
                     <div>
-                      <dt>已接受决定</dt>
+                      <dt>{rich("md1866015e7")}</dt>
                       <dd>{detail.decisions}</dd>
                     </div>
                   </div>
-                  <p className="hint">
-                    延迟为实际结算时间减去计划时间，不代表 API 响应延迟。
-                  </p>
+                  <p className="hint">{rich("m079e90e8b5")}</p>
                 </section>
                 <section className="panel">
                   <div className="paneltitle">
-                    <h2>最近运行事件</h2>
-                    <span className="hint">最近 20 条</span>
+                    <h2>{rich("m324375246f")}</h2>
+                    <span className="hint">{rich("m11366cf63b")}</span>
                   </div>
                   <ol className="admin-events">
                     {detail.events.map((e) => (
                       <li key={e.seq}>
                         <span>{events[e.type] || e.type}</span>
                         <time>
-                          {new Date(e.at).toLocaleTimeString("zh-CN")}
+                          {new Date(e.at).toLocaleTimeString(localeTag())}
                         </time>
                       </li>
                     ))}
@@ -404,25 +376,16 @@ export function AdminDashboard({
               </div>
               <section className="panel">
                 <div className="paneltitle">
-                  <h2>交易公平性复核</h2>
+                  <h2>{rich("m9a2ea2a2b5")}</h2>
                   <span className="badge">
                     {detail.integrity.requiresReview
-                      ? "需人工复核"
-                      : "未触发规则"}
+                      ? t("md4dfce3469")
+                      : t("m212880dc21")}
                   </span>
                 </div>
                 <div className="padding stack">
-                  <p className="hint">
-                    已结算成交偏离当轮开盘参考价 ≥25%，或至少 3
-                    人参赛时同一对手组合占 ≥70% 成交且不少于 5
-                    笔，会触发提醒。规则不能认定或排除串谋，不自动扣分。发奖前请核对参赛人、Agent
-                    ID 与完整审计。
-                  </p>
-                  <p>
-                    {detail.integrity.offReferenceTrades} 笔偏价成交 ·{" "}
-                    {detail.integrity.flaggedPairs} 组需复核对手（最多显示 20
-                    组）
-                  </p>
+                  <p className="hint">{rich("mc37c9e7118")}</p>
+                  <p>{rich("m57cf9f3473", [detail.integrity.offReferenceTrades, detail.integrity.flaggedPairs])}</p>
                   {detail.integrity.pairs.map((p) => (
                     <div className="notice" key={p.agentIds.join(":")}>
                       <strong>
@@ -434,12 +397,7 @@ export function AdminDashboard({
                           )
                           .join(" ↔ ")}
                       </strong>
-                      <p>
-                        {p.trades} 笔 / {p.volume} DAT · 偏价{" "}
-                        {p.offReferenceTrades} 笔 · 最大偏离{" "}
-                        {(p.maxDeviationBps / 100).toFixed(2)}%
-                        {p.concentrated ? " · 对手集中" : ""}
-                      </p>
+                      <p>{rich("m305d0d94f1", [p.trades, p.volume, p.offReferenceTrades, (p.maxDeviationBps / 100).toFixed(2), p.concentrated ? t("m4849083826") : ""])}</p>
                       <small className="admin-row-id">
                         {p.agentIds.join(" / ")}
                       </small>
@@ -449,19 +407,17 @@ export function AdminDashboard({
               </section>
               <section className="panel">
                 <div className="paneltitle">
-                  <h2>参与者与决策情况</h2>
-                  <span className="hint">
-                    第 {detail.round} 轮 · 不公开未结算订单方向与价格
-                  </span>
+                  <h2>{rich("m695e5d6288")}</h2>
+                  <span className="hint">{rich("m7cdcf286b6", [detail.round])}</span>
                 </div>
                 <div className="tablewrap admin-participants">
                   <table>
                     <thead>
                       <tr>
                         <th>Agent</th>
-                        <th>能力说明</th>
-                        <th>当前轮决定</th>
-                        <th>累计决定</th>
+                        <th>{rich("m68d67ce74e")}</th>
+                        <th>{rich("m63e8ec97e1")}</th>
+                        <th>{rich("m3d7206102d")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -472,16 +428,16 @@ export function AdminDashboard({
                             <small className="admin-row-id">{a.id}</small>
                           </td>
                           <td className="admin-description">
-                            {a.description || "未填写"}
+                            {a.description || t("m7f05190592")}
                           </td>
                           <td>
                             {detail.round
                               ? a.decided
-                                ? "已提交"
+                                ? t("mbc37a6110a")
                                 : detail.status === "finished"
-                                  ? "未参与"
-                                  : "尚未提交"
-                              : "尚未开赛"}
+                                  ? t("me6e4194d6b")
+                                  : t("m2c49a14f28")
+                              : t("me71c9ff6df")}
                           </td>
                           <td>{a.decisions}</td>
                         </tr>
@@ -489,7 +445,7 @@ export function AdminDashboard({
                     </tbody>
                   </table>
                   {!detail.agents.length && (
-                    <div className="empty">还没有 Agent 注册。</div>
+                    <div className="empty">{rich("m6cba971676")}</div>
                   )}
                 </div>
               </section>

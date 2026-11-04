@@ -1,6 +1,27 @@
 import {test,expect} from '@playwright/test';
 const backend=process.env.TEST_API_URL||'http://127.0.0.1:8787';
 const admin=process.env.ADMIN_TOKEN||'local-test-admin-not-for-production';
+test('crypto ETF defaults are consistent across organizer form, market and account', async ({page,request},info)=>{
+ const id=`crypto-ui-${info.project.name}-${Date.now()}`;
+ await page.goto('/?view=admin');
+ const create=page.locator('section').filter({has:page.getByRole('heading',{name:'创建多标的比赛',exact:true})});
+ await expect(create.getByLabel('标的名称',{exact:true}).nth(0)).toHaveValue('Luma ETF（模拟）');
+ await expect(create.getByLabel('交易代码',{exact:true}).nth(0)).toHaveValue('BFBT');
+ await expect(create.getByLabel('标的名称',{exact:true}).nth(1)).toHaveValue('Vela ETF（模拟）');
+ await expect(create.getByLabel('交易代码',{exact:true}).nth(1)).toHaveValue('EFET');
+ expect((await request.post(`${backend}/api/admin/markets`,{headers:{Authorization:`Bearer ${admin}`},data:{id,name:'Crypto ETF preset test',practice:true}})).status()).toBe(201);
+ const snapshot=await(await request.get(`${backend}/api/markets/${id}`)).json();
+ expect(snapshot.config.instruments.map((i:any)=>i.symbol)).toEqual(['BFBT','EFET']);
+ const joined=await(await request.post(`${backend}/api/markets/${id}/join`,{data:{name:'Crypto preset agent'}})).json();
+ expect(joined.account.holdings).toEqual({BFBT:100,EFET:100});
+ await page.goto(`/?market=${id}`);
+ await expect(page.locator('.instrument-heading')).toContainText('Luma ETF（模拟）');
+ await expect(page.locator('.instrument-heading .asset-icon')).toHaveText('₿');
+ await page.getByRole('button',{name:/Vela ETF/}).click();
+ await expect(page.locator('.instrument-heading')).toContainText('Vela ETF（模拟）');
+ await expect(page.locator('.instrument-heading .asset-icon')).toHaveText('Ξ');
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
+});
 test('organizer creates three instruments then edits names prices icons and supply before start',async({page,request},info)=>{
  const id=`assets-ui-${info.project.name}-${Date.now()}`;
  await page.goto('/?view=admin');await page.getByLabel('组织者管理凭证').fill(admin);

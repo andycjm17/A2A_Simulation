@@ -5,7 +5,11 @@
   "compatibility_date": "2026-09-11",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": false,
-  "routes": [{ "pattern": "a2a.andycui.com", "custom_domain": true }],
+  "routes": [
+    { "pattern": "a2asimulation.com", "custom_domain": true },
+    { "pattern": "www.a2asimulation.com", "custom_domain": true },
+    { "pattern": "a2a.andycui.com", "custom_domain": true }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -20,7 +24,7 @@
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["MarketRoom", "MarketCatalog"] },
   ],
-  "vars": { "APP_ORIGIN": "https://a2a.andycui.com" },
+  "vars": { "APP_ORIGIN": "https://a2asimulation.com" },
   "ratelimits": [
     {
       "name": "IP_LIMITER",

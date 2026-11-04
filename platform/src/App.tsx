@@ -1,3 +1,5 @@
+import { ClubBrand, ModuleGrid } from "./ClubBrand";
+import { t, rich, useLocale, localizedLabels, localeTag, message, displayName, displayMarketName, apiError } from "./i18n";
 import { useState, useEffect } from "react";
 import {
   ArrowUpRight,
@@ -6,7 +8,6 @@ import {
   ChartNoAxesCombined,
   CircleHelp,
   Settings2,
-  Sprout,
   Copy,
   Check,
   Download,
@@ -16,8 +17,9 @@ import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
 import { InstrumentIcon } from "./InstrumentSettings";
-import { assetName, startingBalances } from "../worker/engine";
+import { assetName as rawAssetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
+const assetName=(...args:Parameters<typeof rawAssetName>)=>displayName(rawAssetName(...args));
 export type Snapshot = ReturnType<typeof publicState>;
 export type Account = ReturnType<typeof accountState>;
 export const money = (n: number) =>
@@ -25,12 +27,12 @@ export const money = (n: number) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(n / 100);
-export const statusName = {
+export const statusName = localizedLabels({
   lobby: "等待开始",
   running: "交易进行中",
   paused: "比赛已暂停",
   finished: "已完成结算",
-};
+});
 export async function api(path: string, token = "", data?: unknown) {
   const r = await fetch(path, {
     method: data === undefined ? "GET" : "POST",
@@ -41,7 +43,7 @@ export async function api(path: string, token = "", data?: unknown) {
     body: data === undefined ? undefined : JSON.stringify(data),
   });
   const j: any = await r.json();
-  if (!r.ok) throw new Error(j.error?.message || `请求失败 (${r.status})`);
+  if (!r.ok) throw new Error(apiError(j.error,r.status));
   return j;
 }
 export function download(name: string, data: unknown) {
@@ -55,6 +57,7 @@ export function download(name: string, data: unknown) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 export function CopyButton({ text }: { text: string }) {
+  useLocale();
   const [copied, setCopied] = useState(false),
     [error, setError] = useState(false);
   return (
@@ -73,18 +76,17 @@ export function CopyButton({ text }: { text: string }) {
         }}
       >
         {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-        {copied ? "已复制" : "复制"}
+        {copied ? t("m8f6f8d979c") : t("m63d90d9773")}
       </button>
       {error && (
-        <span role="alert" className="hint">
-          请手动复制，剪贴板权限不可用。
-        </span>
+        <span role="alert" className="hint">{rich("m0f0e54673b")}</span>
       )}
     </>
   );
 }
 export type Act = (fn: () => Promise<void>) => Promise<void>;
 export default function App() {
+  useLocale();
   const [view, setView] = useState(
       new URLSearchParams(location.search).get("view") === "admin"
         ? "admin"
@@ -204,24 +206,16 @@ export default function App() {
     setKey(v);
   };
   const nav = [
-    ["market", "市场总览", ChartNoAxesCombined],
-    ["agent", "我的 Agent", Bot],
-    ["connect", "连接与接口", Braces],
-    ["rules", "比赛规则", CircleHelp],
+    ["market", t("m4ba4ba1f53"), ChartNoAxesCombined],
+    ["agent", t("m037c361523"), Bot],
+    ["connect", t("mec89dad379"), Braces],
+    ["rules", t("m8737071d4f"), CircleHelp],
   ] as const;
   return (
     <div className="app">
       <aside className="appnav">
-        <a className="brand" href="/">
-          <span className="brandmark">
-            <Sprout size={23} />
-          </span>
-          <span>
-            Agent Exchange<small>自主交易 · 共同发现</small>
-          </span>
-        </a>
-        <div className="nav-label">WORKSPACE</div>
-        <nav aria-label="主要导航">
+        <ClubBrand />
+        <nav aria-label={t("m968608e4ff")}>
           {nav.map(([v, label, Icon]) => (
             <button
               key={v}
@@ -235,82 +229,66 @@ export default function App() {
         </nav>
         <div className="sidebar-bottom">
           <span className="tag">SIMULATION</span>
-          <p>
-            测试资产，没有真钱。
-            <br />
-            策略属于每一位参与者。
-          </p>
-          <button className="textbutton" onClick={() => setView("admin")}>
-            <Settings2 size={16} />
-            赛事管理
-          </button>
+          <p>{rich("m2b82a2b409", [<br />])}</p>
+          <button className="textbutton" onClick={() => setView("admin")}>{rich("maa0b6e18d0", [<Settings2 size={16} />])}</button>
         </div>
       </aside>
       <main>
         <header>
-          <span>
-            工作台 <span className="slash">/</span>{" "}
-            {nav.find((n) => n[0] === view)?.[1] || "赛事管理"}
-          </span>
-          <a href="https://andycui.com" target="_blank" rel="noreferrer">
-            andycui.com <ArrowUpRight size={14} />
-          </a>
+          <span>{rich("mf26c47df5c", [<span className="slash">/</span>, nav.find((n) => n[0] === view)?.[1] || t("m1e17af1aee")])}</span>
+          <span className="environment-label">SIMULATED MARKETS</span>
         </header>
         <div className="content">
-          <div className="pageheading">
+          <div className="pageheading brand-hero">
+            <ModuleGrid />
             <div>
-              <div className="eyebrow">AGENT EXCHANGE / SIMULATION</div>
+              <div className="eyebrow">DBC / AGENT ECONOMY</div>
               <h1>
                 {view === "market"
-                  ? "交易市场"
+                  ? t("ma5b69214e4")
                   : view === "agent"
-                    ? "你的 Agent，你的策略。"
+                    ? t("m8d4a63b3c9")
                     : view === "connect"
-                      ? "带上你习惯的工具。"
+                      ? t("mef1e45687a")
                       : view === "admin"
-                        ? "管理控制台"
-                        : "简单的规则，真实的决策。"}
+                        ? t("m8fffc04ec9")
+                        : t("m82b821f3a2")}
               </h1>
               <p>
                 {view === "admin"
-                  ? "查看赛事状态，管理参赛凭证与结算。"
-                  : "平台只负责撮合。Agent 由参与者自行构建和运行。"}
+                  ? t("m672e3e77bf")
+                  : t("mb1b34812f6")}
               </p>
             </div>
             {view !== "admin" && (
               <button className="primary" onClick={() => setView("agent")}>
                 <Bot size={17} />
-                {account ? "查看我的 Agent" : "连接我的 Agent"}
+                {account ? t("m6fddf0abd0") : t("mf6fce42efe")}
               </button>
             )}
           </div>
           {error && (
             <div className="notice error row between" role="alert">
-              <span>{error}</span>
-              <button className="textbutton" onClick={() => setError("")}>
-                关闭
-              </button>
+              <span>{message(error)}</span>
+              <button className="textbutton" onClick={() => setError("")}>{rich("m6b7c3d1ced")}</button>
             </div>
           )}
           <div className="row between marketselect">
-            <label className="row">
-              当前比赛{" "}
-              <select
-                aria-label="当前比赛"
+            <label className="row">{rich("m33e40daa98", [<select
+                aria-label={t("md0a6620e1a")}
                 value={id}
                 onChange={(e) => setId(e.target.value)}
               >
-                <option value="">选择比赛</option>
+                <option value="">{rich("mb2a8ca10ef")}</option>
                 {markets.map((m) => (
                   <option value={m.id} key={m.id}>
-                    {m.name}
-                    {m.practice ? " · 练习" : ""}
+                    {displayMarketName(m.name)}
+                    {m.practice ? t("m929d559db7") : ""}
                   </option>
                 ))}
-              </select>
-            </label>
+              </select>])}</label>
             <span className={`connection ${online ? "positive" : "negative"}`}>
-              {online ? "● 服务已连接 · 每 4 秒刷新" : "○ 连接中或暂时离线"}
+              {online ? t("me876f0d2cd") : t("m1d3caf0584")}
             </span>
           </div>
           {view === "market" &&
@@ -325,18 +303,16 @@ export default function App() {
             ) : (
               <section className="panel empty">
                 <ChartNoAxesCombined size={34} />
-                <h3>下一个市场，由你的 Agent 开始。</h3>
+                <h3>{rich("m608be06300")}</h3>
                 <p>
                   {id
-                    ? "正在读取市场状态…"
-                    : "组织者创建比赛后，在上方选择比赛。"}
+                    ? t("m909138a3b0")
+                    : t("mabbede4879")}
                 </p>
                 <button
                   className="secondary"
                   onClick={() => setView("connect")}
-                >
-                  查看连接方式
-                </button>
+                >{rich("me38460edac")}</button>
               </section>
             ))}
           {view === "agent" && (
@@ -379,10 +355,8 @@ export default function App() {
               }}
             />
           )}
-          <div className="footnote">
-            本平台的标的名称和图标由组织者配置，仅用于模拟，不代表真实股票、股权或报价，也不表示与相应公司存在关联。DUSD
-            为模拟现金，不可充值或提现。
-          </div>
+          <div className="club-footer"><span>DUKE BLOCKCHAIN CLUB</span><span>MODULAR / CONNECTED / FORWARD</span></div>
+          <div className="footnote">{rich("ma29293bb13")}</div>
         </div>
       </main>
     </div>
@@ -399,11 +373,12 @@ function MarketView({
   account: Account | null;
   connect: () => void;
 }) {
+  useLocale();
   const [symbol, setSymbol] = useState(s.instruments[0].symbol);
   const instrument =
     s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
-  if (s.maker) names.set(s.maker.id, s.maker.name);
+  if (s.maker) names.set(s.maker.id, displayName(s.maker.name));
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
     : 0;
@@ -411,27 +386,27 @@ function MarketView({
     <div className="market-workspace">
       <div className="stats market-stats">
         <div>
-          <span>当前轮次</span>
+          <span>{rich("m2ac8d3648a")}</span>
           <strong>
-            {s.round || "—"} <small>/ {s.config.rounds} 轮</small>
+            {s.round || "—"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
           </strong>
         </div>
         <div>
-          <span>最新参考价 / DUSD</span>
+          <span>{rich("mc2dad55147")}</span>
           <strong>
-            {money(instrument.reference)} <small>{instrument.name}</small>
+            {money(instrument.reference)} <small>{displayName(instrument.name)}</small>
           </strong>
         </div>
         <div>
-          <span>参与 Agent</span>
+          <span>{rich("mf374be2755")}</span>
           <strong>
             {s.participantCount} <small>/ {s.config.capacity}</small>
           </strong>
         </div>
         <div>
-          <span>累计成交量</span>
+          <span>{rich("m350516fe1f")}</span>
           <strong>
-            {instrument.volume} <small>份 · {instrument.tradeCount} 笔</small>
+            {instrument.volume} <small>{rich("m1faf3e3c14", [instrument.tradeCount])}</small>
           </strong>
         </div>
       </div>
@@ -442,13 +417,13 @@ function MarketView({
             <div>
               <span className="instrument-symbol">{instrument.symbol}</span>
               <h2>
-                <InstrumentIcon icon={instrument.icon} name={instrument.name} />
-                {instrument.name} <span className="subtle">/ DUSD · 模拟</span>
+                <InstrumentIcon icon={instrument.icon} name={displayName(instrument.name)} />
+                {displayName(instrument.name)} <span className="subtle">{rich("ma4b7cd7768")}</span>
               </h2>
             </div>
             <span className="badge">{statusName[s.status]}</span>
           </div>
-          <div className="instrument-tabs" role="group" aria-label="交易标的">
+          <div className="instrument-tabs" role="group" aria-label={t("m3442ef02d4")}>
             {s.instruments.map((i) => (
               <button
                 key={i.symbol}
@@ -456,11 +431,11 @@ function MarketView({
                 onClick={() => setSymbol(i.symbol)}
               >
                 <span>
-                  <InstrumentIcon icon={i.icon} name={i.name} />
-                  {i.name}
+                  <InstrumentIcon icon={i.icon} name={displayName(i.name)} />
+                  {displayName(i.name)}
                 </span>
                 <small>
-                  {i.lastPrice === null ? "暂无成交" : money(i.lastPrice)}
+                  {i.lastPrice === null ? t("mc1edae7e4a") : money(i.lastPrice)}
                 </small>
               </button>
             ))}
@@ -471,7 +446,7 @@ function MarketView({
                 ? "—"
                 : money(instrument.lastPrice)}
             </span>
-            <small>最新成交 / DUSD</small>
+            <small>{rich("m590070958a")}</small>
           </div>
           <CandlestickChart
             key={instrument.symbol}
@@ -485,86 +460,68 @@ function MarketView({
           />
           <div className="statusbar">
             {s.status === "running"
-              ? `第 ${s.round} 轮 · ${secs ? `距离下单截止 ${secs} 秒` : "已锁单，等待撮合"} · 每轮 ${s.config.roundMs / 1000} 秒`
+              ? t("mbe2bacb0d8", [s.round, secs ? t("med4bda5ca9", [secs]) : t("m0aab9522e2"), s.config.roundMs / 1000])
               : s.status === "finished"
-                ? "全部轮次已结算，各标的已按各自最终参考价兑换。"
+                ? t("m8319551931")
                 : s.status === "paused"
-                  ? `计时暂停，等待组织者恢复${s.pauseReason === "scheduler_delay" ? "（调度延迟保护）" : ""}。`
-                  : "等待组织者开始。开赛后每种标的每轮可提交一个决定。"}
+                  ? t("m191feee058", [s.pauseReason === "scheduler_delay" ? t("mb61c552a20") : ""])
+                  : t("m485c2ef1b9")}
           </div>
         </section>
         <section className="panel agent-ticket">
           <div className="paneltitle">
-            <h2>Agent 账户</h2>
+            <h2>{rich("m0b4d1f2dee")}</h2>
             <Bot size={20} />
           </div>
           <div className="padding stack ticket-body">
             <div>
               <span className="hint">
-                {account ? account.name : "尚未连接 Agent"}
+                {account ? account.name : t("m1c7ce7a7a0")}
               </span>
               <div className="ticket-value">
                 {account ? money(account.cash) : "—"}
-                <small>DUSD 现金余额</small>
+                <small>{rich("m2462a87986")}</small>
               </div>
             </div>
             <dl className="ticket-facts">
               <div>
-                <dt>可用现金</dt>
+                <dt>{rich("mc3ee29d0be")}</dt>
                 <dd>{account ? money(account.availableCash) : "—"}</dd>
               </div>
               {s.instruments.map((i) => (
                 <div key={i.symbol}>
-                  <dt>{i.name} 持仓</dt>
+                  <dt>{rich("m0ca151f9e9", [displayName(i.name)])}</dt>
                   <dd>{account ? account.holdings[i.symbol] : "—"}</dd>
                 </div>
               ))}
               <div>
-                <dt>接入方式</dt>
+                <dt>{rich("m2374e5d33f")}</dt>
                 <dd>MCP / API</dd>
               </div>
             </dl>
             <button className="primary" onClick={connect}>
-              {account ? "查看接入配置" : "配置我的 Agent"}
+              {account ? t("mc371852678") : t("me4907a041c")}
               <ArrowUpRight size={17} />
             </button>
-            <p className="hint ticket-note">
-              交易由你自己的 Agent 发起。平台负责校验、撮合与结算。
-            </p>
+            <p className="hint ticket-note">{rich("mf0ee88cece")}</p>
             <div className="ticket-divider" />
             <div className="row between">
-              <span className="hint">本场比赛</span>
+              <span className="hint">{rich("meeb810be2f")}</span>
               <span className="badge">
-                {s.config.practice ? "练习赛" : "正式赛"}
+                {s.config.practice ? t("maec9fca791") : t("md1cf34ca68")}
               </span>
             </div>
-            <h3>{s.config.name}</h3>
+            <h3>{displayMarketName(s.config.name)}</h3>
             <div className="row between">
-              <span className="hint">运行时长</span>
-              <span>{(s.config.rounds * s.config.roundMs) / 60000} 分钟</span>
+              <span className="hint">{rich("mb1e3a96e54")}</span>
+              <span>{rich("mc65627ead1", [(s.config.rounds * s.config.roundMs) / 60000])}</span>
             </div>
-            <div className="hint">
-              初始资产：
-              {money(
+            <div className="hint">{rich("m4ecd0bd211", [money(
                 (s.initialBalances ?? startingBalances(s.config)).cash,
-              )}{" "}
-              DUSD
-              {s.instruments.map((i) => (
-                <span key={i.symbol}>
-                  {" "}
-                  + {i.name}{" "}
-                  {(s.initialBalances ?? startingBalances(s.config))[i.symbol]}{" "}
-                  份
-                </span>
-              ))}
-              <br />
-              机制：
-              {s.orderBookMode === "sealed" ? "历史密封订单" : "公开五档盘口"}
-              、每轮集中撮合
-            </div>
-            <p className="hint">
-              现金余额决定排名，现金相同共享名次，持仓估值不计分。奖品安排由组织者在活动前公布；练习赛不作为领奖依据。
-            </p>
+              ), s.instruments.map((i) => (
+                <span key={i.symbol}>{rich("m5f24979aa3", [displayName(i.name), (s.initialBalances ?? startingBalances(s.config))[i.symbol]])}</span>
+              )), <br />, s.orderBookMode === "sealed" ? t("m85b8ec6295") : t("m8dac07a2ea")])}</div>
+            <p className="hint">{rich("m3abfee2a0c")}</p>
           </div>
         </section>
       </div>
@@ -573,7 +530,7 @@ function MarketView({
           <h2>
             Leaderboard{" "}
             <span className="subtle">
-              {s.status === "finished" ? "最终现金排名" : "实时现金排名"}
+              {s.status === "finished" ? t("m15dfd53a98") : t("me1626fb3a3")}
             </span>
           </h2>
           <button
@@ -586,27 +543,22 @@ function MarketView({
                 leaderboard: s.leaderboard,
               })
             }
-          >
-            <Download size={15} />
-            导出排名
-          </button>
+          >{rich("m7a8ca94be7", [<Download size={15} />])}</button>
         </div>
         <div className="tablewrap">
-          <table aria-label="现金排行榜">
-            <caption className="ranking-caption">
-              按现金余额排名，包含挂单冻结的现金。持仓估值不计分；现金变化包含股票买卖和最终兑付。
-            </caption>
+          <table aria-label={t("m16d475190e")}>
+            <caption className="ranking-caption">{rich("m7f690056ad")}</caption>
             <thead>
               <tr>
-                <th>排名</th>
+                <th>{rich("m6570a98f28")}</th>
                 <th>Agent</th>
-                <th>现金余额 / DUSD</th>
-                <th>现金变化 / DUSD</th>
+                <th>{rich("m02e4efbce9")}</th>
+                <th>{rich("mf862e1954e")}</th>
                 {s.instruments.map((i) => (
-                  <th key={i.symbol}>{i.name}</th>
+                  <th key={i.symbol}>{displayName(i.name)}</th>
                 ))}
-                <th>决策轮数</th>
-                <th>成交轮数</th>
+                <th>{rich("m55aaa84ea6")}</th>
+                <th>{rich("mfa997f40c7")}</th>
               </tr>
             </thead>
             <tbody>
@@ -632,25 +584,23 @@ function MarketView({
               ))}
             </tbody>
           </table>
-          {!s.participantCount && <div className="empty">尚无参赛 Agent。</div>}
+          {!s.participantCount && <div className="empty">{rich("m8837f79ae0")}</div>}
         </div>
       </section>
       <section className="panel market-table">
         <div className="paneltitle">
-          <h2>
-            最新成交 <span className="subtle">{instrument.name}</span>
-          </h2>
-          <span className="hint">最近 100 笔 · 结算后公开</span>
+          <h2>{rich("m3aa093fc13", [<span className="subtle">{displayName(instrument.name)}</span>])}</h2>
+          <span className="hint">{rich("m4116f5a5f4")}</span>
         </div>
         <div className="tablewrap">
           <table>
             <thead>
               <tr>
-                <th>轮次</th>
-                <th>买方 Agent</th>
-                <th>卖方 Agent</th>
-                <th>价格 / DUSD</th>
-                <th>数量 / 份</th>
+                <th>{rich("m4890584bb5")}</th>
+                <th>{rich("m1042114048")}</th>
+                <th>{rich("mb8c500522e")}</th>
+                <th>{rich("m1d83c362e2")}</th>
+                <th>{rich("m5e53430518")}</th>
               </tr>
             </thead>
             <tbody>
@@ -666,9 +616,7 @@ function MarketView({
             </tbody>
           </table>
           {!instrument.tradeCount && (
-            <div className="empty">
-              尚无成交。只有价格相容的买卖订单才会成交。
-            </div>
+            <div className="empty">{rich("m51faa06bcc")}</div>
           )}
         </div>
       </section>
@@ -677,14 +625,12 @@ function MarketView({
   );
 }
 function Commitment({ s }: { s: Snapshot }) {
+  useLocale();
   const [result, setResult] = useState("");
   return (
     <details className="panel padding">
-      <summary>价格路径承诺与赛后验证</summary>
-      <p className="hint">
-        创建比赛时锁定完整价格路径并发布 SHA-256
-        承诺。赛后公开种子和路径，可在本机核验。这是内部模拟记录，不是链上证明。
-      </p>
+      <summary>{rich("m72ea66d7fc")}</summary>
+      <p className="hint">{rich("m7c8f1eab37")}</p>
       <pre>{s.commitment}</pre>
       {s.reveal && (
         <>
@@ -700,13 +646,11 @@ function Commitment({ s }: { s: Snapshot }) {
                 Array.from(new Uint8Array(h))
                   .map((x) => x.toString(16).padStart(2, "0"))
                   .join("") === s.commitment
-                  ? "验证通过：价格路径与赛前承诺一致。"
-                  : "验证失败，请联系组织者。",
+                  ? t("m90cdf58006")
+                  : t("maa061befe7"),
               );
             }}
-          >
-            在本机验证承诺
-          </button>
+          >{rich("mbab18eb47c")}</button>
           <p role="status">{result}</p>
         </>
       )}
@@ -734,6 +678,7 @@ function AgentView({
   logout: () => void;
   connect: () => void;
 }) {
+  useLocale();
   const [name, setName] = useState(""),
     [description, setDescription] = useState(""),
     [invite, setInvite] = useState(""),
@@ -741,7 +686,7 @@ function AgentView({
     [show, setShow] = useState(false),
     [fresh, setFresh] = useState(false);
   const captureSession = useSessionGuard([id]);
-  if (!id) return <div className="notice">请先选择一场比赛。</div>;
+  if (!id) return <div className="notice">{rich("m43afb021d7")}</div>;
   if (account)
     return (
       <>
@@ -749,25 +694,23 @@ function AgentView({
           <section className="panel">
             <div className="paneltitle">
               <h2>{account.name}</h2>
-              <button className="textbutton" onClick={logout}>
-                断开连接
-              </button>
+              <button className="textbutton" onClick={logout}>{rich("m0d2cc8473c")}</button>
             </div>
             <div className="padding stack">
-              <span className="badge">参与者自主运行 · MCP / API</span>
+              <span className="badge">{rich("m997d1ed624")}</span>
               <div>
-                <span className="hint">能力与策略说明（本人自述）</span>
-                <p>{account.description || "尚未填写"}</p>
+                <span className="hint">{rich("m909909b669")}</span>
+                <p>{account.description || t("m1c64182187")}</p>
               </div>
               <div className="split">
                 <div>
-                  <span className="hint">可用现金</span>
+                  <span className="hint">{rich("mc3ee29d0be")}</span>
                   <div className="metric">
                     {money(account.availableCash)} <small>DUSD</small>
                   </div>
                 </div>
                 <div>
-                  <span className="hint">可用库存</span>
+                  <span className="hint">{rich("md68cc804a8")}</span>
                   <div className="metric">
                     {Object.entries(account.availableHoldings).map(
                       ([symbol, quantity]) => (
@@ -780,40 +723,26 @@ function AgentView({
                   </div>
                 </div>
               </div>
-              <p className="hint">
-                页面不代替 Agent 下单。把凭证配置到自己的
-                Agent，由它通过接口进行交易。
-              </p>
-              <button className="primary" onClick={connect}>
-                查看 MCP / API 接入文档
-              </button>
+              <p className="hint">{rich("m26a226294d")}</p>
+              <button className="primary" onClick={connect}>{rich("mf327b4a048")}</button>
             </div>
           </section>
           <section className="panel">
             <div className="paneltitle">
-              <h2>Agent 凭证</h2>
+              <h2>{rich("m93cbbb48cc")}</h2>
             </div>
             <div className="padding stack">
               {fresh && (
-                <div className="notice success">
-                  账户已创建。平台不会再次返回原始密钥，请现在妥善保存。
-                </div>
+                <div className="notice success">{rich("maacfb31014")}</div>
               )}
-              <p className="hint">
-                密钥可操作你在本场比赛的模拟资产，请勿公开。当前标签页会话暂存密钥；丢失后请组织者重置。
-              </p>
-              <label className="field">
-                专属 API Key
-                <input
+              <p className="hint">{rich("m7b56827cfd")}</p>
+              <label className="field">{rich("mc6b9807a7e", [<input
                   type={show ? "text" : "password"}
                   readOnly
                   value={apiKey}
-                />
-              </label>
+                />])}</label>
               <div className="row">
-                <button className="secondary" onClick={() => setShow(!show)}>
-                  {show ? "隐藏" : "显示"}密钥
-                </button>
+                <button className="secondary" onClick={() => setShow(!show)}>{rich("mdeeba79351", [show ? t("m145219e726") : t("m4e1449e7d5")])}</button>
                 <CopyButton text={apiKey} />
               </div>
             </div>
@@ -821,20 +750,20 @@ function AgentView({
         </div>
         <section className="panel">
           <div className="paneltitle">
-            <h2>我的决策与回执</h2>
-            <span className="hint">仅本人可见</span>
+            <h2>{rich("m7d31f0ea8b")}</h2>
+            <span className="hint">{rich("m73bb27bcd5")}</span>
           </div>
           <div className="tablewrap">
             <table>
               <thead>
                 <tr>
-                  <th>轮次</th>
-                  <th>标的</th>
-                  <th>决定</th>
-                  <th>限价 / DUSD</th>
-                  <th>委托数量</th>
-                  <th>成交数量</th>
-                  <th>状态</th>
+                  <th>{rich("m4890584bb5")}</th>
+                  <th>{rich("md31ca201e4")}</th>
+                  <th>{rich("mf4aafaba3b")}</th>
+                  <th>{rich("mad645c9881")}</th>
+                  <th>{rich("m19a69d1e71")}</th>
+                  <th>{rich("m5bffd9af3e")}</th>
+                  <th>{rich("m6320b4a872")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -849,11 +778,11 @@ function AgentView({
                     <td>
                       {
                         {
-                          pending: "等待撮合",
-                          filled: "全部成交",
-                          partial: "部分成交",
-                          expired: "未成交到期",
-                          pass: "观望",
+                          pending: t("m22e73c8133"),
+                          filled: t("m7cda9beb9c"),
+                          partial: t("m06d51d949d"),
+                          expired: t("m4d330ca4cf"),
+                          pass: t("m17b6ab8fa6"),
                         }[o.status]
                       }
                     </td>
@@ -862,9 +791,7 @@ function AgentView({
               </tbody>
             </table>
             {!account.orders.length && (
-              <div className="empty">
-                尚无决策。Agent 提交的决定会显示在这里。
-              </div>
+              <div className="empty">{rich("m816a6de660")}</div>
             )}
           </div>
         </section>
@@ -874,7 +801,7 @@ function AgentView({
     <div className="grid">
       <section className="panel">
         <div className="paneltitle">
-          <h2>创建参赛 Agent</h2>
+          <h2>{rich("m321e24e4ed")}</h2>
         </div>
         <form
           className="padding stack"
@@ -893,47 +820,36 @@ function AgentView({
             });
           }}
         >
-          <label className="field">
-            Agent 名称
-            <input
+          <label className="field">{rich("m57f5dfe100", [<input
               required
               minLength={2}
               maxLength={40}
               value={name}
               onChange={(e) => setName(e.target.value)}
-            />
-          </label>
-          <label className="field">
-            能力与策略说明
-            <textarea
+            />])}</label>
+          <label className="field">{rich("m8cd5316585", [<textarea
               maxLength={500}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="你的 Agent 如何观察市场、控制风险和做出决定？请勿填写密钥。"
-            />
-          </label>
+              placeholder={t("m109b4b1760")}
+            />])}</label>
           {!s?.config.practice && (
-            <label className="field">
-              组织者邀请码
-              <input
+            <label className="field">{rich("m119df53088", [<input
                 required
                 autoComplete="off"
                 value={invite}
                 onChange={(e) => setInvite(e.target.value)}
-              />
-            </label>
+              />])}</label>
           )}
-          <span className="hint">
-            只有等待阶段可以加入。开赛后参赛名单和初始资产固定。
-          </span>
+          <span className="hint">{rich("mb30a71ae36")}</span>
           <button className="primary" disabled={busy || s?.status !== "lobby"}>
-            {busy ? "正在创建…" : "创建并获取连接凭证"}
+            {busy ? t("m7c0305bc0c") : t("m831fa1cf5e")}
           </button>
         </form>
       </section>
       <section className="panel">
         <div className="paneltitle">
-          <h2>已有 Agent？恢复连接</h2>
+          <h2>{rich("m3b07217090")}</h2>
         </div>
         <form
           className="padding stack"
@@ -948,9 +864,7 @@ function AgentView({
             });
           }}
         >
-          <p className="hint">
-            输入对应比赛的 API Key。一个凭证不能用于其他比赛。
-          </p>
+          <p className="hint">{rich("m685ad1a491")}</p>
           <label className="field">
             API Key
             <input
@@ -961,9 +875,7 @@ function AgentView({
               onChange={(e) => setRestore(e.target.value)}
             />
           </label>
-          <button className="secondary" disabled={busy}>
-            验证并连接
-          </button>
+          <button className="secondary" disabled={busy}>{rich("m864c4e6cf8")}</button>
         </form>
       </section>
     </div>

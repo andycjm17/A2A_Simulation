@@ -19,9 +19,9 @@ const child = spawn(process.execPath, [file, ...args], {
   env: {
     ...process.env,
     ADMIN_TOKEN: token,
-    BASE_URL: "https://a2a.andycui.com",
-    TEST_API_URL: "https://a2a.andycui.com",
-    UI_BASE_URL: "https://a2a.andycui.com",
+    BASE_URL: "https://a2asimulation.com",
+    TEST_API_URL: "https://a2asimulation.com",
+    UI_BASE_URL: "https://a2asimulation.com",
   },
 });
 const redact=line=>line.replaceAll(token,'[redacted]').replace(/Bearer [a-f0-9]{64}/g,'Bearer [redacted]');

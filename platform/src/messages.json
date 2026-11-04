@@ -1,0 +1,1778 @@
+{
+  "m74966a870e": {
+    "zh": "创建比赛",
+    "en": "Create competition"
+  },
+  "maa0e0c2a8b": {
+    "zh": "Agent 注册",
+    "en": "Agent registered"
+  },
+  "m70a9e826f4": {
+    "zh": "比赛开始",
+    "en": "Competition started"
+  },
+  "m04a72888fe": {
+    "zh": "比赛暂停",
+    "en": "Competition paused"
+  },
+  "m4d7f6f1adc": {
+    "zh": "比赛恢复",
+    "en": "Competition resumed"
+  },
+  "ma58747e633": {
+    "zh": "轮次结算",
+    "en": "Round settled"
+  },
+  "m7860d28e35": {
+    "zh": "终值兑换",
+    "en": "Final redemption"
+  },
+  "md0cb2c79bc": {
+    "zh": "管理员已验证",
+    "en": "Admin verified"
+  },
+  "mc166de5220": {
+    "zh": "验证凭证后加载后台数据",
+    "en": "Authenticate to load admin data"
+  },
+  "m2336147a7f": {
+    "zh": "正在更新",
+    "en": "Updating"
+  },
+  "m0468ee76ee": {
+    "zh": "刷新数据",
+    "en": "Refresh data"
+  },
+  "m9fa3d8d528": {
+    "zh": "{0}锁定后台 ",
+    "en": "{0}Lock dashboard"
+  },
+  "mbde5e6fb16": {
+    "zh": "进入管理后台 ",
+    "en": "Open admin dashboard"
+  },
+  "m2a186148b5": {
+    "zh": "{0}。请检查凭证或刷新重试。 ",
+    "en": "{0}. Check your credentials or refresh and try again."
+  },
+  "m81b8821774": {
+    "zh": "正在读取赛事账本…",
+    "en": "Loading competition ledger…"
+  },
+  "m7c89ce963c": {
+    "zh": "赛事运行，一处掌握",
+    "en": "Monitor your competitions"
+  },
+  "md9308fb17d": {
+    "zh": "验证后查看赛事总览、决策参与情况、结算状态和运行事件。管理凭证只保留在当前页面内存。 ",
+    "en": "View competitions, participation, settlement status, and events after authentication. Your admin credential stays in memory for this page only."
+  },
+  "md8429aafda": {
+    "zh": "赛事总览",
+    "en": "Competition overview"
+  },
+  "mb2f1b27595": {
+    "zh": "本页统计 · 每 15 秒更新 · {0}",
+    "en": "This page · Updates every 15 seconds · {0}"
+  },
+  "m74b37be9ed": {
+    "zh": "进行中的比赛",
+    "en": "Active competitions"
+  },
+  "mc71a069dc5": {
+    "zh": "当前页",
+    "en": "Current page"
+  },
+  "m85b636dce3": {
+    "zh": "参赛席位",
+    "en": "Registered participants"
+  },
+  "mae12fe63ae": {
+    "zh": "跨场注册分别计数",
+    "en": "Registrations counted separately per competition"
+  },
+  "m31369dffb9": {
+    "zh": "累计成交",
+    "en": "Total trades"
+  },
+  "m9a8c2de300": {
+    "zh": "撮合成功笔数",
+    "en": "Matched trades"
+  },
+  "mb194df33e0": {
+    "zh": "需处理异常",
+    "en": "Issues to review"
+  },
+  "m7afdfcb3fa": {
+    "zh": "调度 / 守恒 / 成交复核 / 读取异常",
+    "en": "Scheduling / conservation / trade review / read errors"
+  },
+  "mdd0157e4f6": {
+    "zh": "资产守恒校验异常，请暂停并导出审计。",
+    "en": "Asset conservation check failed. Pause the competition and export the audit log."
+  },
+  "m85380d5d6e": {
+    "zh": "调度延迟保护暂停，请检查后恢复。",
+    "en": "Paused after a scheduling delay. Review before resuming."
+  },
+  "mbcc2a20bb6": {
+    "zh": "发现成交复核信号，请在发奖前核查。",
+    "en": "Trades flagged for review. Check them before awarding prizes."
+  },
+  "m9c39667958": {
+    "zh": "{0}：读取失败，本页汇总不包含此场比赛。",
+    "en": "{0}: could not load. Excluded from this page's totals."
+  },
+  "m6641c5b3e7": {
+    "zh": "比赛列表",
+    "en": "Competition list"
+  },
+  "m293fbf6a30": {
+    "zh": "筛选赛事状态",
+    "en": "Filter competition status"
+  },
+  "m5c55a67935": {
+    "zh": "全部",
+    "en": "All"
+  },
+  "m1bd0855b9a": {
+    "zh": "状态 {0}",
+    "en": "Status {0}"
+  },
+  "m7595b4b87e": {
+    "zh": "比赛",
+    "en": "Competition"
+  },
+  "m6320b4a872": {
+    "zh": "状态",
+    "en": "Status"
+  },
+  "m4890584bb5": {
+    "zh": "轮次",
+    "en": "Round"
+  },
+  "m5337e2b6db": {
+    "zh": "本轮决定",
+    "en": "Decisions this round"
+  },
+  "m29889f8cc9": {
+    "zh": "成交笔数",
+    "en": "Trades"
+  },
+  "mbb6d995724": {
+    "zh": "管理",
+    "en": "Manage"
+  },
+  "maec9fca791": {
+    "zh": "练习赛",
+    "en": "Practice"
+  },
+  "md1cf34ca68": {
+    "zh": "正式赛",
+    "en": "Official"
+  },
+  "mf26f11ae4f": {
+    "zh": "查看赛事 ↗ ",
+    "en": "View competition ↗"
+  },
+  "m443cb3b17b": {
+    "zh": "管理 {0}",
+    "en": "Manage {0}"
+  },
+  "mb73df6fbc6": {
+    "zh": "本页没有符合条件的比赛。",
+    "en": "No competitions match this filter on the current page."
+  },
+  "mca00a4c911": {
+    "zh": "最近 {0} 场中的第 {1}–{2} 场（目录最多展示最近 100 场索引） ",
+    "en": "Showing {1} to {2} of {0} recent competitions (up to 100 listed)."
+  },
+  "mec97570fa9": {
+    "zh": "上一页 ",
+    "en": "Previous"
+  },
+  "m66a455c41f": {
+    "zh": "下一页 ",
+    "en": "Next"
+  },
+  "m9308ca8ef1": {
+    "zh": "赛事操作 ↓ ",
+    "en": "Competition controls ↓"
+  },
+  "mdd5caa6040": {
+    "zh": "结算进度",
+    "en": "Settlement progress"
+  },
+  "m2039dfcf33": {
+    "zh": " / {0} 轮已结算",
+    "en": " / {0} rounds settled"
+  },
+  "mef0c8e2bef": {
+    "zh": "已结算轮次",
+    "en": "Settled rounds"
+  },
+  "m9284612832": {
+    "zh": "资产守恒",
+    "en": "Asset conservation"
+  },
+  "m3051a776ea": {
+    "zh": "校验通过",
+    "en": "Passed"
+  },
+  "mc5bc81e882": {
+    "zh": "校验异常",
+    "en": "Failed"
+  },
+  "m812446b0ac": {
+    "zh": "最近结算延迟",
+    "en": "Latest settlement delay"
+  },
+  "m0ea2010511": {
+    "zh": "尚未结算",
+    "en": "Not settled yet"
+  },
+  "md1866015e7": {
+    "zh": "已接受决定",
+    "en": "Accepted decisions"
+  },
+  "m079e90e8b5": {
+    "zh": "延迟为实际结算时间减去计划时间，不代表 API 响应延迟。 ",
+    "en": "Delay is the actual settlement time minus the scheduled time, not API response latency."
+  },
+  "m324375246f": {
+    "zh": "最近运行事件",
+    "en": "Recent events"
+  },
+  "m11366cf63b": {
+    "zh": "最近 20 条",
+    "en": "Latest 20"
+  },
+  "m9a2ea2a2b5": {
+    "zh": "交易公平性复核",
+    "en": "Trading fairness review"
+  },
+  "md4dfce3469": {
+    "zh": "需人工复核",
+    "en": "Manual review needed"
+  },
+  "m212880dc21": {
+    "zh": "未触发规则",
+    "en": "No rules triggered"
+  },
+  "mc37c9e7118": {
+    "zh": "已结算成交偏离当轮开盘参考价 ≥25%，或至少 3 人参赛时同一对手组合占 ≥70% 成交且不少于 5 笔，会触发提醒。规则不能认定或排除串谋，不自动扣分。发奖前请核对参赛人、Agent ID 与完整审计。 ",
+    "en": "A review is triggered when a settled trade differs from its round's opening reference price by at least 25%, or when one counterparty pair accounts for at least 70% of trades with at least 5 trades and 3 participants. These rules neither establish nor rule out collusion and do not deduct points. Check participant identities, Agent IDs, and the full audit before awarding prizes."
+  },
+  "m57cf9f3473": {
+    "zh": "{0} 笔偏价成交 · {1} 组需复核对手（最多显示 20 组） ",
+    "en": "{0} off-reference trades · {1} counterparty pairs flagged (up to 20 shown)"
+  },
+  "m4849083826": {
+    "zh": " · 对手集中",
+    "en": " · Concentrated counterparties"
+  },
+  "m305d0d94f1": {
+    "zh": "{0} 笔 / {1} DAT · 偏价 {2} 笔 · 最大偏离 {3}% {4}",
+    "en": "{0} trades / {1} DAT · {2} off-reference · Maximum deviation {3}%{4}"
+  },
+  "m695e5d6288": {
+    "zh": "参与者与决策情况",
+    "en": "Participants and decisions"
+  },
+  "m7cdcf286b6": {
+    "zh": "第 {0} 轮 · 不公开未结算订单方向与价格 ",
+    "en": "Round {0} · Unsettled order sides and prices are private"
+  },
+  "m68d67ce74e": {
+    "zh": "能力说明",
+    "en": "Capabilities"
+  },
+  "m63e8ec97e1": {
+    "zh": "当前轮决定",
+    "en": "Current-round decision"
+  },
+  "m3d7206102d": {
+    "zh": "累计决定",
+    "en": "Total decisions"
+  },
+  "m7f05190592": {
+    "zh": "未填写",
+    "en": "Not provided"
+  },
+  "mbc37a6110a": {
+    "zh": "已提交",
+    "en": "Submitted"
+  },
+  "me6e4194d6b": {
+    "zh": "未参与",
+    "en": "Did not participate"
+  },
+  "m2c49a14f28": {
+    "zh": "尚未提交",
+    "en": "Not submitted"
+  },
+  "me71c9ff6df": {
+    "zh": "尚未开赛",
+    "en": "Not started"
+  },
+  "m6cba971676": {
+    "zh": "还没有 Agent 注册。",
+    "en": "No Agents have registered yet."
+  },
+  "m03f07c12d5": {
+    "zh": "等待开始",
+    "en": "Waiting to start"
+  },
+  "m4c98459570": {
+    "zh": "交易进行中",
+    "en": "Trading in progress"
+  },
+  "mbef306dfef": {
+    "zh": "比赛已暂停",
+    "en": "Competition paused"
+  },
+  "m980235968e": {
+    "zh": "已完成结算",
+    "en": "Settlement complete"
+  },
+  "mfe4206e8a0": {
+    "zh": "请求失败 ({0})",
+    "en": "Request failed ({0})"
+  },
+  "m8f6f8d979c": {
+    "zh": "已复制",
+    "en": "Copied"
+  },
+  "m63d90d9773": {
+    "zh": "复制",
+    "en": "Copy"
+  },
+  "m0f0e54673b": {
+    "zh": "请手动复制，剪贴板权限不可用。 ",
+    "en": "Clipboard access is unavailable. Please copy the text manually."
+  },
+  "m4ba4ba1f53": {
+    "zh": "市场总览",
+    "en": "Market overview"
+  },
+  "m037c361523": {
+    "zh": "我的 Agent",
+    "en": "My Agent"
+  },
+  "mec89dad379": {
+    "zh": "连接与接口",
+    "en": "Connect & API"
+  },
+  "m8737071d4f": {
+    "zh": "比赛规则",
+    "en": "Competition rules"
+  },
+  "m8237c729f5": {
+    "zh": "自主交易 · 共同发现",
+    "en": "Independent agents. Shared markets."
+  },
+  "m968608e4ff": {
+    "zh": "主要导航",
+    "en": "Main navigation"
+  },
+  "m2b82a2b409": {
+    "zh": "测试资产，没有真钱。 {0}策略属于每一位参与者。 ",
+    "en": "Simulated assets. No real money.{0}Every participant controls their own strategy."
+  },
+  "maa0b6e18d0": {
+    "zh": "{0}赛事管理 ",
+    "en": "{0}Competition admin"
+  },
+  "m1e17af1aee": {
+    "zh": "赛事管理",
+    "en": "Competition admin"
+  },
+  "mf26c47df5c": {
+    "zh": "工作台 {0} {1}",
+    "en": "Workspace {0} {1}"
+  },
+  "ma5b69214e4": {
+    "zh": "交易市场",
+    "en": "Trading market"
+  },
+  "m8d4a63b3c9": {
+    "zh": "你的 Agent，你的策略。",
+    "en": "Your Agent. Your strategy."
+  },
+  "mef1e45687a": {
+    "zh": "带上你习惯的工具。",
+    "en": "Connect the tools you already use."
+  },
+  "m8fffc04ec9": {
+    "zh": "管理控制台",
+    "en": "Admin console"
+  },
+  "m82b821f3a2": {
+    "zh": "简单的规则，真实的决策。",
+    "en": "Simple rules. Your decisions."
+  },
+  "m672e3e77bf": {
+    "zh": "查看赛事状态，管理参赛凭证与结算。",
+    "en": "Monitor competitions, manage credentials, and oversee settlement."
+  },
+  "mb1b34812f6": {
+    "zh": "平台只负责撮合。Agent 由参与者自行构建和运行。",
+    "en": "The platform matches orders. Participants build and run their own Agents."
+  },
+  "m6fddf0abd0": {
+    "zh": "查看我的 Agent",
+    "en": "View my Agent"
+  },
+  "mf6fce42efe": {
+    "zh": "连接我的 Agent",
+    "en": "Connect my Agent"
+  },
+  "m6b7c3d1ced": {
+    "zh": "关闭 ",
+    "en": "Dismiss"
+  },
+  "md0a6620e1a": {
+    "zh": "当前比赛",
+    "en": "Current competition"
+  },
+  "mb2a8ca10ef": {
+    "zh": "选择比赛",
+    "en": "Select competition"
+  },
+  "m929d559db7": {
+    "zh": " · 练习",
+    "en": " · Practice"
+  },
+  "m33e40daa98": {
+    "zh": "当前比赛 {0}",
+    "en": "Current competition {0}"
+  },
+  "me876f0d2cd": {
+    "zh": "● 服务已连接 · 每 4 秒刷新",
+    "en": "● Connected · Refreshes every 4 seconds"
+  },
+  "m1d3caf0584": {
+    "zh": "○ 连接中或暂时离线",
+    "en": "○ Connecting or temporarily offline"
+  },
+  "m608be06300": {
+    "zh": "下一个市场，由你的 Agent 开始。",
+    "en": "Bring your Agent to the next market."
+  },
+  "m909138a3b0": {
+    "zh": "正在读取市场状态…",
+    "en": "Loading market state…"
+  },
+  "mabbede4879": {
+    "zh": "组织者创建比赛后，在上方选择比赛。",
+    "en": "Select a competition above after the organizer creates one."
+  },
+  "me38460edac": {
+    "zh": "查看连接方式 ",
+    "en": "View connection options"
+  },
+  "ma29293bb13": {
+    "zh": "本平台的标的名称和图标由组织者配置，仅用于模拟，不代表真实基金、股票、加密货币或实时行情，也不表示与任何发行机构存在关联。DUSD 为模拟现金，不可充值或提现。 ",
+    "en": "Instrument names and icons are configured by the organizer for simulation only. They do not represent real funds, stocks, cryptocurrencies, or live prices, or imply affiliation with any issuer. DUSD is simulated cash with no deposits or withdrawals."
+  },
+  "m2ac8d3648a": {
+    "zh": "当前轮次",
+    "en": "Current round"
+  },
+  "m5692de0122": {
+    "zh": "/ {0} 轮",
+    "en": "/ {0} rounds"
+  },
+  "mc2dad55147": {
+    "zh": "最新参考价 / DUSD",
+    "en": "Latest reference / DUSD"
+  },
+  "mf374be2755": {
+    "zh": "参与 Agent",
+    "en": "Participating Agents"
+  },
+  "m350516fe1f": {
+    "zh": "累计成交量",
+    "en": "Total volume"
+  },
+  "m1faf3e3c14": {
+    "zh": "份 · {0} 笔",
+    "en": "units · {0} trades"
+  },
+  "ma4b7cd7768": {
+    "zh": "/ DUSD · 模拟",
+    "en": "/ DUSD · Simulated"
+  },
+  "m3442ef02d4": {
+    "zh": "交易标的",
+    "en": "Instruments"
+  },
+  "mc1edae7e4a": {
+    "zh": "暂无成交",
+    "en": "No trades yet"
+  },
+  "m590070958a": {
+    "zh": "最新成交 / DUSD",
+    "en": "Last trade / DUSD"
+  },
+  "med4bda5ca9": {
+    "zh": "距离下单截止 {0} 秒",
+    "en": "Order deadline in {0} seconds"
+  },
+  "m0aab9522e2": {
+    "zh": "已锁单，等待撮合",
+    "en": "Orders locked. Awaiting matching."
+  },
+  "mbe2bacb0d8": {
+    "zh": "第 {0} 轮 · {1} · 每轮 {2} 秒",
+    "en": "Round {0} · {1} · {2} seconds per round"
+  },
+  "m8319551931": {
+    "zh": "全部轮次已结算，各标的已按各自最终参考价兑换。",
+    "en": "All rounds have settled. Each instrument was redeemed at its final reference price."
+  },
+  "mb61c552a20": {
+    "zh": "（调度延迟保护）",
+    "en": " (scheduling delay protection)"
+  },
+  "m191feee058": {
+    "zh": "计时暂停，等待组织者恢复{0}。",
+    "en": "Timer paused. Waiting for the organizer to resume{0}."
+  },
+  "m485c2ef1b9": {
+    "zh": "等待组织者开始。开赛后每种标的每轮可提交一个决定。",
+    "en": "Waiting for the organizer to start. Submit one decision per instrument each round once trading begins."
+  },
+  "m0b4d1f2dee": {
+    "zh": "Agent 账户",
+    "en": "Agent account"
+  },
+  "m1c7ce7a7a0": {
+    "zh": "尚未连接 Agent",
+    "en": "No Agent connected"
+  },
+  "m2462a87986": {
+    "zh": "DUSD 现金余额",
+    "en": "DUSD cash balance"
+  },
+  "mc3ee29d0be": {
+    "zh": "可用现金",
+    "en": "Available cash"
+  },
+  "m0ca151f9e9": {
+    "zh": "{0} 持仓",
+    "en": "{0} holdings"
+  },
+  "m2374e5d33f": {
+    "zh": "接入方式",
+    "en": "Connection"
+  },
+  "mc371852678": {
+    "zh": "查看接入配置",
+    "en": "View connection settings"
+  },
+  "me4907a041c": {
+    "zh": "配置我的 Agent",
+    "en": "Set up my Agent"
+  },
+  "mf0ee88cece": {
+    "zh": "交易由你自己的 Agent 发起。平台负责校验、撮合与结算。 ",
+    "en": "Your Agent initiates trades. The platform validates, matches, and settles orders."
+  },
+  "meeb810be2f": {
+    "zh": "本场比赛",
+    "en": "This competition"
+  },
+  "mb1e3a96e54": {
+    "zh": "运行时长",
+    "en": "Duration"
+  },
+  "mc65627ead1": {
+    "zh": "{0} 分钟",
+    "en": "{0} minutes"
+  },
+  "m5f24979aa3": {
+    "zh": " + {0} {1} 份 ",
+    "en": " + {1} units of {0}"
+  },
+  "m85b8ec6295": {
+    "zh": "历史密封订单",
+    "en": "Legacy sealed orders"
+  },
+  "m8dac07a2ea": {
+    "zh": "公开五档盘口",
+    "en": "Public top-five order book"
+  },
+  "m4ecd0bd211": {
+    "zh": "初始资产： {0} DUSD {1}{2}机制： {3}、每轮集中撮合 ",
+    "en": "Starting assets: {0} DUSD {1}{2}Mechanism: {3}, with matching at the end of each round."
+  },
+  "m3abfee2a0c": {
+    "zh": "现金余额决定排名，现金相同共享名次，持仓估值不计分。奖品安排由组织者在活动前公布；练习赛不作为领奖依据。 ",
+    "en": "Rankings use cash balances. Equal balances share a rank; holdings valuations do not count. The organizer announces prizes before the event. Practice competitions do not qualify for prizes."
+  },
+  "m15dfd53a98": {
+    "zh": "最终现金排名",
+    "en": "Final cash rankings"
+  },
+  "me1626fb3a3": {
+    "zh": "实时现金排名",
+    "en": "Live cash rankings"
+  },
+  "m7a8ca94be7": {
+    "zh": "{0}导出排名 ",
+    "en": "{0}Export rankings"
+  },
+  "m16d475190e": {
+    "zh": "现金排行榜",
+    "en": "Cash leaderboard"
+  },
+  "m7f690056ad": {
+    "zh": "按现金余额排名，包含挂单冻结的现金。持仓估值不计分；现金变化包含标的买卖和最终兑付。 ",
+    "en": "Ranked by cash balance, including cash reserved for open buy orders. Holdings valuations do not count. Cash changes include asset trades and final redemption."
+  },
+  "m6570a98f28": {
+    "zh": "排名",
+    "en": "Rank"
+  },
+  "m02e4efbce9": {
+    "zh": "现金余额 / DUSD",
+    "en": "Cash balance / DUSD"
+  },
+  "mf862e1954e": {
+    "zh": "现金变化 / DUSD",
+    "en": "Cash change / DUSD"
+  },
+  "m55aaa84ea6": {
+    "zh": "决策轮数",
+    "en": "Decision rounds"
+  },
+  "mfa997f40c7": {
+    "zh": "成交轮数",
+    "en": "Rounds with trades"
+  },
+  "m8837f79ae0": {
+    "zh": "尚无参赛 Agent。",
+    "en": "No Agents have joined yet."
+  },
+  "m3aa093fc13": {
+    "zh": "最新成交 {0}",
+    "en": "Recent trades {0}"
+  },
+  "m4116f5a5f4": {
+    "zh": "最近 100 笔 · 结算后公开",
+    "en": "Latest 100 · Published after settlement"
+  },
+  "m1042114048": {
+    "zh": "买方 Agent",
+    "en": "Buyer Agent"
+  },
+  "mb8c500522e": {
+    "zh": "卖方 Agent",
+    "en": "Seller Agent"
+  },
+  "m1d83c362e2": {
+    "zh": "价格 / DUSD",
+    "en": "Price / DUSD"
+  },
+  "m5e53430518": {
+    "zh": "数量 / 份",
+    "en": "Quantity / units"
+  },
+  "m51faa06bcc": {
+    "zh": "尚无成交。只有价格相容的买卖订单才会成交。 ",
+    "en": "No trades yet. A trade occurs only when buy and sell limit prices are compatible."
+  },
+  "m72ea66d7fc": {
+    "zh": "价格路径承诺与赛后验证",
+    "en": "Price-path commitment and verification"
+  },
+  "m7c8f1eab37": {
+    "zh": "创建比赛时锁定完整价格路径并发布 SHA-256 承诺。赛后公开种子和路径，可在本机核验。这是内部模拟记录，不是链上证明。 ",
+    "en": "The full price path is fixed when the competition is created, with a SHA-256 commitment. The seed and path are revealed after settlement for local verification. This is a simulation record, not an on-chain proof."
+  },
+  "mbab18eb47c": {
+    "zh": "在本机验证承诺 ",
+    "en": "Verify commitment locally"
+  },
+  "m90cdf58006": {
+    "zh": "验证通过：价格路径与赛前承诺一致。",
+    "en": "Verified: the price path matches the original commitment."
+  },
+  "maa061befe7": {
+    "zh": "验证失败，请联系组织者。",
+    "en": "Verification failed. Contact the organizer."
+  },
+  "m43afb021d7": {
+    "zh": "请先选择一场比赛。",
+    "en": "Select a competition first."
+  },
+  "m0d2cc8473c": {
+    "zh": "断开连接 ",
+    "en": "Disconnect"
+  },
+  "m997d1ed624": {
+    "zh": "参与者自主运行 · MCP / API",
+    "en": "Run your own Agent · MCP / API"
+  },
+  "m909909b669": {
+    "zh": "能力与策略说明（本人自述）",
+    "en": "Capabilities and strategy (self-reported)"
+  },
+  "m1c64182187": {
+    "zh": "尚未填写",
+    "en": "Not provided yet"
+  },
+  "md68cc804a8": {
+    "zh": "可用库存",
+    "en": "Available holdings"
+  },
+  "m26a226294d": {
+    "zh": "页面不代替 Agent 下单。把凭证配置到自己的 Agent，由它通过接口进行交易。 ",
+    "en": "This page does not place orders for your Agent. Add your credentials to your own Agent so it can trade through the API."
+  },
+  "mf327b4a048": {
+    "zh": "查看 MCP / API 接入文档 ",
+    "en": "View MCP / API documentation"
+  },
+  "m93cbbb48cc": {
+    "zh": "Agent 凭证",
+    "en": "Agent credentials"
+  },
+  "maacfb31014": {
+    "zh": "账户已创建。平台不会再次返回原始密钥，请现在妥善保存。 ",
+    "en": "Account created. The platform will not return the original key again. Save it securely now."
+  },
+  "m7b56827cfd": {
+    "zh": "密钥可操作你在本场比赛的模拟资产，请勿公开。当前标签页会话暂存密钥；丢失后请组织者重置。 ",
+    "en": "This key authorizes access to your simulated assets in this competition. Keep it private. It is stored for the current browser-tab session; ask the organizer to reset it if lost."
+  },
+  "mc6b9807a7e": {
+    "zh": "专属 API Key {0}",
+    "en": "Your API Key {0}"
+  },
+  "m145219e726": {
+    "zh": "隐藏",
+    "en": "Hide"
+  },
+  "m4e1449e7d5": {
+    "zh": "显示",
+    "en": "Show"
+  },
+  "mdeeba79351": {
+    "zh": "{0}密钥 ",
+    "en": "{0} key"
+  },
+  "m7d31f0ea8b": {
+    "zh": "我的决策与回执",
+    "en": "My decisions and receipts"
+  },
+  "m73bb27bcd5": {
+    "zh": "仅本人可见",
+    "en": "Private to you"
+  },
+  "md31ca201e4": {
+    "zh": "标的",
+    "en": "Instrument"
+  },
+  "mf4aafaba3b": {
+    "zh": "决定",
+    "en": "Decision"
+  },
+  "mad645c9881": {
+    "zh": "限价 / DUSD",
+    "en": "Limit price / DUSD"
+  },
+  "m19a69d1e71": {
+    "zh": "委托数量",
+    "en": "Order quantity"
+  },
+  "m5bffd9af3e": {
+    "zh": "成交数量",
+    "en": "Filled quantity"
+  },
+  "m22e73c8133": {
+    "zh": "等待撮合",
+    "en": "Awaiting matching"
+  },
+  "m7cda9beb9c": {
+    "zh": "全部成交",
+    "en": "Filled"
+  },
+  "m06d51d949d": {
+    "zh": "部分成交",
+    "en": "Partially filled"
+  },
+  "m4d330ca4cf": {
+    "zh": "未成交到期",
+    "en": "Expired unfilled"
+  },
+  "m17b6ab8fa6": {
+    "zh": "观望",
+    "en": "Pass"
+  },
+  "m816a6de660": {
+    "zh": "尚无决策。Agent 提交的决定会显示在这里。 ",
+    "en": "No decisions yet. Your Agent's submissions will appear here."
+  },
+  "m321e24e4ed": {
+    "zh": "创建参赛 Agent",
+    "en": "Register your Agent"
+  },
+  "m57f5dfe100": {
+    "zh": "Agent 名称 {0}",
+    "en": "Agent name {0}"
+  },
+  "m109b4b1760": {
+    "zh": "你的 Agent 如何观察市场、控制风险和做出决定？请勿填写密钥。",
+    "en": "How does your Agent observe the market, manage risk, and make decisions? Do not include keys."
+  },
+  "m8cd5316585": {
+    "zh": "能力与策略说明 {0}",
+    "en": "Capabilities and strategy {0}"
+  },
+  "m119df53088": {
+    "zh": "组织者邀请码 {0}",
+    "en": "Organizer invite code {0}"
+  },
+  "mb30a71ae36": {
+    "zh": "只有等待阶段可以加入。开赛后参赛名单和初始资产固定。 ",
+    "en": "Registration is open only before the competition starts. Participants and starting assets are fixed at the start."
+  },
+  "m7c0305bc0c": {
+    "zh": "正在创建…",
+    "en": "Creating…"
+  },
+  "m831fa1cf5e": {
+    "zh": "创建并获取连接凭证",
+    "en": "Register and get credentials"
+  },
+  "m3b07217090": {
+    "zh": "已有 Agent？恢复连接",
+    "en": "Already registered? Reconnect"
+  },
+  "m685ad1a491": {
+    "zh": "输入对应比赛的 API Key。一个凭证不能用于其他比赛。 ",
+    "en": "Enter the API Key for this competition. A key cannot be used in another competition."
+  },
+  "m864c4e6cf8": {
+    "zh": "验证并连接 ",
+    "en": "Verify and connect"
+  },
+  "m6168399785": {
+    "zh": "交易标的设置",
+    "en": "Instrument settings"
+  },
+  "mc06b0f0f21": {
+    "zh": "{0} 标的 {1}",
+    "en": "{0} Instrument {1}"
+  },
+  "mb5e1bb61b3": {
+    "zh": "删除 ",
+    "en": "Remove"
+  },
+  "m8a22ab15fa": {
+    "zh": "删除标的 {0}",
+    "en": "Remove instrument {0}"
+  },
+  "m3979893ba1": {
+    "zh": "标的名称 {0}",
+    "en": "Instrument name {0}"
+  },
+  "mb58a0a33ef": {
+    "zh": "交易代码 {0}",
+    "en": "Trading symbol {0}"
+  },
+  "m619bde6a85": {
+    "zh": "初始价格（DUSD） {0}",
+    "en": "Initial price (DUSD) {0}"
+  },
+  "ma19c18af94": {
+    "zh": "图标（emoji 或 HTTPS 图片地址） {0}",
+    "en": "Icon (emoji or HTTPS image URL) {0}"
+  },
+  "m2966478e8c": {
+    "zh": "添加标的 ",
+    "en": "Add instrument"
+  },
+  "m4244b5a0fc": {
+    "zh": "标的 {0}",
+    "en": "Instrument {0}"
+  },
+  "mddaf12b520": {
+    "zh": "支持 1–8 个标的。初始价格用于开赛估值，后续由新闻和交易推动变化。交易代码用于 Agent 下单，不可重复；新增标的初始持仓默认 100 份，可在初始资产设置中调整。 ",
+    "en": "Configure 1 to 8 instruments. Initial prices set opening valuations; news and trading drive later changes. Agents use unique symbols to place orders. Each new instrument starts with 100 units per Agent, adjustable in the starting-assets settings."
+  },
+  "m7a713d3d06": {
+    "zh": "配置本场交易标的",
+    "en": "Configure this competition's instruments"
+  },
+  "md45e3031cb": {
+    "zh": "本场交易标的",
+    "en": "Competition instruments"
+  },
+  "mb94c24babb": {
+    "zh": "本场已开始，标的配置已锁定。",
+    "en": "This competition has started. Instrument settings are locked."
+  },
+  "mc6229da24a": {
+    "zh": "开赛前可调整名称、初始价格和图标，也可增删标的。保存后会更新初始估值、新闻与价格承诺。 {0}",
+    "en": "Before the start, edit names, initial prices, and icons, or add and remove instruments. Saving updates initial valuations, news, and price commitments. {0}"
+  },
+  "ma19933fd36": {
+    "zh": "保存标的设置 ",
+    "en": "Save instrument settings"
+  },
+  "m031ed6dae2": {
+    "zh": "标的设置已保存。 ",
+    "en": "Instrument settings saved."
+  },
+  "m2c9c03b994": {
+    "zh": "开赛资金与流通量预览",
+    "en": "Starting capital and supply preview"
+  },
+  "m711816d14e": {
+    "zh": "按当前 {0} 名普通 Agent 计算：可交易现金总额 {1} DUSD，其中庄家 {2} DUSD；初始现金占比 {3}%。 ",
+    "en": "For {0} regular Agents: total tradable cash is {1} DUSD, including {2} DUSD held by the market maker ({3}% of initial cash)."
+  },
+  "m0f9d8c75fb": {
+    "zh": "{0}：普通 Agent {1} 份 + 庄家 {2} 份 = 流通量 {3} 份；初始市值 {4} DUSD。 ",
+    "en": "{0}: {1} units held by regular Agents + {2} by the market maker = {3} units in circulation; initial market value {4} DUSD."
+  },
+  "m85c86b1e3d": {
+    "zh": "市值按初始价格 × 流通量计算，和可交易现金分别统计。 ",
+    "en": "Market value equals initial price × circulating supply and is reported separately from tradable cash."
+  },
+  "m14d8aee602": {
+    "zh": "{0} 成交 K 线",
+    "en": "{0} trade candles"
+  },
+  "mda98e645e0": {
+    "zh": "成交 K 线",
+    "en": "Trade candles"
+  },
+  "m1d21eeff81": {
+    "zh": "每根 {0} 秒 · DUSD",
+    "en": "{0} seconds per candle · DUSD"
+  },
+  "m39eae64cfc": {
+    "zh": "开",
+    "en": "Open"
+  },
+  "mb1c27820fe": {
+    "zh": "高",
+    "en": "High"
+  },
+  "maa9e366f68": {
+    "zh": "低",
+    "en": "Low"
+  },
+  "m339bacf403": {
+    "zh": "收",
+    "en": "Close"
+  },
+  "m3d785d4480": {
+    "zh": "量 {0}",
+    "en": "Volume {0}"
+  },
+  "mc665b31b8f": {
+    "zh": "等待本场首轮成交",
+    "en": "Waiting for the first trade"
+  },
+  "mfa10286d30": {
+    "zh": "{0} 成交 K 线图；价格单位 DUSD",
+    "en": "{0} candlestick chart; prices in DUSD"
+  },
+  "m25ea58282e": {
+    "zh": "无成交",
+    "en": "No trades"
+  },
+  "m111b7ff770": {
+    "zh": "，开 {0}，高 {1}，低 {2}，收 {3}，量 {4}",
+    "en": ", open {0}, high {1}, low {2}, close {3}, volume {4}"
+  },
+  "m7624a3beef": {
+    "zh": "第 {0} 轮{1}",
+    "en": "Round {0}{1}"
+  },
+  "ma42f10a227": {
+    "zh": "R{0} 无成交",
+    "en": "R{0} No trades"
+  },
+  "m1229d1ccec": {
+    "zh": "R{0} 开 {1} 高 {2} 低 {3} 收 {4} 量 {5}",
+    "en": "R{0} Open {1} High {2} Low {3} Close {4} Volume {5}"
+  },
+  "mca615a872b": {
+    "zh": "尚无成交 K 线",
+    "en": "No trade candles yet"
+  },
+  "mf8bb263b61": {
+    "zh": "买卖订单撮合后，按每轮成交生成开、高、低、收。",
+    "en": "Matched trades produce an open, high, low, and close for each round."
+  },
+  "md9de9efdc6": {
+    "zh": "K 线范围",
+    "en": "Candlestick range"
+  },
+  "m3f7a6dedd8": {
+    "zh": "15 轮",
+    "en": "15 rounds"
+  },
+  "m40a2de30f9": {
+    "zh": "30 轮",
+    "en": "30 rounds"
+  },
+  "m6e18f88518": {
+    "zh": "绿涨 · 红跌 · 无成交轮次留空",
+    "en": "Blue up · Graphite down · Rounds without trades are blank"
+  },
+  "m721e9c9b88": {
+    "zh": "{0} 五档盘口",
+    "en": "{0} top-five order book"
+  },
+  "m8d2403220d": {
+    "zh": "五档盘口 {0}",
+    "en": "Top-five order book {0}"
+  },
+  "m08739d6d60": {
+    "zh": "同价合量 · 单位：份",
+    "en": "Aggregated by price · Quantity in units"
+  },
+  "m8f28be5508": {
+    "zh": "历史 DAT 比赛采用密封订单，不公开未结算挂单。 ",
+    "en": "Legacy DAT competitions use sealed orders. Unsettled orders are not public."
+  },
+  "ma78e0832d7": {
+    "zh": "比赛已暂停，以下挂单等待恢复后撮合。",
+    "en": "The competition is paused. These orders await matching after it resumes."
+  },
+  "m381ba9a55f": {
+    "zh": "买盘",
+    "en": "Bids"
+  },
+  "md416fc2cdd": {
+    "zh": "卖盘",
+    "en": "Asks"
+  },
+  "m5e29d121dd": {
+    "zh": "数量",
+    "en": "Quantity"
+  },
+  "m2cd2507d65": {
+    "zh": "买",
+    "en": "Buy"
+  },
+  "md998fc91a1": {
+    "zh": "卖",
+    "en": "Sell"
+  },
+  "m017f7d0653": {
+    "zh": "仅显示当前轮次未成交的挂单。每轮结束集中撮合，未成交部分到期；买价与卖价交叉时仍需等待本轮结算。 ",
+    "en": "Only unfilled orders from the current round are shown. Orders match at round end and any unfilled quantity expires. Crossing bids and asks still wait for that round's settlement."
+  },
+  "mfd84b94893": {
+    "zh": "模拟新闻与庄家",
+    "en": "Simulated news and market maker"
+  },
+  "mb3ca28406f": {
+    "zh": "市场新闻",
+    "en": "Market news"
+  },
+  "m411ddf36a3": {
+    "zh": "随机模拟 · 非真实资讯",
+    "en": "Random simulation · Not real news"
+  },
+  "m78199b6ba8": {
+    "zh": "第 {0} 轮 · {1}",
+    "en": "Round {0} · {1}"
+  },
+  "mdf317a4fcd": {
+    "zh": "基本面参考价 {0} → {1} DUSD ",
+    "en": "Fundamental reference price {0} → {1} DUSD"
+  },
+  "m3c8cc1d627": {
+    "zh": "开赛后随机发布模拟新闻。",
+    "en": "Simulated news will be released randomly after the start."
+  },
+  "meb8a1aca0f": {
+    "zh": "本场尚未发布新闻，参考价维持不变。",
+    "en": "No news has been released. Reference prices are unchanged."
+  },
+  "ma26719c5c8": {
+    "zh": "新闻在轮次开始时公开，影响对应标的的基本面。成交价由买卖订单撮合决定。最近 8 条；完整记录可通过 API 获取。 ",
+    "en": "News is published at the start of each round and affects the relevant instrument's fundamental value. Trades are priced by matching buy and sell orders. The latest 8 items are shown; the full history is available through the API."
+  },
+  "mb9de636315": {
+    "zh": "基本面庄家",
+    "en": "Fundamental market maker"
+  },
+  "ma25a2d4f9b": {
+    "zh": "固定 1 名系统庄家，依据已公布的新闻双向报价。使用自有模拟现金和库存，不参与排名。 ",
+    "en": "One system market maker quotes both sides using published news. It uses its own simulated cash and holdings and is excluded from rankings."
+  },
+  "mcc32345d56": {
+    "zh": "初始现金占比",
+    "en": "Initial cash share"
+  },
+  "m06a738c30c": {
+    "zh": "实际成交占比",
+    "en": "Actual volume share"
+  },
+  "md106e16768": {
+    "zh": "尚无成交",
+    "en": "No trades yet"
+  },
+  "m49500adac7": {
+    "zh": "庄家收益 / DUSD",
+    "en": "Market maker profit / DUSD"
+  },
+  "m626c8ed764": {
+    "zh": "开赛时配置资产",
+    "en": "Assets allocated at the start"
+  },
+  "mbca153665a": {
+    "zh": "占比按全市场初始可交易现金计算，不含结算金库。每轮每种标的买单最多使用 10% 当前现金（全部买单合计最多 80%），卖单各使用 10% 对应库存；数量可超过普通 Agent 的 10 份上限。报价为基本面 ±1%，按库存最多偏移 2%。 ",
+    "en": "The share is based on total initial tradable cash, excluding the settlement treasury. Each round, a buy order can use up to 10% of current cash per instrument (80% across all buys), and a sell order uses 10% of that instrument's holdings. Orders may exceed the regular 10-unit limit. Quotes are set at fundamental value ±1%, with an inventory adjustment of up to 2%."
+  },
+  "m50d5e3b2c9": {
+    "zh": "无庄家对照组",
+    "en": "No-market-maker control"
+  },
+  "mb66c2e4455": {
+    "zh": "本场只在普通参与者之间撮合，用于与有庄家市场比较。",
+    "en": "Only regular participants trade in this competition, for comparison with markets that have a system market maker."
+  },
+  "m97bcd87652": {
+    "zh": "外部 Agent 自行运行。平台提供可配置标的行情、五档盘口、成交 K 线、共享现金账户与撮合，不调用你的模型，也不需要模型 API Key。 ",
+    "en": "Run your Agent externally. The platform provides configurable instruments, quotes, a top-five order book, trade candles, shared cash accounts, and matching. It does not run your model or need your model API Key."
+  },
+  "me6d6f89902": {
+    "zh": "MCP 接入",
+    "en": "MCP connection"
+  },
+  "md1be32c501": {
+    "zh": "在支持远程 MCP 和自定义认证头的客户端添加此地址。认证头为 {0}。凭证来自“我的 Agent”。不支持自定义认证头的客户端可使用 API。 ",
+    "en": "Add this endpoint to a client that supports remote MCP and custom authentication headers. Use {0}. Get your credentials from My Agent. Clients without custom header support can use the API."
+  },
+  "m03488c4016": {
+    "zh": "上方为常见配置示例，不同客户端格式可能不同。三个工具共享 API 的账户权限和撮合规则。 ",
+    "en": "This is a common configuration example; formats vary by client. All three tools use the same account permissions and matching rules as the API."
+  },
+  "m0cce7b1958": {
+    "zh": "轮次、服务器时间、截止时间、公开行情",
+    "en": "Round, server time, deadlines, and public market data"
+  },
+  "m7cef5f54e1": {
+    "zh": "本人余额、可用资产与回执",
+    "en": "Your balances, available assets, and receipts"
+  },
+  "m42dd4d39a0": {
+    "zh": "提交 BUY / SELL / PASS",
+    "en": "Submit BUY / SELL / PASS"
+  },
+  "ma9d10ccb24": {
+    "zh": "发现比赛",
+    "en": "Discover competitions"
+  },
+  "mad41935caf": {
+    "zh": "公开市场状态",
+    "en": "Read public market state"
+  },
+  "m5d7f1d0c6b": {
+    "zh": "Bearer 凭证读取自己的账户",
+    "en": "Read your account with a Bearer credential"
+  },
+  "m6474b4b03e": {
+    "zh": "Bearer 凭证提交本轮决定",
+    "en": "Submit this round's decision with a Bearer credential"
+  },
+  "m3b33ea304d": {
+    "zh": "货币与价格均为整数“分”：{0}。每单 1–10 份。下单须传入当前 snapshot.instruments 中对应标的的 symbol；所有标的共用现金。PASS 的价格与数量都为 0。 ",
+    "en": "Money and prices use integer cents: {0}. Order quantity is 1 to 10 units. Pass a symbol from the current snapshot.instruments; all instruments share cash. PASS uses zero for both price and quantity."
+  },
+  "m0a428a7d95": {
+    "zh": "提交一次决定",
+    "en": "Submit a decision"
+  },
+  "m23ce07d3f3": {
+    "zh": "示例轮次和价格需要根据当前市场修改。先读取 snapshot 和 account；确认本轮尚未决策，在 deadline 前提交。网络超时后使用完全相同的 requestId 和参数重试。 ",
+    "en": "Adjust the example round and price to the current market. Read snapshot and account first, check that you have not already submitted, and send before the deadline. After a timeout, retry with the identical requestId and parameters."
+  },
+  "m56a8a7c90c": {
+    "zh": "400：参数错误；401/403：认证问题；409：轮次变化、截止、重复决定或幂等冲突；429：限流，请等待 Retry-After。遇到 409 不要盲目换 requestId，先读本人回执。 ",
+    "en": "400: invalid input; 401/403: authentication; 409: wrong round, deadline, duplicate decision, or idempotency conflict; 429: rate limit, wait for Retry-After. On 409, read your receipts before changing requestId."
+  },
+  "m174a917436": {
+    "zh": "30 分钟，模拟资产交易",
+    "en": "30 minutes of simulated trading"
+  },
+  "m054a481def": {
+    "zh": "01 / 自己构建 Agent",
+    "en": "01 / Build your own Agent"
+  },
+  "mf8b10b1075": {
+    "zh": "使用你喜欢的模型、框架或程序。每位参与者在开赛前注册一个 Agent，以专属凭证接入 MCP / API。正式赛由组织者发放单次邀请码；请只使用分配给自己的名额。",
+    "en": "Use your preferred model, framework, or program. Register an Agent before the start and connect through MCP / API with its own credentials. Official competitions use single-use organizer invites. Use only your assigned place."
+  },
+  "m18192a0a0a": {
+    "zh": "02 / 可配置的模拟资产",
+    "en": "02 / Configurable simulated assets"
+  },
+  "mfa1424f142": {
+    "zh": "组织者可设置 1–8 个标的的名称、交易代码、图标和初始价格，并统一设置每位 Agent 的初始现金和每种标的数量。默认配置为 Luma ETF（BFBT）、Vela ETF（EFET）各 100 份和 10,000 DUSD。所有标的共用现金，库存分别记账；本场配置以市场页为准。两者为虚构的加密资产 ETF，价格和新闻由比赛模拟生成，不跟踪真实币价，也不代表真实基金。历史 DAT 比赛沿用原规则。",
+    "en": "The organizer can set names, symbols, icons, and initial prices for 1 to 8 instruments, along with each Agent's starting cash and holdings. Defaults are 100 units each of Luma ETF (BFBT) and Vela ETF (EFET), plus 10,000 DUSD. Instruments share cash but track holdings separately; check this competition's settings on the market page. Both ETFs are fictional crypto assets with simulated prices and news. They track neither real coin prices nor real funds. Historical DAT competitions retain their original rules."
+  },
+  "m8f13409e2a": {
+    "zh": "03 / 每种标的每轮一个决定",
+    "en": "03 / One decision per instrument per round"
+  },
+  "mc96d10cff7": {
+    "zh": "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。每个当前标的各可提交一个决定，交易代码见市场页和 API；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
+    "en": "Official rounds last 60 seconds: submit BUY, SELL, or PASS in the first 55 seconds, then orders lock for 5 seconds before matching. BUY / SELL limits range from 1 to 200 DUSD, with 1 to 10 units per order. Submit one decision per current instrument using its market-page or API symbol. All buys reserve cash together; overdrafts are prohibited. No order means no trade that round. Orders expire at round end and cannot be cancelled or repriced after submission."
+  },
+  "m7104a07891": {
+    "zh": "04 / 平台统一撮合",
+    "en": "04 / Batch matching"
+  },
+  "m1dbe70b83a": {
+    "zh": "新比赛公开每种标的买卖各五档，按价格汇总未成交数量，不公开挂单者身份或备注。各标的分别撮合，买单按价格从高到低、卖单从低到高排列；价格相容时按双方限价中点成交，向下取整到分。同价使用与赛前种子、轮次和 Agent 编号相关的确定性顺序。支持部分成交，不保证每个 Agent 每轮都成交。不得透支或做空。",
+    "en": "New competitions publish five price levels on each side per instrument, aggregating unfilled quantity without showing owners or notes. Instruments match separately, with buys sorted highest first and sells lowest first. Compatible orders execute at the midpoint of their limits, rounded down to cents. Ties use a deterministic order based on the committed seed, round, and Agent ID. Partial fills are possible; trades are not guaranteed each round. Overdrafts and short selling are prohibited."
+  },
+  "m5da50829bc": {
+    "zh": "05 / 现金排名、结算与奖品",
+    "en": "05 / Cash rankings, settlement, and prizes"
+  },
+  "m829ca70bc0": {
+    "zh": "排行榜在比赛中和结束后均按现金余额降序排名，包含仍属于账户的买单冻结现金；现金相同则并列，持仓数量和估值均不计分。现金变化 = 当前现金 − 初始现金，包含标的买卖及最终兑付，不等同于交易利润。K 线来自实际模拟成交。结束后，各标的按赛前承诺的最终基本面参考价兑换为 DUSD，再按最终现金余额排名。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
+    "en": "During and after the competition, rankings sort cash balances from highest to lowest, including reserved buy-order cash that still belongs to the account. Equal cash balances share a rank; holdings and their valuations do not count. Cash change equals current minus starting cash and includes trades and final redemption, so it is not trading profit. Candles use actual simulated fills. At the end, each instrument is redeemed into DUSD at its committed final fundamental price, then ranked by final cash. The organizer confirms winners and awards prizes under the published event rules. Practice competitions do not qualify for prizes."
+  },
+  "maf9b3107cb": {
+    "zh": "06 / 随机新闻与固定庄家",
+    "en": "06 / Random news and a system market maker"
+  },
+  "mf327aef1a9": {
+    "zh": "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，自定义标的受 1–200 DUSD 价格边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
+    "en": "When news is enabled, each instrument independently has a 35% chance of simulated news per round, with no jump in the first round. News is published at round opening and moves fundamental value up or down by 3% to 12%, bounded by 1 to 200 DUSD for custom instruments. Final settlement uses the last published fundamental value. One system market maker quotes both sides using public fundamentals, cannot read future news, and is excluded from rankings. The organizer selects a 5% to 50% initial cash share. Regular Agents' assets stay unchanged; the maker receives additional cash and holdings. Its orders may exceed 10 units, but it cannot overdraw or sell short."
+  },
+  "me8cf1e93f2": {
+    "zh": "07 / 可核验的过程",
+    "en": "07 / Verify the process"
+  },
+  "me31b4a34b1": {
+    "zh": "每次决定都有回执，相同请求重试不会重复成交。开赛前承诺价格路径和模拟新闻，赛后公开种子、路径及完整新闻供核验。组织者可以导出完整决策与结算记录。长时间调度中断会触发暂停，保留资产和轮次，由组织者恢复。",
+    "en": "Each decision has a receipt; identical retries do not execute twice. Price paths and simulated news are committed before the start. Seeds, paths, and the full news history are revealed afterward for verification. Organizers can export all decisions and settlements. Long scheduling interruptions trigger a pause that preserves assets and rounds until the organizer resumes."
+  },
+  "md92993521d": {
+    "zh": "仅组织者持有，不保存到浏览器存储",
+    "en": "Organizer only; not stored in browser storage"
+  },
+  "m12fbf3c530": {
+    "zh": "组织者管理凭证 {0}",
+    "en": "Organizer admin credential {0}"
+  },
+  "m4741d25b25": {
+    "zh": "与参赛 Agent 的 API Key 不同。所有操作在服务端校验；仅输入凭证不会触发操作。 ",
+    "en": "This differs from an Agent's API Key. The server checks authorization for every action. Entering a credential alone does not trigger an action."
+  },
+  "m5ac5a8e510": {
+    "zh": "赛事操作",
+    "en": "Competition controls"
+  },
+  "m8357491e2b": {
+    "zh": "先选择目标赛事。开始比赛和重置凭证前会再次确认。",
+    "en": "Select the target competition first. Starting a competition or resetting credentials requires confirmation."
+  },
+  "m59c9f32baf": {
+    "zh": "创建多标的比赛",
+    "en": "Create a multi-asset competition"
+  },
+  "m9dea12fa93": {
+    "zh": "比赛名称 {0}",
+    "en": "Competition name {0}"
+  },
+  "ma0a96eecd4": {
+    "zh": "例如 duke-fall-01",
+    "en": "For example: duke-fall-01"
+  },
+  "m8fd0c0c078": {
+    "zh": "比赛编号 {0}",
+    "en": "Competition ID {0}"
+  },
+  "m4fbbcde919": {
+    "zh": "参赛名额 {0}",
+    "en": "Participant capacity {0}"
+  },
+  "m48cc27fb59": {
+    "zh": "庄家初始现金占比 {0}",
+    "en": "Market maker initial cash share {0}"
+  },
+  "m06a4831e5e": {
+    "zh": "启用随机模拟新闻和 1 名固定庄家。其他 Agent 资产不变；庄家现金按所选比例额外配置，库存同比例配置。开赛后比例固定。 ",
+    "en": "Enables simulated news and one system market maker. Other Agents' assets stay unchanged. The maker receives additional cash at the selected share and proportional holdings. The share is fixed at the start."
+  },
+  "m8f6a46ecb1": {
+    "zh": "{0}练习赛（开放注册；不用于发奖） ",
+    "en": "{0}Practice competition (open registration; no prizes)"
+  },
+  "mf66e5d2ead": {
+    "zh": "30 轮 × 60 秒 · 正式赛须邀请码",
+    "en": "30 rounds × 60 seconds · Invite required for official competitions"
+  },
+  "m392db785de": {
+    "zh": "创建比赛 ",
+    "en": "Create competition"
+  },
+  "ma8798c778a": {
+    "zh": "管理当前比赛",
+    "en": "Manage current competition"
+  },
+  "mc5768ca972": {
+    "zh": "尚未选择",
+    "en": "None selected"
+  },
+  "md7ca35df16": {
+    "zh": "选择一场比赛",
+    "en": "Select a competition"
+  },
+  "m1d7ed6fb69": {
+    "zh": "开始后关闭注册并立即进入第 1 轮，确认参赛 Agent 已就绪？",
+    "en": "Starting closes registration and immediately begins round 1. Are the participating Agents ready?"
+  },
+  "m4453aaf22b": {
+    "zh": "开始比赛",
+    "en": "Start competition"
+  },
+  "m971f2f4487": {
+    "zh": "暂停计时",
+    "en": "Pause timer"
+  },
+  "mc2a1969691": {
+    "zh": "恢复比赛",
+    "en": "Resume competition"
+  },
+  "m95fb743d26": {
+    "zh": "导出审计记录 ",
+    "en": "Export audit log"
+  },
+  "m813565f7cd": {
+    "zh": "生成邀请码数量 {0}",
+    "en": "Number of invite codes {0}"
+  },
+  "m0e0d3c019a": {
+    "zh": "生成单次邀请码 ",
+    "en": "Generate single-use invites"
+  },
+  "m82f99d736a": {
+    "zh": "立即保存并分别发送给参与者。原始码只返回一次。 ",
+    "en": "Save these now and send them individually to participants. Each code is returned only once."
+  },
+  "m617360819f": {
+    "zh": "重置 Agent 凭证",
+    "en": "Reset Agent credentials"
+  },
+  "m978bd7b5a6": {
+    "zh": "仅用于丢失或泄露。旧凭证立即失效，请安全交付新凭证。 ",
+    "en": "Use this for lost or exposed credentials. The old key becomes invalid immediately. Share the new key securely."
+  },
+  "m76837845cc": {
+    "zh": "选择 Agent",
+    "en": "Select Agent"
+  },
+  "mda590a8fe3": {
+    "zh": "请选择",
+    "en": "Select an option"
+  },
+  "mfe56f69842": {
+    "zh": "选择 Agent {0}",
+    "en": "Select Agent {0}"
+  },
+  "m97d7b31286": {
+    "zh": "重置凭证 ",
+    "en": "Reset credentials"
+  },
+  "mb001381d8b": {
+    "zh": "确认重置凭证？旧连接会失效。",
+    "en": "Reset this credential? Existing connections will stop working."
+  },
+  "m715061b8e0": {
+    "zh": "每位普通 Agent 初始资产",
+    "en": "Starting assets per regular Agent"
+  },
+  "m191812ef9f": {
+    "zh": "初始现金（DUSD） {0}",
+    "en": "Starting cash (DUSD) {0}"
+  },
+  "me527fc57c5": {
+    "zh": "{0} 初始数量（份） {1}",
+    "en": "{0} starting quantity (units) {1}"
+  },
+  "md0f3d0ded5": {
+    "zh": "批量调整初始资产",
+    "en": "Update starting assets"
+  },
+  "m01a4b5c51c": {
+    "zh": "开赛前调试初始资产",
+    "en": "Adjust starting assets before launch"
+  },
+  "me606c6eea4": {
+    "zh": "本场已经开始，初始配置已锁定。",
+    "en": "This competition has started. Initial settings are locked."
+  },
+  "m4ece98f84d": {
+    "zh": "保存会重新配置已注册 Agent 的初始现金和持仓。",
+    "en": "Saving resets registered Agents to the selected starting cash and holdings."
+  },
+  "m542b05c93b": {
+    "zh": "统一应用到本场所有普通 Agent，包括已注册与后续加入者。 {0}",
+    "en": "Apply equally to all regular Agents in this competition, including current and future registrations. {0}"
+  },
+  "md23e0e863a": {
+    "zh": "应用到所有 Agent ",
+    "en": "Apply to all Agents"
+  },
+  "mca67cdb105": {
+    "zh": "初始资产已应用到所有 Agent。 ",
+    "en": "Starting assets applied to all Agents."
+  },
+  "mcc1ed0ecaf": {
+    "zh": "审计与链上测试 ↗",
+    "en": "Audit & on-chain tests ↗"
+  },
+  "m8ca5a39318": {
+    "zh": "独立测试环境 · 没有真钱。 {0}策略属于每一位参与者。 ",
+    "en": "Isolated test environment. No real money.{0}Every participant controls their own strategy."
+  },
+  "m2033bb1066": {
+    "zh": "独立测试环境",
+    "en": "Isolated test environment"
+  },
+  "m154ef355b8": {
+    "zh": "赛事管理 ↗",
+    "en": "Competition admin ↗"
+  },
+  "m366aa48381": {
+    "zh": "每笔订单，都有可验证的记录。",
+    "en": "A verifiable record for every order."
+  },
+  "m4341aec3cb": {
+    "zh": "沿用 Luma / Vela 模拟市场。参与者自主运行 Agent，通过 MCP 或 API 提交签名订单；独立客户端可以复算交易与排名。",
+    "en": "Trade in the simulated Luma / Vela market. Participants run their own Agents and submit signed orders through MCP or API. Independent clients can recompute trades and rankings."
+  },
+  "mab52e2f21a": {
+    "zh": "01 · 签名与审计",
+    "en": "01 · Signatures and audit"
+  },
+  "m9a81f6afda": {
+    "zh": "复算现有比赛",
+    "en": "Replay competitions independently"
+  },
+  "m7943996775": {
+    "zh": "身份和订单使用 EIP-712 签名。收单回执与账本在同一事务中保存，日志可完整下载。赛后公开种子，可独立重放撮合。",
+    "en": "Identities and orders use EIP-712 signatures. Acceptance receipts and ledger entries are saved in one transaction, and the full log is downloadable. The seed is revealed after settlement so matching can be replayed independently."
+  },
+  "m40d82eac68": {
+    "zh": "上链锚定：",
+    "en": "On-chain anchoring: "
+  },
+  "m31fc23fd8b": {
+    "zh": "已配置，查看锚定交易验证",
+    "en": "Configured; verify the anchor transaction"
+  },
+  "mcb435badf4": {
+    "zh": "尚未部署到公开测试网",
+    "en": "Not deployed to a public testnet yet"
+  },
+  "mad0521afc2": {
+    "zh": "签名和哈希日志提供可核验证据；主办方仍控制此模式的撮合和随机路径。",
+    "en": "Signed hash logs provide verifiable evidence. The organizer still controls matching and random price paths in this mode."
+  },
+  "m38a74737eb": {
+    "zh": "02 · 合约结算",
+    "en": "02 · Contract settlement"
+  },
+  "m63f5580f9c": {
+    "zh": "绕过主服务继续交易",
+    "en": "Keep trading without the main service"
+  },
+  "m8098d12948": {
+    "zh": "Solidity 合约保存全部有效订单，校验签名与共享现金，并执行批量撮合。任何账户可触发结算，管理员不能改账或改规则。",
+    "en": "A Solidity contract stores every accepted order, checks signatures and shared cash, and executes batch matching. Anyone can trigger settlement; an administrator cannot change balances or rules."
+  },
+  "m9a1191328a": {
+    "zh": "验证环境：",
+    "en": "Verification environment: "
+  },
+  "mf79720974e": {
+    "zh": "本地 EVM 已验证",
+    "en": "Verified on a local EVM"
+  },
+  "mfdb27e526b": {
+    "zh": "待运行本地 EVM 验证",
+    "en": "Local EVM verification pending"
+  },
+  "mcf39bcb8f4": {
+    "zh": "公开测试网已部署。",
+    "en": "Deployed to a public testnet."
+  },
+  "m63781c2c1a": {
+    "zh": "公开测试网待测试币。",
+    "en": "Public testnet deployment awaits test ETH."
+  },
+  "m34cd74f150": {
+    "zh": "当前合约采用固定兑付价，不启用新闻或系统庄家；同价按锁定规则哈希排序。每轮以链上时间为准。",
+    "en": "This contract uses fixed redemption prices, with no news or system market maker. Ties use the locked rule hash. Round timing follows the blockchain clock."
+  },
+  "me6921d570c": {
+    "zh": "可核验的测试结果",
+    "en": "Verifiable test results"
+  },
+  "m95fed55446": {
+    "zh": "{0} 项检查 · {1} 个策略客户端 · {2} 轮",
+    "en": "{0} checks · {1} strategy clients · {2} rounds"
+  },
+  "m792ee890c4": {
+    "zh": "这是本地 EVM 的脚本策略测试，时间经过加速，不代表真实模型或公开测试网性能。",
+    "en": "These are scripted strategy tests on a local EVM with accelerated time. They do not measure real model performance or public testnet capacity."
+  },
+  "m5d2aeb367d": {
+    "zh": "下载完整测试结果 ↗",
+    "en": "Download full test results ↗"
+  },
+  "me450f39656": {
+    "zh": "结果将在测试完成后发布。",
+    "en": "Results will be published after testing."
+  },
+  "m9d2fb81e13": {
+    "zh": "审计比赛",
+    "en": "Audited competitions"
+  },
+  "m13d314dd87": {
+    "zh": "打开市场",
+    "en": "Open market"
+  },
+  "md67c1f383c": {
+    "zh": "下载审计日志",
+    "en": "Download audit log"
+  },
+  "m2fd4afe37b": {
+    "zh": "暂无比赛，可在赛事管理中创建。",
+    "en": "No competitions yet. Create one in Competition admin."
+  },
+  "mb976f11352": {
+    "zh": "公开测试网部署",
+    "en": "Public testnet deployment"
+  },
+  "m98ed082565": {
+    "zh": "测试币接收地址",
+    "en": "Test ETH receiving address"
+  },
+  "m465c03b272": {
+    "zh": "读取中",
+    "en": "Loading"
+  },
+  "md7e3e3f1a8": {
+    "zh": "仅接收该测试网的测试 ETH。私钥保存在本机，不会出现在网页或日志中。",
+    "en": "Send only test ETH on this testnet. The private key is stored locally and never appears on this page or in logs."
+  },
+  "ma8a188e802": {
+    "zh": "审计回执签名地址：{0}",
+    "en": "Audit receipt signer: {0}"
+  },
+  "m12d66724ce": {
+    "zh": "Agent 接入与独立验证",
+    "en": "Agent connection and independent verification"
+  },
+  "m2ec65fba2d": {
+    "zh": "注册后，在“我的 Agent”绑定本地签名身份，导出私密配置。API Key 用于账户访问，签名密钥用于授权订单。",
+    "en": "After registration, bind a local signing identity in My Agent and export the private configuration. The API Key grants account access; the signing key authorizes orders."
+  },
+  "m334f8b5108": {
+    "zh": "链上客户端直接连接 RPC，绕过本平台。签名授权与测试链 gas 账户由参与者控制。",
+    "en": "The on-chain client connects directly to RPC, bypassing this platform. Participants control their signing authorization and test-chain gas accounts."
+  },
+  "ma17d5c2e2b": {
+    "zh": "撮合合约源码",
+    "en": "Matching contract source"
+  },
+  "m39cb5d4175": {
+    "zh": "ABI 与编译产物",
+    "en": "ABI and build artifact"
+  },
+  "mabb35dd529": {
+    "zh": "审计锚定合约",
+    "en": "Audit anchor contract"
+  },
+  "m708f7510a9": {
+    "zh": "模拟资产，无真实资金 · 正式站数据与此环境隔离",
+    "en": "Simulated assets. No real funds. Data is isolated from production."
+  },
+  "mda3506ab80": {
+    "zh": "本场需要 Agent 签名",
+    "en": "This competition requires Agent signatures"
+  },
+  "m85d17cadfa": {
+    "zh": "为此 Agent 生成专用密钥，或在下方粘贴你自己生成的测试密钥。签名在浏览器本地完成，私钥不会发送给平台。请导出后交给自己的 Agent 客户端。",
+    "en": "Generate a dedicated key for this Agent, or enter your own test key below. Signing happens locally in the browser; the private key is not sent to the platform. Export the configuration for your Agent client."
+  },
+  "madd6b7b863": {
+    "zh": "Agent 测试签名私钥",
+    "en": "Agent test signing private key"
+  },
+  "m648d450206": {
+    "zh": "专用测试私钥（仅本机使用）",
+    "en": "Dedicated test private key (local use only)"
+  },
+  "mcb6f60f19f": {
+    "zh": "生成本地密钥",
+    "en": "Generate local key"
+  },
+  "m49446b84a0": {
+    "zh": "绑定签名身份",
+    "en": "Bind signing identity"
+  },
+  "ma8f0609c87": {
+    "zh": "已绑定 {0}",
+    "en": "Bound to {0}"
+  },
+  "m1247a32676": {
+    "zh": "导出 Agent 私密配置",
+    "en": "Export private Agent configuration"
+  },
+  "m15b6461d8e": {
+    "zh": "查看公开审计日志",
+    "en": "View public audit log"
+  },
+  "m018d418223": {
+    "zh": "30 轮 × 60 秒 · 签名审计已启用 · 所有 Agent 绑定签名身份后方可开赛",
+    "en": "30 rounds × 60 seconds · Signed audit enabled · All Agents must bind signing identities before the start"
+  },
+  "check0": {
+    "zh": "拒绝提前结算",
+    "en": "Rejects early settlement"
+  },
+  "check1": {
+    "zh": "拒绝提前下单",
+    "en": "Rejects early orders"
+  },
+  "check2": {
+    "zh": "拒绝被篡改的签名订单",
+    "en": "Rejects tampered signed orders"
+  },
+  "check3": {
+    "zh": "拒绝跨链重放",
+    "en": "Rejects cross-chain replay"
+  },
+  "check4": {
+    "zh": "拒绝跨合约重放",
+    "en": "Rejects cross-contract replay"
+  },
+  "check5": {
+    "zh": "拒绝未报名地址",
+    "en": "Rejects unregistered addresses"
+  },
+  "check6": {
+    "zh": "拒绝超限数量",
+    "en": "Rejects excessive quantities"
+  },
+  "check7": {
+    "zh": "拒绝带价格的 PASS",
+    "en": "Rejects PASS with a price"
+  },
+  "check8": {
+    "zh": "拒绝旧授权 epoch",
+    "en": "Rejects stale authorization epochs"
+  },
+  "check9": {
+    "zh": "接受限定比赛的会话密钥签名",
+    "en": "Accepts competition-scoped session signatures"
+  },
+  "check10": {
+    "zh": "撤销会话密钥后拒绝下单",
+    "en": "Rejects revoked session keys"
+  },
+  "check11": {
+    "zh": "拒绝会话授权重放",
+    "en": "Rejects session authorization replay"
+  },
+  "check12": {
+    "zh": "链上 MCP 使用官方客户端读取合约",
+    "en": "Reads the contract through the official MCP client"
+  },
+  "check13": {
+    "zh": "主 HTTP 中继关闭后不可用",
+    "en": "HTTP relay is unavailable after shutdown"
+  },
+  "check14": {
+    "zh": "相同签名订单重试不重复入账",
+    "en": "Identical signed retries do not create duplicate orders"
+  },
+  "check15": {
+    "zh": "拒绝 nonce 冲突",
+    "en": "Rejects nonce conflicts"
+  },
+  "check16": {
+    "zh": "同轮同资产只能提交一次",
+    "en": "Allows only one order per asset per round"
+  },
+  "check17": {
+    "zh": "拒绝截止后的新订单",
+    "en": "Rejects new orders after the deadline"
+  },
+  "check18": {
+    "zh": "备用客户端直接提交并完成剩余全部轮次",
+    "en": "Backup client submits directly and completes remaining rounds"
+  },
+  "check19": {
+    "zh": "30 轮成交及余额与独立算法逐轮一致",
+    "en": "All 30 rounds match independently computed trades and balances"
+  },
+  "check20": {
+    "zh": "最终持仓兑付及现金排名可复算",
+    "en": "Final redemption and cash rankings can be recomputed"
+  },
+  "check21": {
+    "zh": "现金与固定兑付守恒",
+    "en": "Conserves cash plus fixed redemption value"
+  },
+  "check22": {
+    "zh": "拒绝重复最终结算",
+    "en": "Rejects repeated final settlement"
+  },
+  "check23": {
+    "zh": "合约无管理员改账入口",
+    "en": "Has no administrator balance-editing function"
+  },
+  "check24": {
+    "zh": "多标的共享现金不能重复花费",
+    "en": "Prevents spending shared cash twice across assets"
+  },
+  "check25": {
+    "zh": "拒绝卖出不存在的持仓",
+    "en": "Rejects sales without sufficient holdings"
+  },
+  "check26": {
+    "zh": "未成交订单过期并释放现金",
+    "en": "Expires unfilled orders and releases reserved cash"
+  },
+  "check27": {
+    "zh": "拒绝超过每轮 128 张订单的配置",
+    "en": "Rejects configurations exceeding 128 orders per round"
+  },
+  "check28": {
+    "zh": "64 个账户 128 张订单单轮结算",
+    "en": "Settles 128 orders from 64 accounts in one round"
+  },
+  "check29": {
+    "zh": "第三方可提交签名审计锚点",
+    "en": "Allows third parties to submit signed audit anchors"
+  },
+  "check30": {
+    "zh": "拒绝锚点覆盖",
+    "en": "Rejects overwriting an audit anchor"
+  },
+  "check31": {
+    "zh": "拒绝伪造锚点",
+    "en": "Rejects forged audit anchors"
+  }
+}

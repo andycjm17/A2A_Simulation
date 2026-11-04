@@ -804,18 +804,18 @@ describe("official MCP client compatibility", () => {
 });
 
 describe('dual-asset HTTP and persisted ledger', () => {
-  it('creates AI markets by default, persists both instruments, settles separately, and keeps future paths private', async () => {
+  it('creates crypto ETF markets by default, persists both instruments, settles separately, and keeps future paths private', async () => {
     const created=await req('/api/admin/markets',{token:admin,data:{id:'dual-runtime',name:'Dual runtime',practice:true,rounds:2}});
     expect(created.status).toBe(201);
-    expect(created.body.instruments.map((i:any)=>i.symbol)).toEqual(['OPENAI','ANTHROPIC']);
+    expect(created.body.instruments.map((i:any)=>i.symbol)).toEqual(['BFBT','EFET']);
     const base='/api/markets/dual-runtime';
     const a=(await req(`${base}/join`,{data:{name:'Buyer'}})).body;
     const b=(await req(`${base}/join`,{data:{name:'Seller'}})).body;
     await req('/api/admin/markets/dual-runtime/start',{token:admin,data:{}});
     expect((await req(`${base}/decision`,{token:a.apiKey,data:order})).status).toBe(400);
-    for(const symbol of ['OPENAI','ANTHROPIC']) {
+    for(const symbol of ['BFBT','EFET']) {
       for(const [token,side] of [[a.apiKey,'BUY'],[b.apiKey,'SELL']]) {
-        expect((await req(`${base}/decision`,{token,data:{...order,symbol,side,requestId:`${symbol}-${side}-runtime`,price:symbol==='OPENAI'?10000:12000}})).status).toBe(200);
+        expect((await req(`${base}/decision`,{token,data:{...order,symbol,side,requestId:`${symbol}-${side}-runtime`,price:symbol==='BFBT'?10000:12000}})).status).toBe(200);
       }
     }
     const stub=env.MARKETS.get(env.MARKETS.idFromName('dual-runtime'));
@@ -825,7 +825,7 @@ describe('dual-asset HTTP and persisted ledger', () => {
     const snapshot=(await req(base)).body;
     expect(snapshot.instruments[0].orderBook.bids).toEqual([{price:10000,quantity:5}]);
     const exported=(await req('/api/admin/markets/dual-runtime/export',{token:admin})).body;
-    expect(exported.reveal).toBeNull();expect(exported.audit.assets.OPENAI.path).toBeUndefined();
+    expect(exported.reveal).toBeNull();expect(exported.audit.assets.BFBT.path).toBeUndefined();
     const settle=async()=>{
       await runInDurableObject(stub,(_,ctx)=>{
         const state=JSON.parse(ctx.storage.sql.exec<{state:string}>('SELECT state FROM market WHERE id=1').one().state);
@@ -839,11 +839,11 @@ describe('dual-asset HTTP and persisted ledger', () => {
     expect(after.tradeCount).toBe(2);
     expect(after.instruments.map((i:any)=>i.candles[0].close)).toEqual([10000,12000]);
     expect(after.instruments.every((i:any)=>i.orderBook.bids.length===0)).toBe(true);
-    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({OPENAI:105,ANTHROPIC:105});
+    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({BFBT:105,EFET:105});
     await settle();await evictDurableObject(stub);
     const final=(await req(base)).body;
-    expect(final.status).toBe('finished');expect(final.reveal.paths.OPENAI).toHaveLength(3);
-    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({OPENAI:0,ANTHROPIC:0});
+    expect(final.status).toBe('finished');expect(final.reveal.paths.BFBT).toHaveLength(3);
+    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({BFBT:0,EFET:0});
     expect((await req('/api/admin/markets/dual-runtime/status',{token:admin})).body.conserved).toBe(true);
   });
   it('concurrent requests across symbols cannot overspend shared cash',async()=>{
@@ -855,7 +855,7 @@ describe('dual-asset HTTP and persisted ledger', () => {
       state.agents[0].cash=300000;state.treasuryCash+=700000;
       ctx.storage.sql.exec('UPDATE market SET state=? WHERE id=1',JSON.stringify(state));
     });await evictDurableObject(stub);
-    const results=await Promise.all(['OPENAI','ANTHROPIC'].map(symbol=>req('/api/markets/runtime-market/decision',{token:a.apiKey,data:{...order,symbol,price:20000,quantity:10,requestId:`concurrent-${symbol}`}})));
+    const results=await Promise.all(['BFBT','EFET'].map(symbol=>req('/api/markets/runtime-market/decision',{token:a.apiKey,data:{...order,symbol,price:20000,quantity:10,requestId:`concurrent-${symbol}`}})));
     expect(results.map(r=>r.status).sort()).toEqual([200,400]);
     await evictDurableObject(stub);
     const account=(await req('/api/markets/runtime-market/account',{token:a.apiKey})).body;
@@ -919,7 +919,7 @@ describe("news and system maker persistence", () => {
       (
         await req(`${base}/decision`, {
           token: a.apiKey,
-          data: { ...order, symbol: "OPENAI", price: 12000, quantity: 5 },
+          data: { ...order, symbol: "BFBT", price: 12000, quantity: 5 },
         })
       ).status,
     ).toBe(200);
@@ -949,7 +949,7 @@ describe("news and system maker persistence", () => {
       expect(exported.agents.filter((a: any) => a.system)).toHaveLength(1);
       if (round < 3) {
         expect(exported.reveal).toBeNull();
-        expect(exported.audit.assets.OPENAI.path).toBeUndefined();
+        expect(exported.audit.assets.BFBT.path).toBeUndefined();
       }
       expect(
         (await req(`/api/admin/markets/${id}/status`, { token: admin })).body
@@ -996,19 +996,19 @@ describe('organizer bulk initial balances',()=>{
   const id='balances-runtime',base=`/api/markets/${id}`,path=`/api/admin/markets/${id}/initial-balances`;
   await req('/api/admin/markets',{token:admin,data:{id,name:'Balance debug',practice:true,newsEnabled:true,makerCashShare:.2}});
   const a=(await req(`${base}/join`,{data:{name:'Existing agent'}})).body;
-  const balances={cash:123456,DAT:100,OPENAI:25,ANTHROPIC:250};
+  const balances={cash:123456,BFBT:25,EFET:250};
   expect((await req(path,{token:a.apiKey,data:balances})).status).toBe(403);
-  expect((await req(path,{token:admin,data:{...balances,OPENAI:2.5}})).status).toBe(400);
+  expect((await req(path,{token:admin,data:{...balances,BFBT:2.5}})).status).toBe(400);
   expect((await req(path,{token:admin,data:balances})).status).toBe(200);
   const stub=env.MARKETS.get(env.MARKETS.idFromName(id));await evictDurableObject(stub);
-  expect((await req(`${base}/account`,{token:a.apiKey})).body).toMatchObject({cash:123456,holdings:{OPENAI:25,ANTHROPIC:250}});
+  expect((await req(`${base}/account`,{token:a.apiKey})).body).toMatchObject({cash:123456,holdings:{BFBT:25,EFET:250}});
   const b=(await req(`${base}/join`,{data:{name:'Later agent'}})).body;
   expect(b.account.cash).toBe(123456);
   const initial=(await req(base)).body;
   expect(initial.initialBalances).toEqual(balances);expect(initial.leaderboard.every((a:any)=>a.profit===0)).toBe(true);
   await req(`/api/admin/markets/${id}/start`,{token:admin,data:{}});await evictDurableObject(stub);
   const running=(await req(base)).body;
-  expect(running.maker).toMatchObject({initialCash:61728,initialInventory:{OPENAI:12,ANTHROPIC:125},profit:0});
+  expect(running.maker).toMatchObject({initialCash:61728,initialInventory:{BFBT:12,EFET:125},profit:0});
   expect((await req(path,{token:admin,data:{...balances,cash:1}})).status).toBe(409);
   expect((await req(`/api/admin/markets/${id}/status`,{token:admin})).body.conserved).toBe(true);
   expect((await req(`${base}/account`,{token:a.apiKey})).body.cash).toBe(123456);
@@ -1033,7 +1033,7 @@ describe('configurable instruments over HTTP',()=>{
   await req(`${manage}/start`,{token:admin,data:{}});
   expect((await req(`${manage}/instruments`,{token:admin,data:items.slice(0,1)})).status).toBe(409);
   expect((await req(`${base}/decision`,{token:a.apiKey,data:{...order,symbol:'RED',price:4500,quantity:2}})).status).toBe(200);
-  expect((await req(`${base}/decision`,{token:a.apiKey,data:{...order,symbol:'OPENAI',requestId:'invalid-symbol-custom'}})).status).toBe(400);
+  expect((await req(`${base}/decision`,{token:a.apiKey,data:{...order,symbol:'BFBT',requestId:'invalid-symbol-custom'}})).status).toBe(400);
   await evictDurableObject(stub);
   expect((await req(`${base}/account`,{token:a.apiKey})).body.orders[0].symbol).toBe('RED');
   expect((await req(`${manage}/status`,{token:admin})).body.conserved).toBe(true);
