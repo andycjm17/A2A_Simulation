@@ -157,6 +157,10 @@ function validateBalances(config: MarketConfig) {
     "启用庄家时，普通 Agent 初始现金须大于 0",
   );
 }
+export const MAKER_POLICY_V1 = "public-fundamentals-v1";
+export const MAKER_POLICY_V2 = "risk-limited-v2";
+export type MakerPolicy = typeof MAKER_POLICY_V1 | typeof MAKER_POLICY_V2;
+
 export type MarketConfig = {
   id: string;
   name: string;
@@ -167,6 +171,7 @@ export type MarketConfig = {
   assetMode?: "ai" | "legacy";
   newsEnabled?: boolean;
   makerCashShare?: number;
+  makerPolicy?: MakerPolicy;
   initialBalances?: InitialBalances;
   instruments?: InstrumentConfig[];
 };
@@ -1136,7 +1141,10 @@ function initializeMaker(s: State, now: number) {
     id: `system-maker:${s.config.id}`,
     name: "基本面庄家",
     system: "fundamental-maker",
-    description: "按已公布的新闻基本面双向报价，不使用未来新闻。",
+    description:
+      s.config.makerPolicy === MAKER_POLICY_V2
+        ? "按已公开基本面报价，根据当轮新闻和库存调整挂单量。"
+        : "按已公布的新闻基本面双向报价，不使用未来新闻。",
     keyHash: "",
     cash,
     dat: 0,
@@ -1170,13 +1178,26 @@ function openRound(s: State, now: number) {
     if (n.round === s.round) event(s, now, "news_published", n.id);
   const a = s.agents.find((a) => a.system);
   if (!a) return;
-  // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
-  // of current cash per asset / 10% of inventory offered per round. No future reads.
+  const riskLimited = s.config.makerPolicy === MAKER_POLICY_V2;
+  const marked = riskLimited ? makerEquity(s, a) : null;
+  // Mark at the current public reference and reserve the worst-case loss across all quotes.
+  let lossBudget = marked
+    ? Math.max(0, marked.equity - Math.ceil(marked.initialEquity * 0.95))
+    : Infinity;
+  const reduceOnly = riskLimited && lossBudget === 0;
+  const protectPrice = riskLimited && (reduceOnly || s.round === s.config.rounds);
+  const marketSymbols = symbols(s);
   const cashPerAsset = Math.floor(
-    a.cash * Math.min(0.1, 0.8 / symbols(s).length),
+    a.cash * Math.min(0.1, 0.8 / marketSymbols.length),
   );
-  for (const symbol of symbols(s)) {
-    const fundamental = pathFor(s, symbol)[s.round - 1];
+  for (const symbol of marketSymbols) {
+    const path = pathFor(s, symbol);
+    const fundamental = path[s.round - 1];
+    const previous = path[Math.max(0, s.round - 2)];
+    const newsMove = riskLimited ? (fundamental - previous) / previous : 0;
+    const halfSpread = riskLimited
+      ? Math.min(0.0125, 0.0075 + Math.abs(newsMove) * 0.05)
+      : 0.01;
     const inventory = holding(a, symbol);
     const initial = a.initialInventory?.[symbol] ?? a.initialHoldings!;
     const imbalance = (inventory - initial) / Math.max(1, initial);
@@ -1184,18 +1205,42 @@ function openRound(s: State, now: number) {
     const center = fundamental * (1 - skew);
     const ask = Math.max(
       MIN_PRICE + 1,
-      Math.min(MAX_PRICE, Math.ceil(center + fundamental * 0.01)),
+      protectPrice ? fundamental : MIN_PRICE,
+      Math.min(MAX_PRICE, Math.ceil(center + fundamental * halfSpread)),
     );
     const bid = Math.min(
       ask - 1,
-      Math.max(MIN_PRICE, Math.floor(center - fundamental * 0.01)),
+      protectPrice ? fundamental : MAX_PRICE,
+      Math.max(MIN_PRICE, Math.floor(center - fundamental * halfSpread)),
+    );
+    const inventoryLimit = initial
+      ? Math.floor(initial * 1.5)
+      : Math.floor((a.initialCash! * 0.1) / path[0]);
+    const inventoryScale = Math.max(1, initial || inventoryLimit / 2);
+    const newsTilt = Math.max(-0.25, Math.min(0.25, newsMove * 2.5));
+    const target = Math.max(0, initial + inventoryScale * newsTilt);
+    const sizeTilt = Math.max(
+      -0.5,
+      Math.min(0.5, (target - inventory) / inventoryScale),
     );
     for (const side of ["BUY", "SELL"] as const) {
-      const price = side === "BUY" ? bid : ask;
-      const quantity =
-        side === "BUY"
-          ? Math.floor(cashPerAsset / price)
-          : Math.floor(inventory * 0.1);
+      const buying = side === "BUY";
+      if (reduceOnly && buying) continue;
+      const price = buying ? bid : ask;
+      let quantity = buying
+        ? Math.floor(cashPerAsset / price)
+        : Math.floor(inventory * 0.1);
+      if (riskLimited && quantity > 0) {
+        const size = Math.min(1, 0.8 + 0.5 * (buying ? sizeTilt : -sizeTilt));
+        quantity = Math.max(1, Math.floor(quantity * size));
+        if (buying)
+          quantity = Math.min(quantity, Math.max(0, inventoryLimit - inventory));
+        const lossPerUnit = buying ? price - fundamental : fundamental - price;
+        if (lossPerUnit > 0) {
+          quantity = Math.min(quantity, Math.floor(lossBudget / lossPerUnit));
+          lossBudget -= quantity * lossPerUnit;
+        }
+      }
       if (quantity < 1) continue;
       const id = `${s.config.id}:${s.round}:${a.id}:${symbol}:${side}`;
       s.orders.push({
@@ -1211,15 +1256,15 @@ function openRound(s: State, now: number) {
         filled: 0,
         cashFlow: 0,
         status: "pending",
-        note: "系统庄家：已公开基本面 ±1% 点差，库存偏移上限 2%",
+        note: riskLimited
+          ? "系统庄家：公开基本面、新闻与库存风控策略"
+          : "系统庄家：已公开基本面 ±1% 点差，库存偏移上限 2%",
       });
     }
   }
 }
 
-export function makerState(s: State) {
-  const a = s.agents.find((a) => a.system);
-  if (!a) return null;
+function makerEquity(s: State, a: Agent) {
   const initialInventory =
     a.initialInventory ??
     Object.fromEntries(
@@ -1242,6 +1287,13 @@ export function makerState(s: State) {
           ],
       0,
     );
+  return { initialInventory, initialEquity, equity };
+}
+
+export function makerState(s: State) {
+  const a = s.agents.find((a) => a.system);
+  if (!a) return null;
+  const { initialInventory, initialEquity, equity } = makerEquity(s, a);
   const makerVolume = s.trades
     .filter((t) => t.buyer === a.id || t.seller === a.id)
     .reduce((sum, t) => sum + t.quantity, 0);
@@ -1262,6 +1314,6 @@ export function makerState(s: State) {
         (s.agents.length - 1) * startingBalances(s.config).cash),
     volume: makerVolume,
     volumeShare: volume ? makerVolume / volume : null,
-    policy: "public-fundamentals-v1" as const,
+    policy: s.config.makerPolicy ?? MAKER_POLICY_V1,
   };
 }

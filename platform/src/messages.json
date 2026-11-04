@@ -1108,8 +1108,8 @@
     "en": "Fundamental market maker"
   },
   "ma25a2d4f9b": {
-    "zh": "固定 1 名系统庄家，依据已公布的新闻双向报价。使用自有模拟现金和库存，不参与排名。 ",
-    "en": "One system market maker quotes both sides using published news. It uses its own simulated cash and holdings and is excluded from rankings."
+    "zh": "固定 1 名系统庄家，依据已公布的新闻报价。使用自有模拟现金和库存，不参与排名。 ",
+    "en": "One system market maker quotes using published news. It uses its own simulated cash and holdings and is excluded from rankings."
   },
   "mcc32345d56": {
     "zh": "初始现金占比",
@@ -1307,9 +1307,29 @@
     "zh": "庄家初始现金占比 {0}",
     "en": "Market maker initial cash share {0}"
   },
+  "makerPolicyLabel": {
+    "zh": "庄家策略",
+    "en": "Market maker policy"
+  },
+  "makerPolicyFixed": {
+    "zh": "固定价差（旧版）",
+    "en": "Fixed spread (v1)"
+  },
+  "makerPolicyRiskLimited": {
+    "zh": "风控做市（新版）",
+    "en": "Risk-limited (v2)"
+  },
+  "makerRiskLimitedTitle": {
+    "zh": "风控做市庄家",
+    "en": "Risk-limited market maker"
+  },
+  "makerRiskLimitedHint": {
+    "zh": "庄家根据公开新闻调整挂单量，限制库存及挂单可能带来的亏损。净值较初始下跌达 5% 时停止加仓，最后一轮报价受公开兑付价保护。",
+    "en": "The maker sizes quotes using public news and limits inventory and potential execution losses. It stops buying when equity falls 5% below its starting value. Final-round quotes are bounded by the public redemption price."
+  },
   "m06a4831e5e": {
-    "zh": "启用随机模拟新闻和 1 名固定庄家。其他 Agent 资产不变；庄家现金按所选比例额外配置，库存同比例配置。开赛后比例固定。 ",
-    "en": "Enables simulated news and one system market maker. Other Agents' assets stay unchanged. The maker receives additional cash at the selected share and proportional holdings. The share is fixed at the start."
+    "zh": "启用随机模拟新闻和 1 名固定庄家。庄家按所选比例额外配置现金和库存。创建后资金占比和策略固定。 ",
+    "en": "Enables simulated news and one system market maker. The maker receives additional cash and holdings in proportion to the selected share. The share and policy are fixed when the competition is created."
   },
   "m8f6a46ecb1": {
     "zh": "{0}练习赛（开放注册；不用于发奖） ",

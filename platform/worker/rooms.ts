@@ -3,6 +3,8 @@ import { z } from "zod";
 import { adminStatus } from "./admin-status";
 import {
   type State,
+  MAKER_POLICY_V1,
+  MAKER_POLICY_V2,
   MarketError,
   ensure,
   createState,
@@ -74,6 +76,7 @@ export const configSchema = z
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
     newsEnabled: z.boolean().default(false),
     makerCashShare: z.number().min(0).max(0.5).default(0),
+    makerPolicy: z.enum([MAKER_POLICY_V1, MAKER_POLICY_V2]).optional(),
     initialBalances: initialBalancesSchema.optional(),
     instruments: instrumentsSchema.optional(),
   })

@@ -3,8 +3,11 @@ import { useState, useEffect } from "react";
 import {
   startingBalances,
   DEFAULT_INSTRUMENTS,
+  MAKER_POLICY_V1,
+  MAKER_POLICY_V2,
   type InitialBalances,
   type InstrumentConfig,
+  type MakerPolicy,
 } from "../worker/engine";
 import {
   InstrumentFields,
@@ -191,6 +194,7 @@ export function Admin({
     [practice, setPractice] = useState(false),
     [capacity, setCapacity] = useState(50),
     [makerCashShare, setMakerCashShare] = useState(0.2),
+    [makerPolicy, setMakerPolicy] = useState<MakerPolicy>(MAKER_POLICY_V1),
     [instruments, setInstruments] = useState<InstrumentConfig[]>(
       DEFAULT_INSTRUMENTS.map((i) => ({ ...i, name: displayName(i.name) })),
     ),
@@ -269,6 +273,7 @@ export function Admin({
                   assetMode: "ai",
                   newsEnabled: true,
                   makerCashShare,
+                  makerPolicy,
                   initialBalances,
                   instruments,
                   rounds: 30,
@@ -315,6 +320,16 @@ export function Admin({
                   </option>
                 ))}
               </select>])}</label>
+            <label className="field">
+              {t("makerPolicyLabel")}
+              <select
+                value={makerPolicy}
+                onChange={(e) => setMakerPolicy(e.target.value as MakerPolicy)}
+              >
+                <option value={MAKER_POLICY_V1}>{t("makerPolicyFixed")}</option>
+                <option value={MAKER_POLICY_V2}>{t("makerPolicyRiskLimited")}</option>
+              </select>
+            </label>
             <p className="hint">{rich("m06a4831e5e")}</p>
             <label className="row hint">{rich("m8f6a46ecb1", [<input
                 type="checkbox"

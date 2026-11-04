@@ -1,10 +1,12 @@
 import { t, rich, useLocale, localizedLabels, localeTag, message, displayName, newsHeadline } from "./i18n";
 import type { Snapshot } from "./App";
 import { money } from "./App";
+import { MAKER_POLICY_V2 } from "../worker/engine";
 export function NewsPanel({ s }: { s: Snapshot }) {
   useLocale();
   if (!s.config.newsEnabled) return null;
   const maker = s.maker;
+  const riskLimited = (maker?.policy ?? s.config.makerPolicy) === MAKER_POLICY_V2;
   return (
     <section className="panel news-panel" aria-label={t("mfd84b94893")}>
       <div className="paneltitle">
@@ -41,7 +43,7 @@ export function NewsPanel({ s }: { s: Snapshot }) {
         {(s.config.makerCashShare ?? 0) > 0 ? (
           <aside className="maker-card">
             <span className="instrument-symbol">SYSTEM MARKET MAKER</span>
-            <h3>{rich("mb9de636315")}</h3>
+            <h3>{t(riskLimited ? "makerRiskLimitedTitle" : "mb9de636315")}</h3>
             <p>{rich("ma25a2d4f9b")}</p>
             <dl>
               <div>
@@ -66,7 +68,9 @@ export function NewsPanel({ s }: { s: Snapshot }) {
                 <dd>{maker ? money(maker.profit) : t("m626c8ed764")}</dd>
               </div>
             </dl>
-            <p className="hint">{rich("mbca153665a")}</p>
+            <p className="hint">
+              {t(riskLimited ? "makerRiskLimitedHint" : "mbca153665a")}
+            </p>
           </aside>
         ) : (
           <aside className="maker-card">

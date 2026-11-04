@@ -14,6 +14,8 @@ import {
   audit,
   pause,
   resume,
+  MAKER_POLICY_V2,
+  type MarketConfig,
 } from "../worker/engine";
 const config = {
   id: "news-test",
@@ -26,9 +28,9 @@ const config = {
   newsEnabled: true,
   makerCashShare: 0.2,
 };
-async function setup(share = 0.2, count = 2) {
+async function setup(share = 0.2, count = 2, overrides: Partial<MarketConfig> = {}) {
   const s = await createState(
-    { ...config, makerCashShare: share },
+    { ...config, makerCashShare: share, ...overrides },
     "news-test-seed",
     0,
   );
@@ -40,6 +42,97 @@ async function setup(share = 0.2, count = 2) {
     );
   return s;
 }
+
+describe("risk-limited market maker", () => {
+  async function startWithNews(openai: number, anthropic = 10000, count = 2) {
+    const s = await setup(0.2, count, { makerPolicy: MAKER_POLICY_V2, rounds: 3 });
+    // Fix the public marks in these fixtures so each guard can be tested independently.
+    s.assets!.OPENAI.path.fill(openai, 1);
+    s.assets!.ANTHROPIC.path.fill(anthropic, 1);
+    start(s, 1000);
+    return s;
+  }
+
+  it("shifts both quote sizes with the public news while future marks cannot affect quotes", async () => {
+    const flat = await startWithNews(10000, 10000, 20);
+    const positive = await startWithNews(11000, 10000, 20);
+    const negative = await startWithNews(9000, 10000, 20);
+    expect(positive.orders).toEqual(flat.orders);
+    expect(negative.orders).toEqual(flat.orders);
+    for (const s of [flat, positive, negative]) clearRound(s, settlementAt(s));
+    const quantities = [negative, flat, positive].map((s) => {
+      const book = publicState(s, s.openedAt).instruments[0].orderBook;
+      return { bid: book.bids[0].quantity, ask: book.asks[0].quantity };
+    });
+    expect(quantities[0].bid).toBeLessThan(quantities[1].bid);
+    expect(quantities[1].bid).toBeLessThan(quantities[2].bid);
+    expect(quantities[0].ask).toBeGreaterThan(quantities[1].ask);
+    expect(quantities[1].ask).toBeGreaterThan(quantities[2].ask);
+  });
+
+  it("clamps final quotes to the public redemption price even with skewed inventory", async () => {
+    const s = await startWithNews(10000);
+    const maker = s.agents.find((a) => a.system)!;
+    maker.holdings!.OPENAI += 25;
+    maker.holdings!.ANTHROPIC -= 25;
+    s.agents[0].holdings!.OPENAI -= 25;
+    s.agents[0].holdings!.ANTHROPIC += 25;
+    clearRound(s, settlementAt(s));
+    const [beforeOpenAI, beforeAnthropic] = publicState(s, s.openedAt).instruments;
+    expect(beforeOpenAI.orderBook.asks[0].price).toBeLessThan(10000);
+    expect(beforeAnthropic.orderBook.bids[0].price).toBeGreaterThan(10000);
+    clearRound(s, settlementAt(s));
+    const final = publicState(s, s.openedAt);
+    expect(final.maker?.policy).toBe(MAKER_POLICY_V2);
+    expect(final.instruments[0].orderBook.asks[0].price).toBe(10000);
+    expect(final.instruments[1].orderBook.bids[0].price).toBe(10000);
+  });
+
+  it("caps inventory and reserves the loss budget at the worst allowed fill price", async () => {
+    const s = await startWithNews(10000);
+    const maker = s.agents.find((a) => a.system)!;
+    maker.holdings!.OPENAI += 25;
+    s.agents[0].holdings!.OPENAI -= 25;
+    s.agents[0].cash += maker.cash - 175050;
+    maker.cash = 175050;
+    clearRound(s, settlementAt(s));
+    const book = publicState(s, s.openedAt).instruments[0].orderBook;
+    expect(book.bids).toEqual([]);
+    expect(book.asks).toEqual([{ price: 9975, quantity: 2 }]);
+    submit(s, s.agents[0].id, {
+      round: 2, symbol: "OPENAI", side: "BUY", price: 9975, quantity: 2,
+      requestId: "maker-loss-bound",
+    }, s.openedAt + 1);
+    clearRound(s, settlementAt(s));
+    const atFloor = publicState(s, s.openedAt);
+    expect(atFloor.maker?.equity).toBe(1425000);
+    expect(atFloor.instruments.every((i) => !i.orderBook.bids.length)).toBe(true);
+  });
+
+  it("keeps protective sell quotes after a public shock crosses the loss threshold", async () => {
+    const s = await startWithNews(9000, 9000);
+    clearRound(s, settlementAt(s));
+    const snapshot = publicState(s, s.openedAt);
+    expect(snapshot.maker?.equity).toBeLessThan(snapshot.maker!.initialEquity * 0.95);
+    for (const instrument of snapshot.instruments) {
+      expect(instrument.orderBook.bids).toEqual([]);
+      expect(instrument.orderBook.asks[0].price).toBeGreaterThanOrEqual(9000);
+    }
+  });
+
+  it("can provide a buy quote with zero starting inventory", async () => {
+    const s = await setup(0.2, 2, {
+      makerPolicy: MAKER_POLICY_V2,
+      initialBalances: { cash: 1000000, OPENAI: 0, ANTHROPIC: 100 },
+    });
+    start(s, 1000);
+    const { orderBook } = publicState(s, s.openedAt).instruments[0];
+    expect(orderBook.bids[0].quantity).toBeGreaterThan(0);
+    expect(orderBook.bids[0].quantity).toBeLessThanOrEqual(5);
+    expect(orderBook.asks).toEqual([]);
+  });
+});
+
 describe("random public news and a single capital-funded maker", () => {
   it("commits deterministic news, exposes it only at release, and redeems at the last known fundamental", async () => {
     const s = await setup();

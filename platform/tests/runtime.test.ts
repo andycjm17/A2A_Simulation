@@ -991,6 +991,33 @@ describe("news and system maker persistence", () => {
 });
 
 
+it("stores the new maker policy through market creation, reconfiguration and eviction", async () => {
+  const policy = "risk-limited-v2";
+  const base = "/api/markets/runtime-market";
+  const management = "/api/admin/markets/runtime-market";
+  await create(true, {
+    assetMode: "ai",
+    newsEnabled: true,
+    makerCashShare: 0.2,
+    makerPolicy: policy,
+  });
+  const configured = await req(`${management}/instruments`, {
+    token: admin,
+    data: [{ symbol: "LOCAL", name: "Local asset", initialPrice: 10000, icon: "L" }],
+  });
+  expect(configured.status).toBe(200);
+  expect((await req(base)).body.config.makerPolicy).toBe(policy);
+  expect((await join()).status).toBe(201);
+  expect((await req(`${management}/start`, { token: admin, data: {} })).status).toBe(200);
+  await evictDurableObject(env.MARKETS.get(env.MARKETS.idFromName("runtime-market")));
+  const snapshot = (await req(base)).body;
+  expect(snapshot.maker.policy).toBe(policy);
+  expect(snapshot.instruments[0].orderBook).toMatchObject({
+    bids: [{ price: 9925 }],
+    asks: [{ price: 10075 }],
+  });
+});
+
 describe('organizer bulk initial balances',()=>{
  it('requires admin, persists bulk updates across eviction, covers later joins and locks after start',async()=>{
   const id='balances-runtime',base=`/api/markets/${id}`,path=`/api/admin/markets/${id}/initial-balances`;

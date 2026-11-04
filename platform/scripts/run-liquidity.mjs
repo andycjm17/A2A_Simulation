@@ -9,7 +9,7 @@ await build({
 });
 const result = spawnSync(
   process.execPath,
-  ["reports/liquidity-experiment.mjs"],
+  ["reports/liquidity-experiment.mjs", ...process.argv.slice(2)],
   { stdio: "inherit", env: process.env },
 );
 process.exit(result.status ?? 1);

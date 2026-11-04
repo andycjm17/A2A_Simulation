@@ -9,8 +9,11 @@ import {
   publicState,
   audit,
   sha256,
+  MAKER_POLICY_V1,
+  MAKER_POLICY_V2,
 } from "../worker/engine";
 import { mkdir, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
 
 function rng(seed: number) {
   return () => {
@@ -20,9 +23,22 @@ function rng(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-const output = process.argv[2] ?? "experiments/raw.json";
+const args = process.argv.slice(2);
+const comparePolicies = args[0] === "--maker-policies";
+const output = comparePolicies
+  ? (args[1] ?? "reports/maker-policy.json")
+  : (args[0] ?? "experiments/raw.json");
 const primarySeeds = Number(process.env.EXPERIMENT_SEEDS ?? 200);
 const populations = process.env.EXPERIMENT_PRIMARY_ONLY ? [20] : [20, 10, 40];
+const treatments = comparePolicies
+  ? [MAKER_POLICY_V1, MAKER_POLICY_V2].map((makerPolicy) => ({
+      share: 0.2,
+      makerPolicy,
+    }))
+  : Array.from({ length: 11 }, (_, step) => ({
+      share: step / 20,
+      makerPolicy: undefined,
+    }));
 const rows: any[] = [];
 for (const population of populations) {
   const repetitions =
@@ -37,8 +53,8 @@ for (const population of populations) {
         Array.from({ length: 2 }, () => Array.from({ length: 5 }, random)),
       ),
     );
-    for (let step = 0; step <= 10; step++) {
-      const share = step / 20;
+    let commitment: string | undefined;
+    for (const { share, makerPolicy } of treatments) {
       const s = await createState(
         {
           id: "experiment-v1",
@@ -50,10 +66,14 @@ for (const population of populations) {
           assetMode: "ai",
           newsEnabled: true,
           makerCashShare: share,
+          ...(makerPolicy ? { makerPolicy } : {}),
         },
         seed,
         0,
       );
+      if (commitment !== undefined && s.commitment !== commitment)
+        throw new Error("Paired treatments must share the same news and price path");
+      commitment = s.commitment;
       for (let i = 0; i < population; i++)
         addAgent(
           s,
@@ -66,9 +86,38 @@ for (const population of populations) {
           0,
         );
       start(s, 1);
+      let assetRounds = 0;
+      let twoSidedQuotes = 0;
+      let spreadSumBps = 0;
+      let twoSidedDepth = 0;
+      let lossThresholdOpens = 0;
+      let equityPeak = 0;
+      let drawdownPct = 0;
+      const mark = (equity: number) => {
+        equityPeak = Math.max(equityPeak, equity);
+        drawdownPct = Math.max(
+          drawdownPct,
+          (100 * (equityPeak - equity)) / equityPeak,
+        );
+      };
       for (let r = 0; r < 30; r++) {
         // Snapshot is the only market information supplied to ordinary policies.
         const snapshot = publicState(s, s.openedAt);
+        if (comparePolicies) {
+          const maker = snapshot.maker!;
+          mark(maker.equity);
+          if (maker.equity <= Math.ceil(maker.initialEquity * 0.95))
+            lossThresholdOpens++;
+          for (const { orderBook, reference } of snapshot.instruments) {
+            assetRounds++;
+            const bid = orderBook.bids[0];
+            const ask = orderBook.asks[0];
+            if (!bid || !ask) continue;
+            twoSidedQuotes++;
+            spreadSumBps += ((ask.price - bid.price) * 10000) / reference;
+            twoSidedDepth += Math.min(bid.quantity, ask.quantity);
+          }
+        }
         for (let i = 0; i < population; i++)
           for (let j = 0; j < 2; j++) {
             const a = s.agents[i],
@@ -122,6 +171,7 @@ for (const population of populations) {
       }
       const snapshot = publicState(s, s.openedAt);
       const maker = snapshot.maker;
+      if (comparePolicies) mark(maker!.equity);
       const buyHold =
         1_000_000 +
         100 * snapshot.instruments.reduce((n, x) => n + x.reference, 0);
@@ -160,6 +210,18 @@ for (const population of populations) {
         makerExcessProfitDUSD: maker
           ? (maker.equity - makerBenchmark) / 100
           : 0,
+        ...(comparePolicies
+          ? {
+              makerPolicy: maker!.policy,
+              twoSidedOpenPct: (100 * twoSidedQuotes) / assetRounds,
+              openSpreadBps: twoSidedQuotes
+                ? spreadSumBps / twoSidedQuotes
+                : null,
+              openDepth: twoSidedDepth / assetRounds,
+              openingDrawdownPct: drawdownPct,
+              lossThresholdOpenPct: (100 * lossThresholdOpens) / s.config.rounds,
+            }
+          : {}),
         newsCount: s.news!.length,
         commitment: s.commitment,
         conservation: true,
@@ -171,11 +233,15 @@ for (const population of populations) {
       );
   }
 }
-await mkdir(output.substring(0, output.lastIndexOf("/")), { recursive: true });
+await mkdir(dirname(output), { recursive: true });
 await writeFile(
   output,
   JSON.stringify(
-    { protocol: "capital-v1", generatedAt: new Date().toISOString(), rows },
+    {
+      protocol: comparePolicies ? "maker-policy-paired-v1" : "capital-v1",
+      generatedAt: new Date().toISOString(),
+      rows,
+    },
     null,
     2,
   ),
