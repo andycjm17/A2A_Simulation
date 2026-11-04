@@ -15,6 +15,8 @@ import {
   resume,
   advance,
   retailState,
+  retailDecision,
+  sha256,
   DEFAULT_INSTRUMENTS,
   type MarketConfig,
   type State,
@@ -397,3 +399,93 @@ it("completes 240 rounds with 50 participants and five retail traders under accu
   expect(s.trades.length).toBeGreaterThan(0);
   expect(new Set(s.orders.map((o) => o.id)).size).toBe(s.orders.length);
 }, 30000);
+
+it("uses identical final-round decisions and fills when the market is assumed to continue", async () => {
+  const finite = await setup();
+  start(finite, 1000);
+  while (finite.round < 239) clearRound(finite, settlementAt(finite));
+  const continuing = structuredClone(finite);
+  continuing.config.rounds = 2400;
+  // Neither the horizon nor future/terminal prices may enter the policy.
+  for (const asset of Object.values(continuing.assets!))
+    asset.path.fill(20000, 240);
+  clearRound(finite, settlementAt(finite));
+  clearRound(continuing, settlementAt(continuing));
+  const finalOrders = (s: State) =>
+    s.orders.filter(
+      (o) => o.round === 240 && o.agentId.startsWith("system-retail:"),
+    );
+  expect(finalOrders(finite)).toHaveLength(10);
+  expect(finalOrders(finite)).toEqual(finalOrders(continuing));
+  expect(finalOrders(finite).some((o) => o.side === "BUY")).toBe(true);
+  clearRound(finite, settlementAt(finite));
+  clearRound(continuing, settlementAt(continuing));
+  expect(finite.status).toBe("finished");
+  expect(continuing.status).toBe("running");
+  expect(finite.trades).toEqual(continuing.trades);
+  expect(
+    publicState(finite, finite.finishedAt!).retailTraders.every(
+      (a) => a.decisionHorizon === "indefinite",
+    ),
+  ).toBe(true);
+});
+
+it("retail policies operate from current observations and retain cash and inventory constraints", () => {
+  for (const policy of [
+    "Random mix",
+    "Dip buyer",
+    "Profit taker",
+    "Momentum",
+    "Inventory balancer",
+  ]) {
+    const observation = Object.freeze({
+      policy,
+      reference: 10000,
+      previous: 9900,
+      owned: 100,
+      inventoryCost: 1000000,
+      initialInventory: 100,
+      availableCash: 1000000,
+    });
+    expect(
+      retailDecision(observation, { side: 0, price: 0.5, quantity: 0.9 }),
+    ).toEqual({ side: "BUY", price: 10000, quantity: 10 });
+    expect(
+      retailDecision(
+        { ...observation, availableCash: 0 },
+        { side: 0, price: 0.5, quantity: 0.9 },
+      ),
+    ).toEqual({ side: "SELL", price: 10000, quantity: 10 });
+    expect(
+      retailDecision(
+        { ...observation, availableCash: 0, owned: 0, inventoryCost: 0 },
+        { side: 0, price: 0.5, quantity: 0.9 },
+      ),
+    ).toEqual({ side: "PASS", price: 0, quantity: 0 });
+  }
+});
+
+it("replays the previous release's full retail ledger byte-for-byte", async () => {
+  // Recorded from a51744d's engine: protects existing signed audit histories.
+  const s = await createState(
+    { ...config, id: "historical-retail", name: "Historical retail" },
+    "historical-retail-seed",
+    0,
+  );
+  for (let i = 0; i < 2; i++)
+    addAgent(
+      s,
+      {
+        id: `a${i}`,
+        name: `Participant ${i}`,
+        description: "",
+        keyHash: `key${i}`,
+      },
+      0,
+    );
+  start(s, 1000);
+  while (s.status === "running") clearRound(s, settlementAt(s));
+  expect(await sha256(JSON.stringify(s))).toBe(
+    "80b9b7456b4ae986d89d4230f1a2c5e3d58548d2aa32bad91d1de818b2394a1c",
+  );
+});

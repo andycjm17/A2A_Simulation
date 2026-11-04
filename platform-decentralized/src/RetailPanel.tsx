@@ -20,7 +20,9 @@ export function RetailPanel({ s }: { s: Snapshot }) {
       <div className="tablewrap">
         <table aria-label="Retail trader scores">
           <caption className="ranking-caption">
-            Held units × published reference price − remaining acquisition cost.
+            Traders assume the market continues indefinitely and make decisions
+            without knowing when the competition ends. Score: held units ×
+            published reference price − remaining acquisition cost.
             Realized gains do not count. Final scores are saved before
             redemption. Participant cash rankings are separate.
           </caption>

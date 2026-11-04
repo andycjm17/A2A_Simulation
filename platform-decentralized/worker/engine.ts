@@ -1412,6 +1412,7 @@ export function retailState(s: State) {
       score: a.finalUnrealizedPnl ?? unrealizedPnl(s, a),
       scoreFrozen: a.finalUnrealizedPnl !== undefined,
       scoringBasis: "unrealized-pnl" as const,
+      decisionHorizon: "indefinite" as const,
       decisions: new Set(
         s.orders.filter((o) => o.agentId === a.id).map((o) => o.round),
       ).size,
@@ -1437,35 +1438,26 @@ function openRetailRound(s: State, now: number) {
           availableCash -= existing.price * existing.quantity;
         continue;
       }
-      const reference = pathFor(s, symbol)[s.round - 1];
-      const previous = pathFor(s, symbol)[Math.max(0, s.round - 2)];
-      const owned = holding(a, symbol);
-      const avgCost = owned ? a.inventoryCost![symbol] / owned : reference;
-      let buyProbability = 0.5;
-      if (a.retailPolicy === "Dip buyer")
-        buyProbability = reference < previous ? 0.8 : 0.35;
-      if (a.retailPolicy === "Profit taker")
-        buyProbability = reference > avgCost ? 0.2 : 0.65;
-      if (a.retailPolicy === "Momentum")
-        buyProbability = reference > previous ? 0.8 : 0.3;
-      if (a.retailPolicy === "Inventory balancer")
-        buyProbability = owned < a.initialInventory![symbol] ? 0.8 : 0.3;
       const random = (label: string) =>
         (hash32(`${s.seed}:retail:${id}:${label}`) >>> 0) / 4294967296;
-      let side: Side = random("side") < buyProbability ? "BUY" : "SELL";
-      const price = Math.max(
-        MIN_PRICE,
-        Math.min(
-          MAX_PRICE,
-          Math.round(reference * (0.98 + random("price") * 0.04)),
-        ),
+      // The round identifies a random draw, but the policy cannot see the clock,
+      // total rounds, future prices, terminal redemption, or competition score.
+      const { side, price, quantity } = retailDecision(
+        {
+          policy: a.retailPolicy,
+          reference: pathFor(s, symbol)[s.round - 1],
+          previous: pathFor(s, symbol)[Math.max(0, s.round - 2)],
+          owned: holding(a, symbol),
+          inventoryCost: a.inventoryCost![symbol],
+          initialInventory: a.initialInventory![symbol],
+          availableCash,
+        },
+        {
+          side: random("side"),
+          price: random("price"),
+          quantity: random("quantity"),
+        },
       );
-      const desired = 1 + Math.floor(random("quantity") * MAX_QTY);
-      const feasible = (side: Side) =>
-        side === "BUY" ? Math.floor(availableCash / price) : owned;
-      if (feasible(side) < 1) side = side === "BUY" ? "SELL" : "BUY";
-      const quantity = Math.min(desired, feasible(side));
-      if (!quantity) side = "PASS";
       if (side === "BUY") availableCash -= price * quantity;
       s.orders.push({
         id,
@@ -1484,4 +1476,54 @@ function openRetailRound(s: State, now: number) {
       });
     }
   }
+}
+
+/** Information available to an indefinitely trading retail policy.
+ * Deliberately excludes the competition clock, remaining rounds and redemption.
+ * The event's finite score snapshot is outside the trader's decision process.
+ */
+export type RetailObservation = Readonly<{
+  policy: string | undefined;
+  reference: number;
+  previous: number;
+  owned: number;
+  inventoryCost: number;
+  initialInventory: number;
+  availableCash: number;
+}>;
+
+export function retailDecision(
+  observation: RetailObservation,
+  random: Readonly<{ side: number; price: number; quantity: number }>,
+): { side: Side; price: number; quantity: number } {
+  const {
+    policy,
+    reference,
+    previous,
+    owned,
+    inventoryCost,
+    initialInventory,
+    availableCash,
+  } = observation;
+  const avgCost = owned ? inventoryCost / owned : reference;
+  let buyProbability = 0.5;
+  if (policy === "Dip buyer")
+    buyProbability = reference < previous ? 0.8 : 0.35;
+  if (policy === "Profit taker")
+    buyProbability = reference > avgCost ? 0.2 : 0.65;
+  if (policy === "Momentum") buyProbability = reference > previous ? 0.8 : 0.3;
+  if (policy === "Inventory balancer")
+    buyProbability = owned < initialInventory ? 0.8 : 0.3;
+  let side: Side = random.side < buyProbability ? "BUY" : "SELL";
+  const price = Math.max(
+    MIN_PRICE,
+    Math.min(MAX_PRICE, Math.round(reference * (0.98 + random.price * 0.04))),
+  );
+  const desired = 1 + Math.floor(random.quantity * MAX_QTY);
+  const feasible = (side: Side) =>
+    side === "BUY" ? Math.floor(availableCash / price) : owned;
+  if (feasible(side) < 1) side = side === "BUY" ? "SELL" : "BUY";
+  const quantity = Math.min(desired, feasible(side));
+  if (!quantity) side = "PASS";
+  return { side, price: side === "PASS" ? 0 : price, quantity };
 }

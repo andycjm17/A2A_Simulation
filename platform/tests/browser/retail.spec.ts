@@ -64,6 +64,7 @@ for (const finished of [false, true])
     await expect(panel).toBeVisible();
     await expect(panel.locator("tbody tr")).toHaveCount(5);
     await expect(panel).toContainText("Momentum");
+    await expect(panel).toContainText("Traders assume the market continues indefinitely");
     await expect(panel).toContainText(finished ? "240 / 240" : "1 / 240");
     if (finished) await expect(panel).toContainText("Final scores");
     const human = page

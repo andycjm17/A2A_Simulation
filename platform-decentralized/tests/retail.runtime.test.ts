@@ -103,6 +103,7 @@ it("funds bots once, persists book and cost basis across eviction, and rolls bac
   ).toBe(200);
   const before = (await request(base)).body;
   expect(before.retailTraders).toHaveLength(5);
+  expect(before.retailTraders.every((a: any) => a.decisionHorizon === "indefinite")).toBe(true);
   expect(before.participantCount).toBe(1);
   expect(before.deadline - before.openedAt).toBe(4500);
   await evictDurableObject(stub);
