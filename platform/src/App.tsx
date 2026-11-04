@@ -15,6 +15,7 @@ import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
+import { RetailPanel } from "./RetailPanel";
 import { InstrumentIcon } from "./InstrumentSettings";
 import { assetName as rawAssetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
@@ -27,10 +28,10 @@ export const money = (n: number) =>
     maximumFractionDigits: 2,
   }).format(n / 100);
 export const statusName = localizedLabels({
-  lobby: "绛夊緟寮€濮�",
-  running: "浜ゆ槗杩涜涓�",
-  paused: "姣旇禌宸叉殏鍋�",
-  finished: "宸插畬鎴愮粨绠�",
+  lobby: "等待开始",
+  running: "交易进行中",
+  paused: "比赛已暂停",
+  finished: "已完成结算",
 });
 export async function api(path: string, token = "", data?: unknown) {
   const r = await fetch(path, {
@@ -348,7 +349,7 @@ export default function App() {
             <div className="stack">
               <div>
                 <button className="secondary" onClick={() => setView("agent")}>
-                  鈫� Back to My Agent
+                  ← Back to My Agent
                 </button>
               </div>
               <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
@@ -397,6 +398,7 @@ function MarketView({
     s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
   if (s.maker) names.set(s.maker.id, displayName(s.maker.name));
+  for (const a of s.retailTraders ?? []) names.set(a.id, a.name);
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
     : 0;
@@ -406,7 +408,7 @@ function MarketView({
         <div>
           <span>{rich("m2ac8d3648a")}</span>
           <strong>
-            {s.round || "鈥�"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
+            {s.round || "—"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
           </strong>
         </div>
         <div>
@@ -429,6 +431,7 @@ function MarketView({
         </div>
       </div>
       <NewsPanel s={s} />
+      <RetailPanel s={s} />
       <div className="exchange-grid">
         <section className="price-surface">
           <div className="row between instrument-heading">
@@ -461,7 +464,7 @@ function MarketView({
           <div className="last-trade">
             <span>
               {instrument.lastPrice === null
-                ? "鈥�"
+                ? "—"
                 : money(instrument.lastPrice)}
             </span>
             <small>{rich("m590070958a")}</small>
@@ -497,19 +500,19 @@ function MarketView({
                 {account ? account.name : t("m1c7ce7a7a0")}
               </span>
               <div className="ticket-value">
-                {account ? money(account.cash) : "鈥�"}
+                {account ? money(account.cash) : "—"}
                 <small>{rich("m2462a87986")}</small>
               </div>
             </div>
             <dl className="ticket-facts">
               <div>
                 <dt>{rich("mc3ee29d0be")}</dt>
-                <dd>{account ? money(account.availableCash) : "鈥�"}</dd>
+                <dd>{account ? money(account.availableCash) : "—"}</dd>
               </div>
               {s.instruments.map((i) => (
                 <div key={i.symbol}>
                   <dt>{rich("m0ca151f9e9", [displayName(i.name)])}</dt>
-                  <dd>{account ? account.holdings[i.symbol] : "鈥�"}</dd>
+                  <dd>{account ? account.holdings[i.symbol] : "—"}</dd>
                 </div>
               ))}
               <div>
@@ -559,6 +562,7 @@ function MarketView({
                 final: s.status === "finished",
                 rankingBasis: s.rankingBasis,
                 leaderboard: s.leaderboard,
+                retailTraders: s.retailTraders,
               })
             }
           >{rich("m7a8ca94be7", [<Download size={15} />])}</button>
@@ -796,7 +800,7 @@ function AgentView({
                     <td>R{o.round}</td>
                     <td>{assetName(o.symbol ?? "DAT", s?.config)}</td>
                     <td>{o.side}</td>
-                    <td>{o.side === "PASS" ? "鈥�" : money(o.price)}</td>
+                    <td>{o.side === "PASS" ? "—" : money(o.price)}</td>
                     <td>{o.quantity}</td>
                     <td>{o.filled}</td>
                     <td>

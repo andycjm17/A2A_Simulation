@@ -27,7 +27,7 @@ export const decisionSchema = z
       .string()
       .regex(/^[A-Z][A-Z0-9_]{0,15}$/)
       .optional(),
-    round: z.number().int().min(1).max(100),
+    round: z.number().int().min(1).max(240),
     side: z.enum(["BUY", "SELL", "PASS"]),
     price: z.number().int().min(0).max(20000),
     quantity: z.number().int().min(0).max(10),
@@ -67,20 +67,25 @@ export const configSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]{2,39}$/),
     name: z.string().trim().min(2).max(80),
-    rounds: z.number().int().min(1).max(100).default(30),
-    roundMs: z.number().int().min(2000).max(60000).default(60000),
+    rounds: z.number().int().min(1).max(240).default(240),
+    roundMs: z.number().int().min(2000).max(60000).default(5000),
     capacity: z.number().int().min(2).max(100).default(50),
     practice: z.boolean().default(false),
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
     newsEnabled: z.boolean().default(false),
+    retailAgents: z.boolean().default(true),
     makerCashShare: z.number().min(0).max(0.5).default(0),
     initialBalances: initialBalancesSchema.optional(),
     instruments: instrumentsSchema.optional(),
   })
   .strict()
-  .refine((c) => c.practice || (c.rounds === 30 && c.roundMs === 60000), {
-    message: "正式比赛固定 30 轮，每轮 60 秒",
-  });
+  .refine(
+    (c) =>
+      c.practice || (c.rounds === 240 && c.roundMs === 5000 && c.retailAgents),
+    {
+      message: "正式比赛固定 240 轮，每轮 5 秒，并启用五名模拟散户",
+    },
+  );
 const joinSchema = z
   .object({
     id: z.string(),

@@ -271,8 +271,9 @@ export function Admin({
                   makerCashShare,
                   initialBalances,
                   instruments,
-                  rounds: 30,
-                  roundMs: 60000,
+                  rounds: 240,
+                  roundMs: 5000,
+                  retailAgents: true,
                   auditEnabled: true,
                 });
                 if (current()) await changed(slug, current);

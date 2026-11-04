@@ -147,7 +147,7 @@ describe("participant red team", () => {
       { quantity: 11 },
       { quantity: 0.5 },
       { round: 0 },
-      { round: 101 },
+      { round: 241 },
       { side: "ADMIN" },
       { agentId: b.account.id },
       { cash: 1e9 },
@@ -339,6 +339,7 @@ describe("organizer dashboard", () => {
           id: `dashboard-${String(i).padStart(2, "0")}`,
           name: `Dashboard ${i}`,
           practice: true,
+            retailAgents: false, roundMs: 60000,
         },
       });
     await env.CATALOG.get(env.CATALOG.idFromName("v1")).put({
@@ -396,7 +397,7 @@ async function req(
 async function create(practice = true, extra = {}) {
   const r = await req("/api/admin/markets", {
     token: admin,
-    data: { id: "runtime-market", name: "Runtime market", practice, assetMode: "legacy", ...extra },
+    data: { id: "runtime-market", name: "Runtime market", practice, assetMode: "legacy", ...(practice ? {retailAgents:false,rounds:30,roundMs:60000} : {}), ...extra },
   });
   expect(r.status).toBe(201);
   return r;
@@ -805,7 +806,7 @@ describe("official MCP client compatibility", () => {
 
 describe('dual-asset HTTP and persisted ledger', () => {
   it('creates crypto ETF markets by default, persists both instruments, settles separately, and keeps future paths private', async () => {
-    const created=await req('/api/admin/markets',{token:admin,data:{id:'dual-runtime',name:'Dual runtime',practice:true,rounds:2}});
+    const created=await req('/api/admin/markets',{token:admin,data:{id:'dual-runtime',name:'Dual runtime',practice:true,retailAgents:false,roundMs:60000,rounds:2}});
     expect(created.status).toBe(201);
     expect(created.body.instruments.map((i:any)=>i.symbol)).toEqual(['BFBT','EFET']);
     const base='/api/markets/dual-runtime';
@@ -875,6 +876,7 @@ describe("news and system maker persistence", () => {
             id,
             name: "News runtime",
             practice: true,
+            retailAgents: false, roundMs: 60000,
             rounds: 3,
             newsEnabled: true,
             makerCashShare: 0.5,
@@ -982,6 +984,7 @@ describe("news and system maker persistence", () => {
               id: "invalid-news",
               name: "Invalid config",
               practice: true,
+            retailAgents: false, roundMs: 60000,
               ...data,
             },
           })
@@ -994,7 +997,7 @@ describe("news and system maker persistence", () => {
 describe('organizer bulk initial balances',()=>{
  it('requires admin, persists bulk updates across eviction, covers later joins and locks after start',async()=>{
   const id='balances-runtime',base=`/api/markets/${id}`,path=`/api/admin/markets/${id}/initial-balances`;
-  await req('/api/admin/markets',{token:admin,data:{id,name:'Balance debug',practice:true,newsEnabled:true,makerCashShare:.2}});
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Balance debug',practice:true,retailAgents:false,roundMs:60000,newsEnabled:true,makerCashShare:.2}});
   const a=(await req(`${base}/join`,{data:{name:'Existing agent'}})).body;
   const balances={cash:123456,BFBT:25,EFET:250};
   expect((await req(path,{token:a.apiKey,data:balances})).status).toBe(403);
@@ -1019,7 +1022,7 @@ describe('configurable instruments over HTTP',()=>{
  const items=[{symbol:'RED',name:'红杉模拟',initialPrice:4200,icon:'🌲'},{symbol:'BLUE',name:'海洋模拟',initialPrice:12500,icon:'🌊'},{symbol:'GOLD',name:'黄金模拟',initialPrice:19900,icon:'🌟'}];
  it('updates a waiting room, survives eviction, joins with all custom stocks, and accepts custom-symbol orders',async()=>{
   const id='custom-runtime',base=`/api/markets/${id}`,manage=`/api/admin/markets/${id}`;
-  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom runtime',practice:true,newsEnabled:true,makerCashShare:.2}});
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom runtime',practice:true,retailAgents:false,roundMs:60000,newsEnabled:true,makerCashShare:.2}});
   const a=(await req(`${base}/join`,{data:{name:'Custom Existing'}})).body;
   expect((await req(`${manage}/instruments`,{token:a.apiKey,data:items})).status).toBe(403);
   expect((await req(`${manage}/instruments`,{token:admin,data:[items[0],items[0]]})).status).toBe(400);
@@ -1040,7 +1043,7 @@ describe('configurable instruments over HTTP',()=>{
  });
  it('cannot overwrite a concurrent join during asynchronous price commitment generation',async()=>{
   const id='custom-race',base=`/api/markets/${id}`,manage=`/api/admin/markets/${id}`;
-  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom race',practice:true,newsEnabled:true,makerCashShare:.2}});
+  await req('/api/admin/markets',{token:admin,data:{id,name:'Custom race',practice:true,retailAgents:false,roundMs:60000,newsEnabled:true,makerCashShare:.2}});
   const [configured,joined]=await Promise.all([req(`${manage}/instruments`,{token:admin,data:items}),req(`${base}/join`,{data:{name:'Concurrent join'}})]);
   expect(joined.status).toBe(201);expect([200,409]).toContain(configured.status);
   const account=(await req(`${base}/account`,{token:joined.body.apiKey})).body;

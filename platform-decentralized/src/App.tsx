@@ -17,6 +17,7 @@ import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
+import { RetailPanel } from "./RetailPanel";
 import { InstrumentIcon } from "./InstrumentSettings";
 import { assetName as rawAssetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
@@ -381,6 +382,7 @@ function MarketView({
     s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
   if (s.maker) names.set(s.maker.id, displayName(s.maker.name));
+  for (const a of s.retailTraders ?? []) names.set(a.id, a.name);
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
     : 0;
@@ -413,6 +415,7 @@ function MarketView({
         </div>
       </div>
       <NewsPanel s={s} />
+      <RetailPanel s={s} />
       <div className="exchange-grid">
         <section className="price-surface">
           <div className="row between instrument-heading">
@@ -543,6 +546,7 @@ function MarketView({
                 final: s.status === "finished",
                 rankingBasis: s.rankingBasis,
                 leaderboard: s.leaderboard,
+                retailTraders: s.retailTraders,
               })
             }
           >{rich("m7a8ca94be7", [<Download size={15} />])}</button>

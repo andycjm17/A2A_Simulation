@@ -3,6 +3,7 @@ export default defineConfig({
   test: {
     include: [
       "tests/engine.test.ts",
+      "tests/retail.test.ts",
       "tests/multi-asset.test.ts",
       "tests/news-maker.test.ts",
       "tests/configurable-assets.test.ts",
