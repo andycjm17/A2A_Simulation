@@ -3,8 +3,8 @@ import {createState,addAgent,publicState,start,submit,clearRound,pause,accountSt
 import {adminStatus} from '../../worker/admin-status';
 test.use({locale:'zh-CN'});
 async function fixture(page:Page,active=false){
- const s=await createState({id:'english-fixture',name:'用户命名的比赛',rounds:30,roundMs:60000,capacity:50,practice:true,assetMode:'ai',newsEnabled:true,makerCashShare:0.2},'language-seed',Date.now());
- addAgent(s,{id:'user-a',name:'用户自己的Agent',description:'用户自定义策略',keyHash:'hash'},Date.now());
+ const s=await createState({id:'english-fixture',name:'鐢ㄦ埛鍛藉悕鐨勬瘮璧�',rounds:30,roundMs:60000,capacity:50,practice:true,assetMode:'ai',newsEnabled:true,makerCashShare:0.2},'language-seed',Date.now());
+ addAgent(s,{id:'user-a',name:'鐢ㄦ埛鑷繁鐨凙gent',description:'鐢ㄦ埛鑷畾涔夌瓥鐣�',keyHash:'hash'},Date.now());
  if(active){
   addAgent(s,{id:'user-b',name:'Counterparty',description:'',keyHash:'hash-b'},Date.now());
   start(s,Date.now()-180000);
@@ -18,7 +18,7 @@ async function fixture(page:Page,active=false){
  const snapshot=publicState(s,Date.now());
  await page.route('**/api/markets',r=>r.fulfill({json:{markets:[{id:s.config.id,name:s.config.name,practice:true}]}}));
  await page.route('**/api/markets/english-fixture',r=>r.fulfill({json:snapshot}));
- await page.route('**/api/markets/english-fixture/account',r=>r.fulfill({status:401,json:{error:{code:'UNAUTHORIZED',message:'无效的 API Key'}}}));
+ await page.route('**/api/markets/english-fixture/account',r=>r.fulfill({status:401,json:{error:{code:'UNAUTHORIZED',message:'鏃犳晥鐨� API Key'}}}));
  const status=adminStatus(s,Date.now());
  // An unknown audit event must retain its stable type without crashing localization.
  status.events.unshift({seq:999,at:Date.now(),type:'future_event'});
@@ -29,12 +29,12 @@ async function fixture(page:Page,active=false){
 }
 async function cleanEnglish(page:Page){
  await expect(page.locator('.language-switch')).toHaveCount(0);
- await expect(page.getByRole('button',{name:/^(English|中文)$/})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/^(English|涓枃)$/})).toHaveCount(0);
  await expect(page.locator('a[href*="andycui.com"]')).toHaveCount(0);
  await expect(page.locator('html')).toHaveAttribute('lang','en-US');
  const text=await page.locator('body').innerText();
  expect(text).not.toMatch(/m[0-9a-f]{10}/);
- const remaining=text.replaceAll('中文','').replaceAll('用户命名的比赛','').replaceAll('用户自己的Agent','').replaceAll('用户自定义策略','');
+ const remaining=text.replaceAll('涓枃','').replaceAll('鐢ㄦ埛鍛藉悕鐨勬瘮璧�','').replaceAll('鐢ㄦ埛鑷繁鐨凙gent','').replaceAll('鐢ㄦ埛鑷畾涔夌瓥鐣�','');
  expect(remaining.match(/[^\n]*[\p{Script=Han}][^\n]*/gu)||[]).toEqual([]);
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 }
@@ -50,9 +50,12 @@ test('English market, rules and API docs; English-only UI despite old Chinese pr
  const maker=await page.locator('.maker-card').boundingBox();const panel=await page.locator('.news-panel').boundingBox();
  expect(maker!.x).toBeGreaterThanOrEqual(panel!.x);expect(maker!.y+maker!.height).toBeLessThanOrEqual(panel!.y+panel!.height+1);
  await page.screenshot({path:`reports/dbc-market-${info.project.name}.png`,fullPage:true});
- for(const name of ['Connect & API','Competition rules']){
-  await page.getByRole('button',{name,exact:true}).click();await cleanEnglish(page);
- }
+ await page.getByRole('button',{name:'My Agent',exact:true}).click();
+ await page.getByRole('button',{name:'View MCP / API documentation',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Connect & API',exact:true})).toBeVisible();
+ await cleanEnglish(page);
+ await page.getByRole('button',{name:'Competition rules',exact:true}).click();
+ await cleanEnglish(page);
  await page.goto('/?market=english-fixture');
  await expect(page.locator('html')).toHaveAttribute('lang','en-US');
  expect(errors).toEqual([]);
@@ -60,9 +63,23 @@ test('English market, rules and API docs; English-only UI despite old Chinese pr
 test('participant input remains usable and renders English API errors',async({page})=>{
  await fixture(page);await page.addInitScript(()=>localStorage.setItem('a2a-language','zh'));await page.goto('/?market=english-fixture&lang=zh');
  await page.getByRole('button',{name:'My Agent',exact:true}).click();
- await page.getByLabel('Agent name',{exact:true}).fill('用户自己的Agent');
+ await page.getByLabel('Agent name',{exact:true}).fill('鐢ㄦ埛鑷繁鐨凙gent');
  await page.getByLabel('Capabilities and strategy').fill('Keep my unsaved strategy');
- await expect(page.getByLabel('Agent name',{exact:true})).toHaveValue('用户自己的Agent');
+ await expect(page.getByLabel('Agent name',{exact:true})).toHaveValue('鐢ㄦ埛鑷繁鐨凙gent');
+ await expect(page.getByRole('alert')).toHaveText('This Agent name is already registered.');
+ await page.getByLabel('Agent name',{exact:true}).fill('Fresh Agent');
+ await expect(page.getByRole('alert')).toHaveCount(0);
+ await page.route('**/api/markets/english-fixture/join',r=>r.fulfill({
+  status:409,json:{error:{code:'NAME_TAKEN'}},
+ }));
+ await page.getByRole('button',{name:'Register and get credentials',exact:true}).click();
+ await expect(page.getByRole('alert')).toHaveText('This Agent name is already registered.');
+ await page.getByLabel('Agent name',{exact:true}).fill('Another Agent');
+ await page.getByRole('button',{name:'View MCP / API documentation',exact:true}).click();
+ await expect(page.getByLabel('MCP Endpoint')).toBeVisible();
+ await page.getByRole('button',{name:/Back to My Agent/}).click();
+ await expect(page.getByLabel('Agent name',{exact:true})).toHaveValue('Another Agent');
+ await expect(page.getByLabel('Capabilities and strategy')).toHaveValue('Keep my unsaved strategy');
  await page.getByLabel('API Key',{exact:true}).fill('invalid-key');
  await page.getByRole('button',{name:'Verify and connect',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('credential');
@@ -91,10 +108,10 @@ test('executed charts, news, connected account and leaderboard remain localized'
  await page.getByRole('button',{name:'My Agent',exact:true}).click();
  await page.getByLabel('API Key',{exact:true}).fill('fixture-account-key');
  await page.getByRole('button',{name:'Verify and connect',exact:true}).click();
- await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'鐢ㄦ埛鑷繁鐨凙gent',exact:true})).toBeVisible();
  await cleanEnglish(page);
- await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
- await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'鐢ㄦ埛鑷繁鐨凙gent',exact:true})).toBeVisible();
+ await expect(page.getByRole('heading',{name:'鐢ㄦ埛鑷繁鐨凙gent',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Market overview',exact:true}).click();
  await page.screenshot({path:`reports/dbc-active-${info.project.name}.png`,fullPage:true});
  expect(errors).toEqual([]);
