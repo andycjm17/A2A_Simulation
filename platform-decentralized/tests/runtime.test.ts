@@ -147,7 +147,7 @@ describe("participant red team", () => {
       { quantity: 11 },
       { quantity: 0.5 },
       { round: 0 },
-      { round: 241 },
+      { round: 7201 },
       { side: "ADMIN" },
       { agentId: b.account.id },
       { cash: 1e9 },
@@ -467,7 +467,7 @@ describe("HTTP authentication and validation", () => {
             id: "bad-config",
             name: "Bad",
             practice: false,
-            roundMs: 2000,
+            roundMs: 1000,
           },
         })
       ).status,
@@ -1040,4 +1040,21 @@ describe('configurable instruments over HTTP',()=>{
   expect(view.participantCount).toBe(1);expect(view.instruments).toHaveLength(3);
   expect((await req(`${base}/account`,{token:joined.body.apiKey})).body.holdings).toEqual({RED:100,BLUE:100,GOLD:100});
  });
+});
+
+
+it("admin controls timing before start, persists it, and validates extended round numbers",async()=>{
+ await create(false,{rounds:300,roundMs:4000});
+ const initial=(await req("/api/markets/runtime-market")).body;
+ expect(initial.config).toMatchObject({rounds:300,roundMs:4000,makerPolicy:"capital-preserving-v1"});
+ const a=(await join()).body;
+ expect((await req("/api/admin/markets/runtime-market/schedule",{token:a.apiKey,data:{rounds:400,roundMs:3000}})).status).toBe(403);
+ expect((await req("/api/admin/markets/runtime-market/schedule",{token:admin,data:{rounds:400,roundMs:3000}})).status).toBe(200);
+ const stub=env.MARKETS.get(env.MARKETS.idFromName("runtime-market"));await evictDurableObject(stub);
+ const s=(await req("/api/markets/runtime-market")).body;
+ expect(s.config.rounds).toBe(400);expect(s.commitment).not.toBe(initial.commitment);
+ expect((await req("/api/admin/markets/runtime-market/start",{token:admin,data:{}})).status).toBe(200);
+ expect((await req("/api/admin/markets/runtime-market/schedule",{token:admin,data:{rounds:20,roundMs:5000}})).status).toBe(409);
+ const d=await req("/api/markets/runtime-market/decision",{token:a.apiKey,data:{round:241,side:"PASS",price:0,quantity:0,requestId:"future-241-test"}});
+ expect(d.body.error.code).toBe("WRONG_ROUND");
 });

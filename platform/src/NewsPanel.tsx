@@ -42,7 +42,7 @@ export function NewsPanel({ s }: { s: Snapshot }) {
           <aside className="maker-card">
             <span className="instrument-symbol">SYSTEM MARKET MAKER</span>
             <h3>{rich("mb9de636315")}</h3>
-            <p>{rich("ma25a2d4f9b")}</p>
+            <p>{s.config.makerPolicy ? "Goal: provide liquidity while protecting capital, and trade on public market information." : rich("ma25a2d4f9b")}</p>
             <dl>
               <div>
                 <dt>{rich("mcc32345d56")}</dt>
@@ -66,7 +66,7 @@ export function NewsPanel({ s }: { s: Snapshot }) {
                 <dd>{maker ? money(maker.profit) : t("m626c8ed764")}</dd>
               </div>
             </dl>
-            <p className="hint">{rich("mbca153665a")}</p>
+            <p className="hint">{s.config.makerPolicy ? "Quotes respond to published fundamentals, news and completed trades. Sell quotes stay at or above average acquisition cost. Buying shrinks during losses and stops at a 10% portfolio loss. Cash is reserved, with no borrowing or top-ups. These controls target capital preservation; price moves can still cause losses or leave quotes unfilled." : rich("mbca153665a")}</p>
           </aside>
         ) : (
           <aside className="maker-card">

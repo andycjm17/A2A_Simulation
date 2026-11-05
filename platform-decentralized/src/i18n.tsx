@@ -37,7 +37,7 @@ export function message(text:string){
   return text;
 }
 export function displayName(name:string){
-  return ({'Luma ETF（模拟）':'Luma ETF (simulated)','Vela ETF（模拟）':'Vela ETF (simulated)','基本面庄家':'Fundamental market maker'} as Record<string,string>)[name]??name;
+  return ({'Luma ETF（模拟）':'Luma ETF','Vela ETF（模拟）':'Vela ETF','基本面庄家':'Fundamental market maker'} as Record<string,string>)[name]??name.replace(/\s*\(simulated\)\s*$/i,'').replace(/（模拟）$/,'');
 }
 const news:Record<string,string>={
  '客户需求增长':'Customer demand rises','研发取得突破':'Research breakthrough','运营成本下降':'Operating costs fall','收入表现超预期':'Revenue exceeds expectations',

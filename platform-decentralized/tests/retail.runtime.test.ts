@@ -29,7 +29,7 @@ async function request(path: string, data?: unknown, token = "") {
   });
   return { status: r.status, body: (await r.json()) as any };
 }
-it("enforces the 240 × 5s formal schedule, defaults five traders, and accepts late-round decisions", () => {
+it("defaults to 240 × 5s and validates configurable schedules, defaults five traders, and accepts late-round decisions", () => {
   const base = { id: "new-formal", name: "New formal" };
   expect(configSchema.parse(base)).toMatchObject({
     rounds: 240,
@@ -37,10 +37,10 @@ it("enforces the 240 × 5s formal schedule, defaults five traders, and accepts l
     retailAgents: true,
   });
   for (const extra of [
-    { rounds: 30 },
-    { roundMs: 60000 },
+    { rounds: 0 },
+    { roundMs: 2500 },
     { retailAgents: false },
-    { rounds: 241 },
+    { rounds: 7201 },
   ])
     expect(configSchema.safeParse({ ...base, ...extra }).success).toBe(false);
   expect(
@@ -64,7 +64,7 @@ it("enforces the 240 × 5s formal schedule, defaults five traders, and accepts l
   ).toBe(true);
   expect(
     decisionSchema.safeParse({
-      round: 241,
+      round: 7201,
       side: "PASS",
       price: 0,
       quantity: 0,
@@ -135,11 +135,12 @@ it("funds bots once, persists book and cost basis across eviction, and rolls bac
   await evictDurableObject(stub);
   expect((await request(base)).body.retailTraders).toEqual(next.retailTraders);
 });
-it("accepts round 240 over HTTP and preserves final retail scores after SQL restart", async () => {
+it("accepts round 300 over HTTP and preserves final retail scores after SQL restart", async () => {
   const id = "retail-final",
     config = configSchema.parse({
       id,
       name: "Retail final",
+      rounds: 300,
       practice: true,
       instruments: DEFAULT_INSTRUMENTS,
     });
@@ -156,8 +157,8 @@ it("accepts round 240 over HTTP and preserves final retail scores after SQL rest
     },
     Date.now(),
   );
-  start(s, Date.now() - 239 * 5000);
-  for (let r = 1; r < 240; r++) clearRound(s, settlementAt(s));
+  start(s, Date.now() - 299 * 5000);
+  for (let r = 1; r < 300; r++) clearRound(s, settlementAt(s));
   const stub = env.MARKETS.get(env.MARKETS.idFromName(id));
   expect((await stub.command({ action: "create", data: config })).ok).toBe(
     true,
@@ -167,7 +168,7 @@ it("accepts round 240 over HTTP and preserves final retail scores after SQL rest
   });
   await evictDurableObject(stub);
   const d = {
-    round: 240,
+    round: 300,
     symbol: "BFBT",
     side: "PASS",
     price: 0,
@@ -193,7 +194,7 @@ it("accepts round 240 over HTTP and preserves final retail scores after SQL rest
   const final = (await request(`/api/markets/${id}`)).body;
   expect(final.status).toBe("finished");
   expect(
-    final.retailTraders.every((a: any) => a.scoreFrozen && a.decisions === 240),
+    final.retailTraders.every((a: any) => a.scoreFrozen && a.decisions === 300),
   ).toBe(true);
   await evictDurableObject(stub);
   expect((await request(`/api/markets/${id}`)).body.retailTraders).toEqual(

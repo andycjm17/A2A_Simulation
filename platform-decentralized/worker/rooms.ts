@@ -20,6 +20,8 @@ import {
   settlementAt,
   setInitialBalances,
   retainHoldings,
+  setSchedule,
+  setMakerPolicy,
   reconfigureInstruments,
 } from "./engine";
 
@@ -29,7 +31,7 @@ export const decisionSchema = z
       .string()
       .regex(/^[A-Z][A-Z0-9_]{0,15}$/)
       .optional(),
-    round: z.number().int().min(1).max(240),
+    round: z.number().int().min(1).max(7200),
     side: z.enum(["BUY", "SELL", "PASS"]),
     price: z.number().int().min(0).max(20000),
     quantity: z.number().int().min(0).max(10),
@@ -70,22 +72,23 @@ export const configSchema = z
   .object({
     id: z.string().regex(/^[a-z0-9][a-z0-9-]{2,39}$/),
     name: z.string().trim().min(2).max(80),
-    rounds: z.number().int().min(1).max(240).default(240),
-    roundMs: z.number().int().min(2000).max(60000).default(5000),
+    rounds: z.number().int().min(1).max(7200).default(240),
+    roundMs: z.number().int().min(2000).max(60000).multipleOf(1000).default(5000),
     capacity: z.number().int().min(2).max(100).default(50),
     practice: z.boolean().default(false),
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
     newsEnabled: z.boolean().default(false),
     retailAgents: z.boolean().default(true),
     autoRedeem: z.literal(false).default(false),
+    makerPolicy: z.literal("capital-preserving-v1").default("capital-preserving-v1"),
     makerCashShare: z.number().min(0).max(0.5).default(0),
     initialBalances: initialBalancesSchema.optional(),
     instruments: instrumentsSchema.optional(),
     auditEnabled: z.boolean().default(false),
   })
   .strict()
-  .refine((c) => c.practice || (c.rounds === 240 && c.roundMs === 5000 && c.retailAgents), {
-    message: "正式比赛固定 240 轮，每轮 5 秒，并启用五名模拟散户",
+  .refine((c) => (c.practice || c.retailAgents) && c.rounds*c.roundMs<=14400000, {
+    message: "比赛最多 240 分钟；正式赛启用五名模拟散户",
   });
 const joinSchema = z
   .object({
@@ -319,6 +322,20 @@ export class MarketRoom extends DurableObject<Env> {
         case "resume":
           resume(s, now);
           changed = true;
+          break;
+        case "schedule": {
+          const value = z.object({rounds:z.number(),roundMs:z.number()}).strict().parse(c.data);
+          const before = this.state;
+          await setSchedule(s,value,now);
+          ensure(this.state === before,"STATE_CHANGED","Market changed; reload before saving",409);
+          changed=true;
+          operation.data=c.data;
+          data=publicState(s,now);
+          break;
+        }
+        case "maker-policy":
+          changed=setMakerPolicy(s,now);
+          data=publicState(s,now);
           break;
         case "retain-holdings":
           changed = retainHoldings(s, now);

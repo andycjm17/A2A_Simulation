@@ -1,4 +1,4 @@
-import { createState, addAgent, start, pause, resume, submit, advance, reconfigureInstruments, setInitialBalances, retainHoldings, publicState, type State } from './engine';
+import { createState, addAgent, start, pause, resume, submit, advance, reconfigureInstruments, setInitialBalances, retainHoldings, setSchedule, setMakerPolicy, publicState, type State } from './engine';
 import { ZERO, digest, ledger, verifyEntry, checkSignature, identityTyped, decisionTyped, type LogEntry } from './audit-log';
 export async function verifyAudit(bundle:any, expectedAttestor:string, expectedHead?:string) {
   const entries:LogEntry[]=bundle.entries;
@@ -32,6 +32,8 @@ export async function verifyAudit(bundle:any, expectedAttestor:string, expectedH
           submit(state,p.agentId,p.decision,e.at);break;
         case 'instruments':await reconfigureInstruments(state,p,e.at);break;
         case 'initial-balances':setInitialBalances(state,p,e.at);break;
+        case 'schedule':await setSchedule(state,p,e.at);break;
+        case 'maker-policy':setMakerPolicy(state,e.at);break;
         case 'retain-holdings':retainHoldings(state,e.at);break;
         case 'rotate':break; // Authentication secrets never affect matching or the public ledger.
         default:throw new Error(`Unknown operation ${e.operation.type}`);

@@ -29,7 +29,8 @@ it('requires a bound identity before starting and rejects fabricated binding',as
  expect((await req(base+'/identity',agents[0].proof,c.body.apiKey)).body.error.code).toBe('INVALID_SIGNATURE');
 });
 it('atomically signs receipts, persists through eviction, rejects tampering and independently replays full ledger',async()=>{
- const {market,base,agents}=await setup(3000);
+ const {market,base,agents}=await setup(2000);
+ expect((await req("/api/admin/markets/"+market+"/schedule",{rounds:1,roundMs:3000},admin)).status).toBe(200);
  expect((await req('/api/admin/markets/'+market+'/start',{},admin)).status).toBe(200);
  const a=agents[0],d={round:1,symbol:'BFBT',side:'BUY' as const,price:11000,quantity:5,requestId:'signed-buy-1'};
  const t=decisionTyped(origin,market,a.agentId,d),signature=await a.wallet.signTypedData(t.domain,t.types,t.message);

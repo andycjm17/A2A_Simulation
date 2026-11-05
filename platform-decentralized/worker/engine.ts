@@ -168,6 +168,7 @@ export type MarketConfig = {
   assetMode?: "ai" | "legacy";
   newsEnabled?: boolean;
   makerCashShare?: number;
+  makerPolicy?: "capital-preserving-v1";
   retailAgents?: boolean;
   autoRedeem?: boolean;
   initialBalances?: InitialBalances;
@@ -1217,11 +1218,23 @@ function initializeMaker(s: State, now: number) {
     id: `system-maker:${s.config.id}`,
     name: "基本面庄家",
     system: "fundamental-maker",
-    description: "按已公布的新闻基本面双向报价，不使用未来新闻。",
+    description: s.config.makerPolicy
+      ? "Provide liquidity while protecting capital; trade on published market information."
+      : "按已公布的新闻基本面双向报价，不使用未来新闻。",
     keyHash: "",
     cash,
     dat: 0,
     holdings: { ...inventory },
+    ...(s.config.makerPolicy
+      ? {
+          inventoryCost: Object.fromEntries(
+            symbols(s).map((symbol) => [
+              symbol,
+              inventory[symbol] * pathFor(s, symbol)[0],
+            ]),
+          ),
+        }
+      : {}),
     initialCash: cash,
     initialHoldings: inventory[symbols(s)[0]],
     initialInventory: inventory,
@@ -1252,6 +1265,10 @@ function openRound(s: State, now: number) {
     if (n.round === s.round) event(s, now, "news_published", n.id);
   const a = s.agents.find((a) => a.system === "fundamental-maker");
   if (!a) return;
+  if (s.config.makerPolicy === "capital-preserving-v1") {
+    openCapitalPreservingMaker(s, a, now);
+    return;
+  }
   // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
   // of current cash per asset / 10% of inventory offered per round. No future reads.
   const cashPerAsset = Math.floor(
@@ -1346,7 +1363,22 @@ export function makerState(s: State) {
         (s.agents.length - 1) * startingBalances(s.config).cash),
     volume: makerVolume,
     volumeShare: volume ? makerVolume / volume : null,
-    policy: "public-fundamentals-v1" as const,
+    policy: s.config.makerPolicy ?? "public-fundamentals-v1",
+    ...(s.config.makerPolicy
+      ? {
+          goal: "Provide liquidity while protecting capital and trading on public market information",
+          realizedProfit:
+            a.cash +
+            Object.values(a.inventoryCost!).reduce((n, c) => n + c, 0) -
+            initialEquity,
+          riskMode:
+            equity < initialEquity * 0.9
+              ? "no-new-buys"
+              : equity < initialEquity
+                ? "reduced-buying"
+                : "normal",
+        }
+      : {}),
   };
 }
 
@@ -1568,4 +1600,129 @@ export function retainHoldings(s: State, now: number) {
     "keep cash and holdings after the final round",
   );
   return true;
+}
+
+/** Schedule changes regenerate the committed path before trading starts. */
+export async function setSchedule(
+  s: State,
+  schedule: { rounds: number; roundMs: number },
+  now: number,
+) {
+  ensure(
+    s.status === "lobby",
+    "BAD_STATE",
+    "Schedule is locked after the start",
+    409,
+  );
+  ensure(
+    Number.isInteger(schedule.rounds) &&
+      schedule.rounds >= 1 &&
+      schedule.rounds <= 7200 &&
+      Number.isInteger(schedule.roundMs) &&
+      schedule.roundMs >= 2000 &&
+      schedule.roundMs <= 60000 &&
+      schedule.roundMs % 1000 === 0 &&
+      schedule.rounds * schedule.roundMs <= 14400000,
+    "INVALID_CONFIG",
+    "Use 2–60 whole seconds per round and at most 240 minutes",
+  );
+  const fresh = await createState(
+    { ...s.config, ...schedule },
+    s.seed,
+    s.createdAt,
+  );
+  s.config = fresh.config;
+  s.assets = fresh.assets;
+  s.path = fresh.path;
+  s.news = fresh.news;
+  s.commitment = fresh.commitment;
+  setInitialBalances(s, startingBalances(s.config), now);
+  event(s, now, "schedule_changed", JSON.stringify(schedule));
+}
+export function setMakerPolicy(s: State, now: number) {
+  ensure(
+    s.status === "lobby",
+    "BAD_STATE",
+    "Maker policy is locked after the start",
+    409,
+  );
+  if (s.config.makerPolicy === "capital-preserving-v1") return false;
+  s.config.makerPolicy = "capital-preserving-v1";
+  event(s, now, "maker_policy_changed", "capital-preserving-v1");
+  return true;
+}
+
+/** No future paths, private orders, subsidies, or end-of-match inputs. */
+function openCapitalPreservingMaker(s: State, a: Agent, now: number) {
+  const instruments = symbols(s);
+  const initialEquity =
+    a.initialCash! +
+    instruments.reduce(
+      (n, symbol) => n + a.initialInventory![symbol] * pathFor(s, symbol)[0],
+      0,
+    );
+  const equity =
+    a.cash +
+    instruments.reduce(
+      (n, symbol) => n + holding(a, symbol) * pathFor(s, symbol)[s.round - 1],
+      0,
+    );
+  const drawdown = Math.max(0, 1 - equity / Math.max(1, initialEquity));
+  const riskScale = drawdown >= 0.1 ? 0 : drawdown > 0 ? 0.25 : 1;
+  const budget = Math.floor(
+    a.cash * Math.min(0.05, 0.75 / instruments.length) * riskScale,
+  );
+  for (const symbol of instruments) {
+    const path = pathFor(s, symbol),
+      reference = path[s.round - 1],
+      previous = path[Math.max(0, s.round - 2)];
+    let last = reference;
+    for (let i = s.trades.length - 1; i >= 0; i--)
+      if ((s.trades[i].symbol ?? "DAT") === symbol) {
+        last = s.trades[i].price;
+        break;
+      }
+    const clip = (n: number, limit: number) =>
+      Math.max(-limit, Math.min(limit, n));
+    const momentum = clip(reference / previous - 1, 0.03),
+      executedSignal = clip(last / reference - 1, 0.02);
+    const owned = holding(a, symbol),
+      initial = a.initialInventory![symbol];
+    const skew = clip(((owned - initial) / Math.max(1, initial)) * 0.01, 0.02);
+    const center =
+      reference * (1 + 0.25 * momentum + 0.1 * executedSignal - skew);
+    const spread = reference * (0.01 + Math.min(0.03, drawdown * 0.1));
+    const bid = Math.floor(
+      Math.min(center - spread, reference * 0.995, MAX_PRICE),
+    );
+    const costFloor = owned
+      ? Math.ceil(a.inventoryCost![symbol] / owned)
+      : MAX_PRICE + 1;
+    const ask = Math.ceil(
+      Math.max(center + spread, reference * 1.005, costFloor, MIN_PRICE),
+    );
+    for (const side of ["BUY", "SELL"] as const) {
+      const price = side === "BUY" ? bid : ask;
+      if (price < MIN_PRICE || price > MAX_PRICE) continue;
+      const quantity =
+        side === "BUY" ? Math.floor(budget / price) : Math.floor(owned * 0.1);
+      if (quantity < 1) continue;
+      const id = `${s.config.id}:${s.round}:${a.id}:${symbol}:${side}`;
+      s.orders.push({
+        id,
+        requestId: id,
+        agentId: a.id,
+        symbol,
+        round: s.round,
+        side,
+        price,
+        quantity,
+        createdAt: now,
+        filled: 0,
+        cashFlow: 0,
+        status: "pending",
+        note: "Public news and executed prices; cost-protected asks, cash reserve and drawdown limits",
+      });
+    }
+  }
 }

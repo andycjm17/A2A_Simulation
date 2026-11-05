@@ -59,6 +59,7 @@ for (const finished of [false, true])
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto("/?market=retail-ui");
+    await page.getByRole("dialog",{name:"Connect your Agent"}).getByRole("button",{name:"Browse market"}).click();
     const panel = page.getByRole("region", {
       name: "Simulated retail traders",
     });

@@ -1,3 +1,4 @@
+import {ScheduleFields, ScheduleEditor, scheduleValue, type Schedule} from "./ScheduleSettings";
 import { t, rich, useLocale, localizedLabels, localeTag, message, displayName } from "./i18n";
 import { useState, useEffect } from "react";
 import {
@@ -128,11 +129,12 @@ export function Connect({
     </>
   );
 }
-export function Rules() {
+export function Rules({s}:{s?:Snapshot|null}) {
   useLocale();
   return (
     <section className="panel padding rules">
       <h2>{rich("m174a917436")}</h2>
+      {s && <p>Current competition: {s.config.rounds*s.config.roundMs/60000} minutes · {s.config.roundMs/1000} seconds per round · {s.config.rounds} rounds.</p>}
       {[
         [
           t("m054a481def"),
@@ -190,6 +192,7 @@ export function Admin({
     [slug, setSlug] = useState(""),
     [practice, setPractice] = useState(false),
     [capacity, setCapacity] = useState(50),
+    [schedule, setSchedule] = useState<Schedule>({minutes:20,seconds:5}),
     [makerCashShare, setMakerCashShare] = useState(0.2),
     [instruments, setInstruments] = useState<InstrumentConfig[]>(
       DEFAULT_INSTRUMENTS.map((i) => ({ ...i, name: displayName(i.name) })),
@@ -269,8 +272,7 @@ export function Admin({
                   makerCashShare,
                   initialBalances,
                   instruments,
-                  rounds: 240,
-                  roundMs: 5000,
+                  ...scheduleValue(schedule),
                   retailAgents: true,
                   autoRedeem: false,
                 });
@@ -299,6 +301,7 @@ export function Admin({
                 value={capacity}
                 onChange={(e) => setCapacity(Number(e.target.value))}
               />])}</label>
+            <ScheduleFields value={schedule} change={setSchedule} />
             <InstrumentFields value={instruments} change={setInstruments} />
             <InitialBalanceFields
               instruments={instruments}
@@ -334,6 +337,10 @@ export function Admin({
           </div>
           <div className="padding stack">
             <strong>{s?.config.name || t("md7ca35df16")}</strong>
+            {s && <ScheduleEditor s={s} busy={busy||!token} save={value=>action(async current=>{
+              await api(`/api/admin/markets/${id}/schedule`,token,value);
+              if(current())await changed(undefined,current);
+            })}/>}
             {s && (
               <InstrumentsEditor
                 s={s}

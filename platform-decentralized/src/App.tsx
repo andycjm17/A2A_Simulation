@@ -277,19 +277,7 @@ export default function App() {
             </div>
           )}
           <div className="row between marketselect">
-            <label className="row">{rich("m33e40daa98", [<select
-                aria-label={t("md0a6620e1a")}
-                value={id}
-                onChange={(e) => setId(e.target.value)}
-              >
-                <option value="">{rich("mb2a8ca10ef")}</option>
-                {markets.map((m) => (
-                  <option value={m.id} key={m.id}>
-                    {displayMarketName(m.name)}
-                    {m.practice ? t("m929d559db7") : ""}
-                  </option>
-                ))}
-              </select>])}</label>
+            <span className="row">Current competition: <strong>{s ? displayMarketName(s.config.name) : "Loading competition…"}</strong></span>
             <span className={`connection ${online ? "positive" : "negative"}`}>
               {online ? t("me876f0d2cd") : t("m1d3caf0584")}
             </span>
@@ -339,7 +327,7 @@ export default function App() {
           {view === "connect" && (
             <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
           )}{" "}
-          {view === "rules" && <Rules />}
+          {view === "rules" && <Rules s={s} />}
           {view === "admin" && (
             <Admin
               id={id}

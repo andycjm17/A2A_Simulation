@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   createState,
+  setSchedule,
+  setMakerPolicy,
   setInitialBalances,
   addAgent,
   start,
@@ -312,4 +314,57 @@ describe("organizer initial balances", () => {
     expect(s.totalDat).toBe(0);
     audit(s);
   });
+});
+
+
+describe("capital-preserving maker and configurable schedule",()=>{
+ it("changes a waiting schedule without changing participant funds, locks after start, and keeps replay deterministic",async()=>{
+  const s=await setup();const agents=structuredClone(s.agents),old=s.commitment;
+  await setSchedule(s,{rounds:300,roundMs:4000},100);
+  expect(s.config.rounds*s.config.roundMs).toBe(1200000);
+  expect(s.path).toHaveLength(301);expect(s.commitment).not.toBe(old);
+  expect(s.agents).toEqual(agents);audit(s);
+  expect(setMakerPolicy(s,200)).toBe(true);expect(setMakerPolicy(s,300)).toBe(false);
+  start(s,1000);
+  await expect(setSchedule(s,{rounds:30,roundMs:5000},2000)).rejects.toThrow(/locked/);
+  expect(()=>setMakerPolicy(s,2000)).toThrow(/locked/);
+ });
+ it.each([{rounds:1,roundMs:1000},{rounds:1,roundMs:2500},{rounds:7201,roundMs:2000},{rounds:300,roundMs:60000}])("rejects unsupported schedule %j",async value=>{
+  const s=await setup();const prior=JSON.stringify(s);
+  await expect(setSchedule(s,value,100)).rejects.toThrow();expect(JSON.stringify(s)).toBe(prior);
+ });
+ it("protects realized trading capital, uses only published information, and preserves finite balances",async()=>{
+  const s=await setup();setMakerPolicy(s,100);s.config.autoRedeem=false;start(s,1000);
+  let fills=0;
+  while(s.status==="running"){
+   const maker=s.agents.find(a=>a.system==="fundamental-maker")!;
+   for(const o of s.orders.filter(o=>o.round===s.round&&o.agentId===maker.id)){
+    if(o.side !== (s.round%2 ? "SELL" : "BUY"))continue;
+    const a=s.agents.find(a=>a.id===(o.side==="BUY"?"a0":"a1"))!;
+    const available=accountState(s,a);
+    const can=o.side==="BUY" ? available.availableHoldings[o.symbol!]>=1 : available.availableCash>=o.price;
+    if(can)submit(s,a.id,{round:s.round,symbol:o.symbol,side:o.side==="BUY"?"SELL":"BUY",price:o.price,quantity:1,requestId:`take-${s.round}-${o.symbol}-${o.side}`},s.openedAt+1);
+    if(o.side==="SELL")expect(o.price*maker.holdings![o.symbol!]).toBeGreaterThanOrEqual(maker.inventoryCost![o.symbol!]);
+   }
+   const continuation=structuredClone(s);
+   for(const asset of Object.values(continuation.assets!))for(let i=s.round+1;i<asset.path.length;i++)asset.path[i]=100;
+   clearRound(s,settlementAt(s));clearRound(continuation,settlementAt(continuation));audit(s);
+   expect(continuation.orders).toEqual(s.orders);
+   expect(publicState(s,s.openedAt).maker!.realizedProfit).toBeGreaterThanOrEqual(0);
+   expect(maker.cash).toBeGreaterThanOrEqual(0);
+  }
+  fills=s.trades.filter(t=>t.buyer.startsWith("system-maker")||t.seller.startsWith("system-maker")).length;
+  expect(fills).toBeGreaterThan(0);
+  expect(publicState(s,s.finishedAt!).maker!.policy).toBe("capital-preserving-v1");
+ });
+ it("stops new buys under a large public price loss but never quotes sales below cost",async()=>{
+  const s=await setup();setMakerPolicy(s,100);
+  for(const asset of Object.values(s.assets!)){asset.path[0]=10000;asset.path[1]=1000;}
+  start(s,1000);clearRound(s,settlementAt(s));
+  const maker=s.agents.find(a=>a.system==="fundamental-maker")!;
+  const quotes=s.orders.filter(o=>o.round===2&&o.agentId===maker.id);
+  expect(quotes.some(o=>o.side==="BUY")).toBe(false);
+  expect(quotes.filter(o=>o.side==="SELL").every(o=>o.price>=10000)).toBe(true);
+  expect(publicState(s,s.openedAt).maker!.riskMode).toBe("no-new-buys");
+ });
 });
