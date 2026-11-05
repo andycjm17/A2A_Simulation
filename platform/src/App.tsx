@@ -59,7 +59,7 @@ export function download(name: string, data: unknown) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-export function CopyButton({ text }: { text: string }) {
+export function CopyButton({ text, label }: { text: string; label?: string }) {
   useLocale();
   const [copied, setCopied] = useState(false),
     [error, setError] = useState(false);
@@ -79,7 +79,7 @@ export function CopyButton({ text }: { text: string }) {
         }}
       >
         {copied ? <Check size={15} /> : <Copy size={15} />}{" "}
-        {copied ? t("m8f6f8d979c") : t("m63d90d9773")}
+        {copied ? t("m8f6f8d979c") : (label ?? t("m63d90d9773"))}
       </button>
       {error && (
         <span role="alert" className="hint">{rich("m0f0e54673b")}</span>
@@ -766,6 +766,7 @@ function AgentView({
     duplicateName === normalizedName ||
     s?.leaderboard.some((agent) => agent.name.toLocaleLowerCase() === normalizedName)
   );
+  const mcpEndpoint = `${location.origin}/mcp/${encodeURIComponent(id)}`;
   if (!id) return <div className="notice">{rich("m43afb021d7")}</div>;
   if (account)
     return (
@@ -800,6 +801,10 @@ function AgentView({
                 </div>
               </div>
               <p className="hint">{rich("m26a226294d")}</p>
+              <div className="stack">
+                <span className="hint">MCP endpoint</span>
+                <code style={{ overflowWrap: "anywhere" }}>{mcpEndpoint}</code>
+              </div>
               <button className="primary" onClick={connect}>{rich("mf327b4a048")}</button>
             </div>
           </section>
@@ -811,6 +816,11 @@ function AgentView({
               {fresh && (
                 <div className="notice success">{rich("maacfb31014")}</div>
               )}
+              <label className="field">
+                MCP endpoint
+                <input readOnly value={mcpEndpoint} spellCheck={false} />
+              </label>
+              <CopyButton text={mcpEndpoint} label="Copy MCP link" />
               <p className="hint">{rich("m7b56827cfd")}</p>
               <label className="field">{rich("mc6b9807a7e", [<input
                   type={show ? "text" : "password"}
