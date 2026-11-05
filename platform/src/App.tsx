@@ -1,6 +1,6 @@
 import { ClubBrand, ModuleGrid } from "./ClubBrand";
 import { t, rich, useLocale, localizedLabels, localeTag, message, displayName, displayMarketName, apiError } from "./i18n";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ArrowUpRight,
   Bot,
@@ -87,6 +87,43 @@ export function CopyButton({ text }: { text: string }) {
   );
 }
 export type Act = (fn: () => Promise<void>) => Promise<void>;
+
+function AgentOnboarding({ onConnect, onDismiss }: { onConnect: () => void; onDismiss: () => void }) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    element?.showModal();
+    return () => element?.close();
+  }, []);
+
+  return (
+    <dialog
+      ref={dialog}
+      className="agent-onboarding"
+      aria-labelledby="agent-onboarding-title"
+      aria-describedby="agent-onboarding-description"
+      onCancel={(event) => {
+        event.preventDefault();
+        onDismiss();
+      }}
+    >
+      <Bot size={24} aria-hidden="true" />
+      <h2 id="agent-onboarding-title">Connect your Agent</h2>
+      <p id="agent-onboarding-description">
+        Open My Agent to register for this competition or connect with an existing API key.
+      </p>
+      <div className="agent-onboarding-actions">
+        <button type="button" className="primary" autoFocus onClick={onConnect}>
+          Go to My Agent
+        </button>
+        <button type="button" className="secondary" onClick={onDismiss}>
+          Browse market
+        </button>
+      </div>
+    </dialog>
+  );
+}
+
 export default function App() {
   useLocale();
   const [view, setView] = useState(() => {
@@ -113,6 +150,8 @@ export default function App() {
     [busy, setBusy] = useState(false),
     [now, setNow] = useState(Date.now()),
     [online, setOnline] = useState(false);
+  const [dismissedMarkets, setDismissedMarkets] = useState(() => new Set<string>());
+  const [rejectedCredential, setRejectedCredential] = useState<{ market: string; key: string } | null>(null);
   // Never pair a previous room's credential with the newly selected room, even for one render.
   const key = credential.market === id ? credential.value : "";
   const setKey = (value: string) => setCredential({ market: id, value });
@@ -123,6 +162,10 @@ export default function App() {
       : null;
   const setAccount = (value: Account | null) =>
     setPrivateAccount(value ? { market: id, key, value } : null);
+  const dismissOnboarding = () => setDismissedMarkets((previous) => new Set(previous).add(id));
+  const showOnboarding =
+    view === "market" && s && credential.market === id && !account && !dismissedMarkets.has(id) &&
+    (!key || (rejectedCredential?.market === id && rejectedCredential.key === key));
   useEffect(() => {
     let dead = false;
     const refresh = () =>
@@ -172,8 +215,18 @@ export default function App() {
           setOnline(true);
         }
         if (key) {
-          const a = await api(`/api/markets/${id}/account`, key);
-          if (!dead) setAccount(a);
+          try {
+            const a = await api(`/api/markets/${id}/account`, key);
+            if (!dead) {
+              setAccount(a);
+              setRejectedCredential(null);
+            }
+          } catch (error) {
+            if (!dead && (error as { code?: string }).code === "UNAUTHORIZED") {
+              setRejectedCredential({ market: id, key });
+            }
+            throw error;
+          }
         }
       } catch (e) {
         if (!dead) {
@@ -218,6 +271,16 @@ export default function App() {
   ] as const;
   return (
     <div className="app">
+      {showOnboarding && (
+        <AgentOnboarding
+          key={id}
+          onDismiss={dismissOnboarding}
+          onConnect={() => {
+            dismissOnboarding();
+            setView("agent");
+          }}
+        />
+      )}
       <aside className="appnav">
         <ClubBrand />
         <nav aria-label={t("m968608e4ff")}>
