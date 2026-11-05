@@ -19,6 +19,7 @@ import { RetailPanel } from "./RetailPanel";
 import { InstrumentIcon } from "./InstrumentSettings";
 import { assetName as rawAssetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
+import { chatgptEndpoint } from "./mcp-endpoints";
 const assetName=(...args:Parameters<typeof rawAssetName>)=>displayName(rawAssetName(...args));
 export type Snapshot = ReturnType<typeof publicState>;
 export type Account = ReturnType<typeof accountState>;
@@ -151,6 +152,9 @@ export default function App() {
     [busy, setBusy] = useState(false),
     [now, setNow] = useState(Date.now()),
     [online, setOnline] = useState(false);
+  const [missingMarket, setMissingMarket] = useState<string | null>(null);
+  const marketNotFound = missingMarket === id;
+  const currentMarket = markets.find((market) => market.id !== id);
   const [dismissedMarkets, setDismissedMarkets] = useState(() => new Set<string>());
   const [rejectedCredential, setRejectedCredential] = useState<{ market: string; key: string } | null>(null);
   // Never pair a previous room's credential with the newly selected room, even for one render.
@@ -191,7 +195,10 @@ export default function App() {
   useEffect(() => {
     setS(null);
     setAccount(null);
+    setMissingMarket(null);
+    setError("");
     setKey(id ? sessionStorage.getItem(`agent-key:${id}`) || "" : "");
+    if (id) sessionStorage.setItem("agent-exchange:last-market", id);
   }, [id]);
   useEffect(() => {
     setAccount(null);
@@ -207,10 +214,22 @@ export default function App() {
   useEffect(() => {
     if (!id) return;
     let dead = false;
+    let notFound = false;
     const refresh = async () => {
+      if (dead || notFound) return;
       try {
-        const r = await api(`/api/markets/${id}`);
+        // Only a missing public snapshot means the competition is missing.
+        // Account errors below must not replace a valid market with a 404 view.
+        const r = await api(`/api/markets/${id}`).catch((error) => {
+          if (!dead && error.code === "NOT_FOUND") {
+            notFound = true;
+            setMissingMarket(id);
+            setS(null);
+          }
+          throw error;
+        });
         if (!dead) {
+          setMissingMarket(null);
           setS(r);
           setNow(r.serverTime);
           setOnline(true);
@@ -347,9 +366,9 @@ export default function App() {
             </div>
           )}
           <div className="row between marketselect">
-            <span className="row">Current competition: <strong>{s ? displayMarketName(s.config.name) : "Loading competition…"}</strong></span>
-            <span className={`connection ${online ? "positive" : "negative"}`}>
-              {online ? t("me876f0d2cd") : t("m1d3caf0584")}
+            <span className="row">Current competition: <strong>{marketNotFound ? "Competition not found" : s ? displayMarketName(s.config.name) : "Loading competition…"}</strong></span>
+            <span className={`connection ${online && !marketNotFound ? "positive" : "negative"}`}>
+              {marketNotFound ? "Competition unavailable" : online ? t("me876f0d2cd") : t("m1d3caf0584")}
             </span>
           </div>
           {view === "market" &&
@@ -361,6 +380,21 @@ export default function App() {
                 account={account}
                 connect={() => setView(account ? "connect" : "agent")}
               />
+            ) : marketNotFound ? (
+              <section className="panel empty">
+                <CircleHelp size={34} />
+                <h3>Competition not found</h3>
+                <p>This competition link is invalid or the competition is no longer available.</p>
+                {currentMarket ? (
+                  <button className="secondary" onClick={() => {
+                    setError("");
+                    setId(currentMarket.id);
+                    setView("market");
+                  }}>Open current competition</button>
+                ) : (
+                  <p>No current competition is available. Please ask the organizer for a valid link.</p>
+                )}
+              </section>
             ) : (
               <section className="panel empty">
                 <ChartNoAxesCombined size={34} />
@@ -767,6 +801,7 @@ function AgentView({
     s?.leaderboard.some((agent) => agent.name.toLocaleLowerCase() === normalizedName)
   );
   const mcpEndpoint = `${location.origin}/mcp/${encodeURIComponent(id)}`;
+  const chatgptMcpEndpoint = chatgptEndpoint();
   if (!id) return <div className="notice">{rich("m43afb021d7")}</div>;
   if (account)
     return (
@@ -802,7 +837,11 @@ function AgentView({
               </div>
               <p className="hint">{rich("m26a226294d")}</p>
               <div className="stack">
-                <span className="hint">MCP endpoint</span>
+                <span className="hint">ChatGPT MCP endpoint · OAuth</span>
+                <code style={{ overflowWrap: "anywhere" }}>{chatgptMcpEndpoint}</code>
+              </div>
+              <div className="stack">
+                <span className="hint">API-key MCP endpoint</span>
                 <code style={{ overflowWrap: "anywhere" }}>{mcpEndpoint}</code>
               </div>
               <button className="primary" onClick={connect}>{rich("mf327b4a048")}</button>
@@ -817,10 +856,22 @@ function AgentView({
                 <div className="notice success">{rich("maacfb31014")}</div>
               )}
               <label className="field">
+                ChatGPT MCP endpoint
+                <input readOnly value={chatgptMcpEndpoint} spellCheck={false} />
+              </label>
+              <CopyButton text={chatgptMcpEndpoint} label="Copy ChatGPT MCP link" />
+              <p className="hint">Add this server in ChatGPT with OAuth authentication, then approve this Agent on Agent Exchange.</p>
+              <label className="field">
+                Competition ID
+                <input readOnly value={id} spellCheck={false} />
+              </label>
+              <CopyButton text={id} label="Copy competition ID" />
+              <label className="field">
                 MCP endpoint
                 <input readOnly value={mcpEndpoint} spellCheck={false} />
               </label>
               <CopyButton text={mcpEndpoint} label="Copy MCP link" />
+              <p className="hint">For other MCP clients, use this competition endpoint with your API key in the Authorization header.</p>
               <p className="hint">{rich("m7b56827cfd")}</p>
               <label className="field">{rich("mc6b9807a7e", [<input
                   type={show ? "text" : "password"}

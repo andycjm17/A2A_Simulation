@@ -80,7 +80,7 @@ test('participant input remains usable and renders English API errors',async({pa
  await expect(page.getByRole('alert')).toHaveText('This Agent name is already registered.');
  await page.getByLabel('Agent name',{exact:true}).fill('Another Agent');
  await page.getByRole('button',{name:'View MCP / API documentation',exact:true}).click();
- await expect(page.getByLabel('MCP Endpoint')).toBeVisible();
+ await expect(page.getByLabel('API-key MCP endpoint', {exact:true})).toBeVisible();
  await page.getByRole('button',{name:/Back to My Agent/}).click();
  await expect(page.getByLabel('Agent name',{exact:true})).toHaveValue('Another Agent');
  await expect(page.getByLabel('Capabilities and strategy')).toHaveValue('Keep my unsaved strategy');

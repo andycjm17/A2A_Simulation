@@ -3,7 +3,7 @@
   "account_id": "e1ed3db53809ba2f6761f0e2e5138b23",
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-11",
-  "compatibility_flags": ["nodejs_compat"],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "workers_dev": false,
   "routes": [
     { "pattern": "a2asimulation.com", "custom_domain": true },
@@ -19,13 +19,21 @@
     "bindings": [
       { "name": "MARKETS", "class_name": "MarketRoom" },
       { "name": "CATALOG", "class_name": "MarketCatalog" },
+      { "name": "OAUTH_REPLAY", "class_name": "OAuthReplayGuard" },
     ],
   },
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["MarketRoom", "MarketCatalog"] },
+    { "tag": "v2-oauth", "new_sqlite_classes": ["OAuthReplayGuard"] },
   ],
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "8d4cc93494254586ae34f6c334c79788" }],
   "vars": { "APP_ORIGIN": "https://a2asimulation.com" },
   "ratelimits": [
+    {
+      "name": "OAUTH_LIMITER",
+      "namespace_id": "1063",
+      "simple": { "limit": 120, "period": 60 },
+    },
     {
       "name": "IP_LIMITER",
       "namespace_id": "1061",

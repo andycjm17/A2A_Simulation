@@ -14,6 +14,7 @@ import {
 } from "./InstrumentSettings";
 import { AdminDashboard } from "./AdminDashboard";
 import { useSessionGuard } from "./useSessionGuard";
+import { chatgptEndpoint } from "./mcp-endpoints";
 import {
   api,
   money,
@@ -36,10 +37,29 @@ export function Connect({
   const base = location.origin,
     market = id || "YOUR_MARKET_ID",
     endpoint = `${base}/mcp/${market}`;
-  const sample = `curl '${base}/api/markets/${market}/decision' \\\n+  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n+  -H 'Content-Type: application/json' \\\n+  -d '{"round":1,"symbol":"${s?.instruments[0]?.symbol ?? (legacy ? "DAT" : DEFAULT_INSTRUMENTS[0].symbol)}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
+  const sample = `curl '${base}/api/markets/${market}/decision' \\\n  -H 'Authorization: Bearer YOUR_AGENT_KEY' \\\n  -H 'Content-Type: application/json' \\\n  -d '{"round":1,"symbol":"${s?.instruments[0]?.symbol ?? (legacy ? "DAT" : DEFAULT_INSTRUMENTS[0].symbol)}","side":"BUY","price":10000,"quantity":5,"requestId":"round-1-attempt-1"}'`;
   return (
     <>
       <div className="notice">{rich("m97bcd87652")}</div>
+      <section className="panel">
+        <div className="paneltitle">
+          <h2>ChatGPT in your browser</h2>
+          <span className="badge">OAuth</span>
+        </div>
+        <div className="padding stack">
+          <label className="field">ChatGPT MCP endpoint<input readOnly value={chatgptEndpoint()} spellCheck={false} /></label>
+          <CopyButton text={chatgptEndpoint()} label="Copy ChatGPT MCP link" />
+          <ol className="chatgpt-connect-steps">
+            <li>Register your Agent for the competition. Keep its competition ID and API key available in My Agent.</li>
+            <li>Open <a href="https://chatgpt.com/plugins" target="_blank" rel="noreferrer">ChatGPT Plugins ↗</a> and add a custom MCP server. If your workspace opens Plugin Creator, provide the ChatGPT MCP endpoint above.</li>
+            <li>Choose OAuth authentication. Leave optional OAuth client ID and secret fields empty to use automatic client registration.</li>
+            <li>On the Agent Exchange authorization page, enter the competition ID and your Agent API key, verify the Agent, review permissions, and authorize the connection.</li>
+            <li>Install or select the resulting plugin in ChatGPT. Ask it to read the current market and your account before submitting simulated trades.</li>
+          </ol>
+          <p className="hint">{id ? <>Competition ID: <code>{id}</code>. </> : null}Enter your Agent API key only on the Agent Exchange authorization page. ChatGPT receives a scoped access token.</p>
+          <p className="hint">Your school or organization must allow custom MCP plugins and the requested tools. A connected plugin does not start a trading Agent automatically; give it your strategy and verify its submitted orders.</p>
+        </div>
+      </section>
       <div className="grid">
         <section className="panel">
           <div className="paneltitle">
@@ -48,7 +68,7 @@ export function Connect({
           </div>
           <div className="padding stack">
             <label className="field">
-              MCP Endpoint
+              API-key MCP endpoint
               <input readOnly value={endpoint} />
             </label>
             <CopyButton text={endpoint} />

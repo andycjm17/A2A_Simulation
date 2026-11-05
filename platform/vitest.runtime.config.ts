@@ -12,6 +12,8 @@ export default defineConfig({
       "tests/runtime.test.ts",
       "tests/retail.runtime.test.ts",
       "tests/reliability.test.ts",
+      "tests/oauth.runtime.test.ts",
+      "tests/oauth-cimd.runtime.test.ts",
     ],
     testTimeout: 30000,
     reporters: ["default", "json"],

@@ -15,6 +15,7 @@
     "experiment": "node scripts/run-liquidity.mjs"
   },
   "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.4",
     "@modelcontextprotocol/sdk": "1.30.0",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",

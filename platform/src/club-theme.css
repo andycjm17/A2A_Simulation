@@ -97,3 +97,20 @@ pre{background:var(--pale);border-color:var(--border);border-radius:0;color:var(
 
 /* One desktop workspace on every device. Narrow devices can pan or zoom. */
 html,body{min-width:1280px}
+
+/* OAuth consent uses the same desktop identity, separate from the trading workspace. */
+.oauth-header{display:flex;align-items:center;justify-content:space-between;gap:32px;max-width:1200px;min-height:112px;margin:0 auto;padding:24px 32px;border-bottom:1px solid var(--border)}
+.oauth-main{width:auto;max-width:1200px;margin:0 auto;padding:40px 32px 64px}
+.oauth-intro{max-width:680px;margin-bottom:32px}.oauth-intro>svg{color:var(--royal)}
+.oauth-intro .eyebrow{color:var(--royal);font-size:11px;font-weight:700;letter-spacing:.1em;margin:16px 0 12px}
+.oauth-intro h1{font-size:40px;margin:0 0 16px}.oauth-intro>p:last-child{color:var(--graphite);font-size:15px;line-height:1.65}
+.oauth-columns{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.oauth-details{margin:0}.oauth-details dt{font-size:11px;color:var(--graphite);margin-top:14px}.oauth-details dt:first-child{margin-top:0}
+.oauth-details dd{margin:4px 0 0;color:var(--navy);font-size:16px;font-weight:700;overflow-wrap:anywhere}.oauth-details code{font-size:14px}
+.oauth-permissions{margin:0;padding-left:20px}.oauth-permissions li{padding:0 0 16px}.oauth-permissions li:last-child{padding-bottom:0}
+.oauth-permissions strong{font-size:14px;color:var(--navy)}.oauth-permissions p{font-size:13px;line-height:1.6;color:var(--graphite);margin:4px 0 0}
+.oauth-verified{display:flex;gap:12px;align-items:flex-start;padding:16px;border-left:3px solid var(--royal);background:var(--pale);color:var(--navy);overflow-wrap:anywhere}
+.oauth-verified>svg{flex-shrink:0}.oauth-verified p{margin:4px 0;font-size:13px}.oauth-verified code{font-size:12px}
+.oauth-consent-check{display:flex;align-items:flex-start;gap:12px;font-size:13px;line-height:1.6;cursor:pointer}.oauth-consent-check input{width:18px;height:18px;flex-shrink:0;accent-color:var(--navy);margin:2px 0 0}
+.oauth-actions{display:flex;flex-wrap:wrap;gap:12px}.oauth-actions .primary{display:flex;align-items:center;gap:8px}
+.oauth-error{color:#8c251e}.oauth-page .notice{margin-bottom:20px}.chatgpt-connect-steps{margin:0;padding-left:20px;font-size:14px;line-height:1.65}.chatgpt-connect-steps li+li{margin-top:8px}.chatgpt-connect-steps a{color:var(--royal);text-decoration:underline}

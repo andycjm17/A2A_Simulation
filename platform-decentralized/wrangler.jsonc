@@ -4,7 +4,8 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-09-11",
   "compatibility_flags": [
-    "nodejs_compat"
+    "nodejs_compat",
+    "global_fetch_strictly_public"
   ],
   "workers_dev": false,
   "routes": [
@@ -27,6 +28,10 @@
       {
         "name": "CATALOG",
         "class_name": "MarketCatalog"
+      },
+      {
+        "name": "OAUTH_REPLAY",
+        "class_name": "OAuthReplayGuard"
       }
     ]
   },
@@ -37,13 +42,25 @@
         "MarketRoom",
         "MarketCatalog"
       ]
+    },
+    {
+      "tag": "v2-oauth",
+      "new_sqlite_classes": ["OAuthReplayGuard"]
     }
+  ],
+  "kv_namespaces": [
+    { "binding": "OAUTH_KV", "id": "64fdcad1b457469c9f3a4ce1d6d6504b" }
   ],
   "vars": {
     "APP_ORIGIN": "https://test.a2asimulation.com",
     "LAB_ENV": "decentralization-test"
   },
   "ratelimits": [
+    {
+      "name": "OAUTH_LIMITER",
+      "namespace_id": "2063",
+      "simple": { "limit": 120, "period": 60 }
+    },
     {
       "name": "IP_LIMITER",
       "namespace_id": "2061",
