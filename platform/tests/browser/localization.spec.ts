@@ -41,6 +41,7 @@ async function cleanEnglish(page:Page){
 test('English market, rules and API docs; English-only UI despite old Chinese preferences',async({page},info)=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await fixture(page);await page.addInitScript(()=>localStorage.setItem('a2a-language','zh'));await page.goto('/?market=english-fixture&lang=zh');
+ await page.getByRole('dialog',{name:'Connect your Agent'}).getByRole('button',{name:'Browse market'}).click();
  await expect(page.getByRole('heading',{name:'Leaderboard'})).toBeVisible();
  await expect(page.locator('html')).toHaveAttribute('lang','en-US');
  await cleanEnglish(page);
@@ -63,7 +64,8 @@ test('English market, rules and API docs; English-only UI despite old Chinese pr
 });
 test('participant input remains usable and renders English API errors',async({page})=>{
  await fixture(page);await page.addInitScript(()=>localStorage.setItem('a2a-language','zh'));await page.goto('/?market=english-fixture&lang=zh');
- await page.getByRole('button',{name:'My Agent',exact:true}).click();
+ await page.getByRole('dialog',{name:'Connect your Agent'}).getByRole('button',{name:'Go to My Agent'}).click();
+ await expect(page).toHaveURL(/view=agent/);
  await expect(page.getByLabel(/invite code/i)).toHaveCount(0);
  await page.getByLabel('Agent name',{exact:true}).fill('用户自己的Agent');
  await page.getByLabel('Capabilities and strategy').fill('Keep my unsaved strategy');
@@ -104,6 +106,7 @@ test('admin keeps credential, form and dashboard open',async({page},info)=>{
 test('executed charts, news, connected account and leaderboard remain localized',async({page},info)=>{
  const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));
  await fixture(page,true);await page.goto('/?market=english-fixture&lang=en');
+ await page.getByRole('dialog',{name:'Connect your Agent'}).getByRole('button',{name:'Browse market'}).click();
  const chart=page.getByRole('img',{name:/OpenAI.*DUSD/});await expect(chart).toBeVisible();
  expect(await chart.locator('g[role="button"]').count()).toBeGreaterThan(0);
  await cleanEnglish(page);
@@ -117,6 +120,9 @@ test('executed charts, news, connected account and leaderboard remain localized'
  await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Market overview',exact:true}).click();
+ await page.reload();
+ await expect(page.getByRole('button',{name:'View my Agent',exact:true})).toBeVisible();
+ await expect(page.getByRole('dialog',{name:'Connect your Agent'})).toHaveCount(0);
  await page.screenshot({path:`reports/dbc-active-${info.project.name}.png`,fullPage:true});
  expect(errors).toEqual([]);
 });
@@ -124,6 +130,7 @@ test('executed charts, news, connected account and leaderboard remain localized'
 test('Desktop layout remains usable at supported desktop widths',async({page},info)=>{
  test.skip(info.project.name!=='desktop','Viewport sweep runs once');
  await fixture(page,true);await page.goto('/?market=english-fixture');
+ await page.getByRole('dialog',{name:'Connect your Agent'}).getByRole('button',{name:'Browse market'}).click();
  await expect(page.getByRole('heading',{name:/^Leaderboard/})).toBeVisible();
  for(const width of [1280,1440,1920]){
   await page.setViewportSize({width,height:1000});await cleanEnglish(page);
