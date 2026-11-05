@@ -15,6 +15,7 @@ import type { publicState, accountState } from "../worker/engine";
 import { Connect, Rules, Admin } from "./Workspace";
 import { CandlestickChart, OrderBook } from "./MarketData";
 import { NewsPanel } from "./NewsPanel";
+import { RetailPanel } from "./RetailPanel";
 import { InstrumentIcon } from "./InstrumentSettings";
 import { assetName as rawAssetName, startingBalances } from "../worker/engine";
 import { useSessionGuard } from "./useSessionGuard";
@@ -27,10 +28,10 @@ export const money = (n: number) =>
     maximumFractionDigits: 2,
   }).format(n / 100);
 export const statusName = localizedLabels({
-  lobby: "绛夊緟寮€濮�",
-  running: "浜ゆ槗杩涜涓�",
-  paused: "姣旇禌宸叉殏鍋�",
-  finished: "宸插畬鎴愮粨绠�",
+  lobby: "等待开始",
+  running: "交易进行中",
+  paused: "比赛已暂停",
+  finished: "已完成结算",
 });
 export async function api(path: string, token = "", data?: unknown) {
   const r = await fetch(path, {
@@ -411,7 +412,7 @@ export default function App() {
             <div className="stack">
               <div>
                 <button className="secondary" onClick={() => setView("agent")}>
-                  鈫� Back to My Agent
+                  ← Back to My Agent
                 </button>
               </div>
               <Connect id={id} legacy={s?.orderBookMode === "sealed"} s={s} />
@@ -460,6 +461,7 @@ function MarketView({
     s.instruments.find((i) => i.symbol === symbol) ?? s.instruments[0];
   const names = new Map(s.leaderboard.map((a) => [a.id, a.name]));
   if (s.maker) names.set(s.maker.id, displayName(s.maker.name));
+  for (const a of s.retailTraders ?? []) names.set(a.id, a.name);
   const secs = s.deadline
     ? Math.max(0, Math.ceil((s.deadline - now) / 1000))
     : 0;
@@ -469,7 +471,7 @@ function MarketView({
         <div>
           <span>{rich("m2ac8d3648a")}</span>
           <strong>
-            {s.round || "鈥�"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
+            {s.round || "—"} <small>{rich("m5692de0122", [s.config.rounds])}</small>
           </strong>
         </div>
         <div>
@@ -492,6 +494,7 @@ function MarketView({
         </div>
       </div>
       <NewsPanel s={s} />
+      <RetailPanel s={s} />
       <div className="exchange-grid">
         <section className="price-surface">
           <div className="row between instrument-heading">
@@ -524,7 +527,7 @@ function MarketView({
           <div className="last-trade">
             <span>
               {instrument.lastPrice === null
-                ? "鈥�"
+                ? "—"
                 : money(instrument.lastPrice)}
             </span>
             <small>{rich("m590070958a")}</small>
@@ -543,7 +546,7 @@ function MarketView({
             {s.status === "running"
               ? t("mbe2bacb0d8", [s.round, secs ? t("med4bda5ca9", [secs]) : t("m0aab9522e2"), s.config.roundMs / 1000])
               : s.status === "finished"
-                ? t("m8319551931")
+                ? (s.config.autoRedeem === false ? "All rounds have settled. Cash and holdings are retained; no automatic conversion to cash." : t("m8319551931"))
                 : s.status === "paused"
                   ? t("m191feee058", [s.pauseReason === "scheduler_delay" ? t("mb61c552a20") : ""])
                   : t("m485c2ef1b9")}
@@ -560,19 +563,19 @@ function MarketView({
                 {account ? account.name : t("m1c7ce7a7a0")}
               </span>
               <div className="ticket-value">
-                {account ? money(account.cash) : "鈥�"}
+                {account ? money(account.cash) : "—"}
                 <small>{rich("m2462a87986")}</small>
               </div>
             </div>
             <dl className="ticket-facts">
               <div>
                 <dt>{rich("mc3ee29d0be")}</dt>
-                <dd>{account ? money(account.availableCash) : "鈥�"}</dd>
+                <dd>{account ? money(account.availableCash) : "—"}</dd>
               </div>
               {s.instruments.map((i) => (
                 <div key={i.symbol}>
                   <dt>{rich("m0ca151f9e9", [displayName(i.name)])}</dt>
-                  <dd>{account ? account.holdings[i.symbol] : "鈥�"}</dd>
+                  <dd>{account ? account.holdings[i.symbol] : "—"}</dd>
                 </div>
               ))}
               <div>
@@ -622,6 +625,7 @@ function MarketView({
                 final: s.status === "finished",
                 rankingBasis: s.rankingBasis,
                 leaderboard: s.leaderboard,
+                retailTraders: s.retailTraders,
               })
             }
           >{rich("m7a8ca94be7", [<Download size={15} />])}</button>
@@ -670,14 +674,15 @@ function MarketView({
       </section>
       <section className="panel market-table">
         <div className="paneltitle">
-          <h2>{rich("m3aa093fc13", [<span className="subtle">{displayName(instrument.name)}</span>])}</h2>
+          <h2>Recent trades <span className="subtle">All instruments</span></h2>
           <span className="hint">{rich("m4116f5a5f4")}</span>
         </div>
         <div className="tablewrap">
-          <table>
+          <table aria-label="Recent trades">
             <thead>
               <tr>
                 <th>{rich("m4890584bb5")}</th>
+                <th>Instrument</th>
                 <th>{rich("m1042114048")}</th>
                 <th>{rich("mb8c500522e")}</th>
                 <th>{rich("m1d83c362e2")}</th>
@@ -685,9 +690,10 @@ function MarketView({
               </tr>
             </thead>
             <tbody>
-              {instrument.trades.map((t) => (
+              {s.trades.map((t) => (
                 <tr key={t.id}>
                   <td>R{t.round}</td>
+                  <td>{t.symbol ?? "DAT"} · {displayName(assetName(t.symbol ?? "DAT", s.config))}</td>
                   <td>{names.get(t.buyer)}</td>
                   <td>{names.get(t.seller)}</td>
                   <td>{money(t.price)}</td>
@@ -696,7 +702,7 @@ function MarketView({
               ))}
             </tbody>
           </table>
-          {!instrument.tradeCount && (
+          {!s.tradeCount && (
             <div className="empty">{rich("m51faa06bcc")}</div>
           )}
         </div>
@@ -763,7 +769,6 @@ function AgentView({
   const [name, setName] = useState(""),
     [duplicateName, setDuplicateName] = useState(""),
     [description, setDescription] = useState(""),
-    [invite, setInvite] = useState(""),
     [restore, setRestore] = useState(""),
     [show, setShow] = useState(false),
     [fresh, setFresh] = useState(false);
@@ -785,10 +790,6 @@ function AgentView({
             </div>
             <div className="padding stack">
               <span className="badge">{rich("m997d1ed624")}</span>
-              <div>
-                <span className="hint">{rich("m909909b669")}</span>
-                <p>{account.description || t("m1c64182187")}</p>
-              </div>
               <div className="split">
                 <div>
                   <span className="hint">{rich("mc3ee29d0be")}</span>
@@ -859,7 +860,7 @@ function AgentView({
                     <td>R{o.round}</td>
                     <td>{assetName(o.symbol ?? "DAT", s?.config)}</td>
                     <td>{o.side}</td>
-                    <td>{o.side === "PASS" ? "鈥�" : money(o.price)}</td>
+                    <td>{o.side === "PASS" ? "—" : money(o.price)}</td>
                     <td>{o.quantity}</td>
                     <td>{o.filled}</td>
                     <td>
@@ -901,7 +902,6 @@ function AgentView({
                 const r = await api(`/api/markets/${id}/join`, "", {
                   name,
                   description,
-                  ...(invite ? { invite } : {}),
                 });
                 if (!current()) return;
                 setFresh(true);
@@ -940,14 +940,6 @@ function AgentView({
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("m109b4b1760")}
             />])}</label>
-          {!s?.config.practice && (
-            <label className="field">{rich("m119df53088", [<input
-                required
-                autoComplete="off"
-                value={invite}
-                onChange={(e) => setInvite(e.target.value)}
-              />])}</label>
-          )}
           <span className="hint">{rich("mb30a71ae36")}</span>
           <button className="primary" disabled={busy || nameTaken || s?.status !== "lobby"}>
             {busy ? t("m7c0305bc0c") : t("m831fa1cf5e")}

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { integrityReview } from "../worker/integrity";
 import {
+  retainHoldings,
   createState,
   addAgent,
   start,
@@ -399,4 +400,45 @@ describe('cash-only leaderboard',()=>{
   expect(final.leaderboard.every(a=>a.equity===a.cash)).toBe(true);
   expect(final.leaderboard.map(a=>a.cash)).toEqual(final.leaderboard.map(a=>a.cash).sort((a,b)=>b-a));audit(s);
  });
+});
+
+
+describe("retained final holdings", () => {
+  it("settles the last fills without redemption or terminal-price marking", async () => {
+    const s = await createState({...cfg, rounds: 1, autoRedeem: false}, "retain-final", 0);
+    for (let i=0;i<2;i++) addAgent(s,{id:`a${i}`,name:`Agent ${i}`,description:"",keyHash:`h${i}`},0);
+    start(s,1000);
+    const before=s.agents.map(a=>({cash:a.cash,dat:a.dat}));
+    const treasury={cash:s.treasuryCash,dat:s.treasuryDat};
+    submit(s,"a0",buy,2000); submit(s,"a1",sell,2000);
+    clearRound(s,end(s));
+    expect(s.status).toBe("finished");
+    const trade=s.trades[0]; expect(trade.quantity).toBe(10);
+    expect(s.agents[0].cash).toBe(before[0].cash-trade.price*10);
+    expect(s.agents[1].cash).toBe(before[1].cash+trade.price*10);
+    expect(s.agents.map(a=>a.dat)).toEqual([before[0].dat+10,before[1].dat-10]);
+    expect({cash:s.treasuryCash,dat:s.treasuryDat}).toEqual(treasury);
+    const view=publicState(s,s.finishedAt!);
+    expect(view.reference).toBe(s.path[0]); expect(view.terminalPrice).toBeNull();
+    expect(view.history).toEqual([s.path[0]]);
+    expect(view.leaderboard[0].id).toBe("a1");
+    expect(accountState(s,s.agents[0]).availableCash).toBe(s.agents[0].cash);
+    audit(s);
+    const finished=JSON.stringify(s); advance(s,s.finishedAt!+600000);
+    expect(JSON.stringify(s)).toBe(finished);
+  });
+  it("updates only waiting historical markets, once, without changing balances or paths", async () => {
+    const s=await createState(cfg,"retain-lobby",0);
+    addAgent(s,{id:"a",name:"Agent",description:"",keyHash:"h"},0);
+    addAgent(s,{id:"b",name:"Second Agent",description:"",keyHash:"hb"},0);
+    const balances=JSON.stringify(s.agents), commitment=s.commitment;
+    expect(retainHoldings(s,100)).toBe(true);
+    const migrated=JSON.stringify(s);
+    expect(retainHoldings(s,200)).toBe(false); expect(JSON.stringify(s)).toBe(migrated);
+    expect(JSON.stringify(s.agents)).toBe(balances); expect(s.commitment).toBe(commitment);
+    start(s,1000); expect(()=>retainHoldings(s,2000)).toThrow(/locked/);
+    while(s.status==="running") clearRound(s,end(s));
+    expect(()=>retainHoldings(s,s.finishedAt!)).toThrow(/locked/);
+    expect(s.agents[0].dat).toBeGreaterThan(0);
+  });
 });

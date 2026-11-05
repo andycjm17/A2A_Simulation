@@ -168,6 +168,8 @@ export type MarketConfig = {
   assetMode?: "ai" | "legacy";
   newsEnabled?: boolean;
   makerCashShare?: number;
+  retailAgents?: boolean;
+  autoRedeem?: boolean;
   initialBalances?: InitialBalances;
   instruments?: InstrumentConfig[];
 };
@@ -181,7 +183,10 @@ export type NewsItem = {
   after: number;
 };
 export type Agent = {
-  system?: "fundamental-maker";
+  system?: "fundamental-maker" | "retail-trader";
+  retailPolicy?: string;
+  inventoryCost?: Record<Symbol, number>;
+  finalUnrealizedPnl?: number;
   initialCash?: number;
   initialHoldings?: number;
   initialInventory?: Record<Symbol, number>;
@@ -379,9 +384,25 @@ export async function createState(
           "服务可靠性承压",
         ];
     for (const symbol of Object.keys(assets)) {
-      const cryptoTheme = config.instruments?.some(i => i.symbol === symbol && ['BFBT', 'EFET'].includes(symbol));
-      const positiveHeadlines = cryptoTheme ? ['模拟 ETF 净申购增加', '模拟市场流动性改善', '模拟链上活跃度上升', '模拟托管成本下降'] : positive;
-      const negativeHeadlines = cryptoTheme ? ['模拟 ETF 净赎回增加', '模拟市场流动性收紧', '模拟链上拥堵加剧', '模拟托管成本上升'] : negative;
+      const cryptoTheme = config.instruments?.some(
+        (i) => i.symbol === symbol && ["BFBT", "EFET"].includes(symbol),
+      );
+      const positiveHeadlines = cryptoTheme
+        ? [
+            "模拟 ETF 净申购增加",
+            "模拟市场流动性改善",
+            "模拟链上活跃度上升",
+            "模拟托管成本下降",
+          ]
+        : positive;
+      const negativeHeadlines = cryptoTheme
+        ? [
+            "模拟 ETF 净赎回增加",
+            "模拟市场流动性收紧",
+            "模拟链上拥堵加剧",
+            "模拟托管成本上升",
+          ]
+        : negative;
       const values = [assets[symbol].path[0]];
       for (let round = 2; round <= config.rounds; round++) {
         const digest = await sha256(`${seed}:news:${symbol}:${round}`);
@@ -598,11 +619,13 @@ export function settlementAt(s: State) {
 export function start(s: State, now: number) {
   ensure(s.status === "lobby", "BAD_STATE", "只有等待中的比赛可以开始", 409);
   ensure(
-    s.agents.length >= ((s.config.makerCashShare ?? 0) > 0 ? 1 : 2),
+    s.agents.length >=
+      ((s.config.makerCashShare ?? 0) > 0 || s.config.retailAgents ? 1 : 2),
     "NOT_ENOUGH_AGENTS",
-    "至少需要两名 Agent；启用庄家时至少一名普通 Agent",
+    "至少需要两名 Agent；启用系统交易者时至少一名普通 Agent",
     409,
   );
+  initializeRetail(s, now);
   initializeMaker(s, now);
   s.status = "running";
   s.round = 1;
@@ -767,6 +790,14 @@ export function clearRound(s: State, now: number) {
         cash = price * quantity;
       const buyer = agents.get(b.agentId)!,
         seller = agents.get(a.agentId)!;
+      // Remove average acquisition cost before changing the seller inventory.
+      if (seller.inventoryCost) {
+        const owned = holding(seller, symbol);
+        const cost = seller.inventoryCost[symbol];
+        seller.inventoryCost[symbol] -=
+          quantity === owned ? cost : Math.floor((cost * quantity) / owned);
+      }
+      if (buyer.inventoryCost) buyer.inventoryCost[symbol] += cash;
       buyer.cash -= cash;
       changeHolding(buyer, symbol, quantity);
       seller.cash += cash;
@@ -800,7 +831,7 @@ export function clearRound(s: State, now: number) {
             : "expired";
   s.results.push({
     round: s.round,
-    reference: s.path[s.round],
+    reference: s.path[s.config.autoRedeem === false ? s.round - 1 : s.round],
     trades: count,
     volume,
     decisions: orders.length,
@@ -814,16 +845,21 @@ export function clearRound(s: State, now: number) {
     JSON.stringify({ round: s.round, trades: count, volume }),
   );
   if (s.round === s.config.rounds) {
-    for (const symbol of symbols(s)) {
-      const price = pathFor(s, symbol)[s.config.rounds];
-      for (const a of s.agents) {
-        const quantity = holding(a, symbol),
-          payout = quantity * price;
-        s.treasuryCash -= payout;
-        if (symbol === "DAT") s.treasuryDat += quantity;
-        else s.assets![symbol].treasury += quantity;
-        a.cash += payout;
-        changeHolding(a, symbol, -quantity);
+    for (const a of s.agents.filter((a) => a.system === "retail-trader"))
+      a.finalUnrealizedPnl = unrealizedPnl(s, a);
+    if (s.config.autoRedeem !== false) {
+      for (const symbol of symbols(s)) {
+        const price = pathFor(s, symbol)[s.config.rounds];
+        for (const a of s.agents) {
+          const quantity = holding(a, symbol),
+            payout = quantity * price;
+          s.treasuryCash -= payout;
+          if (symbol === "DAT") s.treasuryDat += quantity;
+          else s.assets![symbol].treasury += quantity;
+          a.cash += payout;
+          changeHolding(a, symbol, -quantity);
+          if (a.inventoryCost) a.inventoryCost[symbol] = 0;
+        }
       }
     }
     s.status = "finished";
@@ -831,8 +867,10 @@ export function clearRound(s: State, now: number) {
     event(
       s,
       now,
-      "redeemed",
-      "all instruments redeemed at their committed terminal prices",
+      s.config.autoRedeem === false ? "competition_finished" : "redeemed",
+      s.config.autoRedeem === false
+        ? "final matching complete; cash and holdings retained without automatic redemption"
+        : "all instruments redeemed at their committed terminal prices",
     );
   } else {
     s.round++;
@@ -853,6 +891,26 @@ export function advance(s: State, now: number) {
   return true;
 }
 export function audit(s: State) {
+  for (const a of s.agents.filter((a) => a.system === "retail-trader")) {
+    ensure(
+      symbols(s).every(
+        (symbol) =>
+          Number.isSafeInteger(a.inventoryCost?.[symbol]) &&
+          a.inventoryCost![symbol] >= 0 &&
+          (holding(a, symbol) > 0 || a.inventoryCost![symbol] === 0),
+      ),
+      "INVARIANT",
+      "Invalid retail acquisition cost",
+      500,
+    );
+    ensure(
+      a.finalUnrealizedPnl === undefined ||
+        Number.isSafeInteger(a.finalUnrealizedPnl),
+      "INVARIANT",
+      "Invalid retail score",
+      500,
+    );
+  }
   if (s.assets)
     for (const symbol of symbols(s)) {
       const asset = s.assets[symbol];
@@ -909,7 +967,9 @@ export function audit(s: State) {
 export function publicState(s: State, now: number) {
   const reference =
     s.path[
-      s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds
+        : Math.max(0, s.round - 1)
     ];
   const counts = new Map<
     string,
@@ -977,7 +1037,9 @@ export function publicState(s: State, now: number) {
     reference,
     history: s.path.slice(
       0,
-      s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds + 1
+        : Math.max(1, s.round),
     ),
     commitment: s.commitment,
     participantCount: s.agents.filter((a) => !a.system).length,
@@ -986,6 +1048,7 @@ export function publicState(s: State, now: number) {
       .slice()
       .reverse(),
     maker: makerState(s),
+    retailTraders: retailState(s),
     tradeCount: s.trades.length,
     volume: s.trades.reduce((n, t) => n + t.quantity, 0),
     rankingBasis: "cash" as const,
@@ -993,7 +1056,10 @@ export function publicState(s: State, now: number) {
     trades: s.trades.slice(-100).reverse(),
     results: s.results,
     settlementMode: "simulation" as const,
-    terminalPrice: s.status === "finished" ? reference : null,
+    terminalPrice:
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? reference
+        : null,
     reveal:
       s.status === "finished"
         ? s.assets
@@ -1094,7 +1160,11 @@ export function instrumentState(s: State, symbol: Symbol) {
       .map(([price, quantity]) => ({ price, quantity }));
   };
   const reference =
-    path[s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)];
+    path[
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds
+        : Math.max(0, s.round - 1)
+    ];
   return {
     symbol,
     name: assetName(symbol, s.config),
@@ -1104,9 +1174,14 @@ export function instrumentState(s: State, symbol: Symbol) {
     reference,
     history: path.slice(
       0,
-      s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds + 1
+        : Math.max(1, s.round),
     ),
-    terminalPrice: s.status === "finished" ? reference : null,
+    terminalPrice:
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? reference
+        : null,
     lastPrice: trades.at(-1)?.price ?? null,
     trades: trades.slice(-100).reverse(),
     tradeCount: trades.length,
@@ -1121,7 +1196,12 @@ export function instrumentState(s: State, symbol: Symbol) {
 function initializeMaker(s: State, now: number) {
   const share = s.config.makerCashShare ?? 0;
   if (!share) return;
-  ensure(!s.agents.some((a) => a.system), "INVARIANT", "庄家重复初始化", 500);
+  ensure(
+    !s.agents.some((a) => a.system === "fundamental-maker"),
+    "INVARIANT",
+    "庄家重复初始化",
+    500,
+  );
   const ordinaryCash = s.agents.reduce((sum, a) => sum + a.cash, 0);
   const cash = Math.round((ordinaryCash * share) / (1 - share));
   const inventory = Object.fromEntries(
@@ -1167,9 +1247,10 @@ function initializeMaker(s: State, now: number) {
 }
 
 function openRound(s: State, now: number) {
+  openRetailRound(s, now);
   for (const n of s.news ?? [])
     if (n.round === s.round) event(s, now, "news_published", n.id);
-  const a = s.agents.find((a) => a.system);
+  const a = s.agents.find((a) => a.system === "fundamental-maker");
   if (!a) return;
   // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
   // of current cash per asset / 10% of inventory offered per round. No future reads.
@@ -1219,7 +1300,7 @@ function openRound(s: State, now: number) {
 }
 
 export function makerState(s: State) {
-  const a = s.agents.find((a) => a.system);
+  const a = s.agents.find((a) => a.system === "fundamental-maker");
   if (!a) return null;
   const initialInventory =
     a.initialInventory ??
@@ -1239,7 +1320,9 @@ export function makerState(s: State) {
         sum +
         holding(a, symbol) *
           pathFor(s, symbol)[
-            s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
+            s.status === "finished" && s.config.autoRedeem !== false
+              ? s.config.rounds
+              : Math.max(0, s.round - 1)
           ],
       0,
     );
@@ -1265,4 +1348,224 @@ export function makerState(s: State) {
     volumeShare: volume ? makerVolume / volume : null,
     policy: "public-fundamentals-v1" as const,
   };
+}
+
+const RETAIL_POLICIES = [
+  "Random mix",
+  "Dip buyer",
+  "Profit taker",
+  "Momentum",
+  "Inventory balancer",
+] as const;
+
+function initializeRetail(s: State, now: number) {
+  // Absence of the flag is intentional: historical ledgers must replay unchanged.
+  if (!s.config.retailAgents) return;
+  ensure(
+    !s.agents.some((a) => a.system === "retail-trader"),
+    "INVARIANT",
+    "Retail traders already funded",
+    500,
+  );
+  const balances = startingBalances(s.config);
+  RETAIL_POLICIES.forEach((policy, index) => {
+    const inventory = Object.fromEntries(
+      symbols(s).map((symbol) => [symbol, balances[symbol]]),
+    );
+    const a: Agent = {
+      id: `system-retail:${s.config.id}:${index + 1}`,
+      name: `Retail ${index + 1}`,
+      description: `Simulated retail trader: ${policy}. Reward: unrealized holdings P&L.`,
+      system: "retail-trader",
+      retailPolicy: policy,
+      keyHash: "",
+      createdAt: now,
+      cash: balances.cash,
+      dat: s.assets ? 0 : balances.DAT,
+      ...(s.assets ? { holdings: { ...inventory } } : {}),
+      initialCash: balances.cash,
+      initialInventory: inventory,
+      inventoryCost: Object.fromEntries(
+        symbols(s).map((symbol) => [
+          symbol,
+          inventory[symbol] * pathFor(s, symbol)[0],
+        ]),
+      ),
+    };
+    s.agents.push(a);
+    const reserve = Object.values(inventory).reduce(
+      (n, q) => n + q * MAX_PRICE,
+      0,
+    );
+    s.treasuryCash += reserve;
+    s.totalCash += balances.cash + reserve;
+    for (const symbol of symbols(s)) {
+      if (s.assets) s.assets[symbol].total += inventory[symbol];
+      else s.totalDat += inventory[symbol];
+    }
+    event(s, now, "retail_funded", a.id);
+  });
+  audit(s);
+}
+
+function unrealizedPnl(s: State, a: Agent) {
+  // Mark at the reference already visible to participants, never the next price.
+  return symbols(s).reduce(
+    (sum, symbol) =>
+      sum +
+      holding(a, symbol) * pathFor(s, symbol)[Math.max(0, s.round - 1)] -
+      (a.inventoryCost?.[symbol] ?? 0),
+    0,
+  );
+}
+
+export function retailState(s: State) {
+  const rows = s.agents
+    .filter((a) => a.system === "retail-trader")
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      policy: a.retailPolicy!,
+      cash: a.cash,
+      holdings: Object.fromEntries(
+        symbols(s).map((symbol) => [symbol, holding(a, symbol)]),
+      ),
+      inventoryCost: a.inventoryCost!,
+      unrealizedPnl: unrealizedPnl(s, a),
+      score: a.finalUnrealizedPnl ?? unrealizedPnl(s, a),
+      scoreFrozen: a.finalUnrealizedPnl !== undefined,
+      scoringBasis: "unrealized-pnl" as const,
+      decisionHorizon: "indefinite" as const,
+      decisions: new Set(
+        s.orders.filter((o) => o.agentId === a.id).map((o) => o.round),
+      ).size,
+    }))
+    .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+  let rank = 0,
+    previous = Infinity;
+  return rows.map((a, i) => {
+    if (a.score !== previous) rank = i + 1;
+    previous = a.score;
+    return { ...a, rank };
+  });
+}
+
+function openRetailRound(s: State, now: number) {
+  for (const a of s.agents.filter((a) => a.system === "retail-trader")) {
+    let availableCash = a.cash;
+    for (const symbol of symbols(s)) {
+      const id = `${s.config.id}:${s.round}:${a.id}:${symbol}`;
+      const existing = s.orders.find((o) => o.id === id);
+      if (existing) {
+        if (existing.side === "BUY")
+          availableCash -= existing.price * existing.quantity;
+        continue;
+      }
+      const random = (label: string) =>
+        (hash32(`${s.seed}:retail:${id}:${label}`) >>> 0) / 4294967296;
+      // The round identifies a random draw, but the policy cannot see the clock,
+      // total rounds, future prices, terminal redemption, or competition score.
+      const { side, price, quantity } = retailDecision(
+        {
+          policy: a.retailPolicy,
+          reference: pathFor(s, symbol)[s.round - 1],
+          previous: pathFor(s, symbol)[Math.max(0, s.round - 2)],
+          owned: holding(a, symbol),
+          inventoryCost: a.inventoryCost![symbol],
+          initialInventory: a.initialInventory![symbol],
+          availableCash,
+        },
+        {
+          side: random("side"),
+          price: random("price"),
+          quantity: random("quantity"),
+        },
+      );
+      if (side === "BUY") availableCash -= price * quantity;
+      s.orders.push({
+        id,
+        requestId: id,
+        agentId: a.id,
+        ...(s.assets ? { symbol } : {}),
+        round: s.round,
+        side,
+        price: side === "PASS" ? 0 : price,
+        quantity,
+        createdAt: now,
+        filled: 0,
+        cashFlow: 0,
+        status: side === "PASS" ? "pass" : "pending",
+        note: `Simulated retail: ${a.retailPolicy}`,
+      });
+    }
+  }
+}
+
+/** Information available to an indefinitely trading retail policy.
+ * Deliberately excludes the competition clock, remaining rounds and redemption.
+ * The event's finite score snapshot is outside the trader's decision process.
+ */
+export type RetailObservation = Readonly<{
+  policy: string | undefined;
+  reference: number;
+  previous: number;
+  owned: number;
+  inventoryCost: number;
+  initialInventory: number;
+  availableCash: number;
+}>;
+
+export function retailDecision(
+  observation: RetailObservation,
+  random: Readonly<{ side: number; price: number; quantity: number }>,
+): { side: Side; price: number; quantity: number } {
+  const {
+    policy,
+    reference,
+    previous,
+    owned,
+    inventoryCost,
+    initialInventory,
+    availableCash,
+  } = observation;
+  const avgCost = owned ? inventoryCost / owned : reference;
+  let buyProbability = 0.5;
+  if (policy === "Dip buyer")
+    buyProbability = reference < previous ? 0.8 : 0.35;
+  if (policy === "Profit taker")
+    buyProbability = reference > avgCost ? 0.2 : 0.65;
+  if (policy === "Momentum") buyProbability = reference > previous ? 0.8 : 0.3;
+  if (policy === "Inventory balancer")
+    buyProbability = owned < initialInventory ? 0.8 : 0.3;
+  let side: Side = random.side < buyProbability ? "BUY" : "SELL";
+  const price = Math.max(
+    MIN_PRICE,
+    Math.min(MAX_PRICE, Math.round(reference * (0.98 + random.price * 0.04))),
+  );
+  const desired = 1 + Math.floor(random.quantity * MAX_QTY);
+  const feasible = (side: Side) =>
+    side === "BUY" ? Math.floor(availableCash / price) : owned;
+  if (feasible(side) < 1) side = side === "BUY" ? "SELL" : "BUY";
+  const quantity = Math.min(desired, feasible(side));
+  if (!quantity) side = "PASS";
+  return { side, price: side === "PASS" ? 0 : price, quantity };
+}
+
+/** Explicit, auditable update for a waiting historical market; never rewrites a completed ledger. */
+export function retainHoldings(s: State, now: number) {
+  ensure(
+    s.status === "lobby",
+    "BAD_STATE",
+    "End-of-competition rules are locked after the start",
+    409,
+  );
+  if (s.config.autoRedeem === false) return false;
+  s.config.autoRedeem = false;
+  event(
+    s,
+    now,
+    "settlement_policy_changed",
+    "keep cash and holdings after the final round",
+  );
+  return true;
 }

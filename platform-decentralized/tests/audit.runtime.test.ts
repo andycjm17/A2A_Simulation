@@ -45,6 +45,8 @@ it('atomically signs receipts, persists through eviction, rejects tampering and 
  const pending=(await req(base+'/audit')).body;expect(pending.reveal).toBeNull();expect(JSON.stringify(pending)).not.toContain('keyHash');
  await new Promise(r=>setTimeout(r,3200));await req(base);
  const bundle=(await req(base+'/audit')).body;
+ expect(bundle.state.agents.filter((a:any)=>a.system==='retail-trader')).toHaveLength(5);
+ expect(bundle.state.agents.filter((a:any)=>a.system==='retail-trader').every((a:any)=>Number.isSafeInteger(a.finalUnrealizedPnl))).toBe(true);
  const result=await verifyAudit(bundle,receipt.attestor);expect(result.verified).toBe(true);expect(result.leaderboard.length).toBe(2);
  expect(bundle.entries.find((e:any)=>e.hash===receipt.hash)).toEqual(receipt);
  const tampered=structuredClone(bundle);tampered.state.agents[0].cash+=1;

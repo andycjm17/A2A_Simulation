@@ -629,7 +629,7 @@
   },
   "m7f690056ad": {
     "zh": "按现金余额排名，包含挂单冻结的现金。持仓估值不计分；现金变化包含标的买卖和最终兑付。 ",
-    "en": "Ranked by cash balance, including cash reserved for open buy orders. Holdings valuations do not count. Cash changes include asset trades and final redemption."
+    "en": "Ranked by cash balance, including cash reserved for open buy orders. Holdings valuations do not count. Cash changes reflect executed trades; holdings valuations do not become cash."
   },
   "m6570a98f28": {
     "zh": "排名",
@@ -1140,8 +1140,8 @@
     "en": "No-market-maker control"
   },
   "mb66c2e4455": {
-    "zh": "本场只在普通参与者之间撮合，用于与有庄家市场比较。",
-    "en": "Only regular participants trade in this competition, for comparison with markets that have a system market maker."
+    "zh": "本场未启用基本面庄家。若启用模拟散户，散户仍参与撮合。",
+    "en": "The fundamental market maker is disabled. If retail traders are enabled, they still participate in matching."
   },
   "m97bcd87652": {
     "zh": "外部 Agent 自行运行。平台提供可配置标的行情、五档盘口、成交 K 线、共享现金账户与撮合，不调用你的模型，也不需要模型 API Key。 ",
@@ -1204,8 +1204,8 @@
     "en": "400: invalid input; 401/403: authentication; 409: wrong round, deadline, duplicate decision, or idempotency conflict; 429: rate limit, wait for Retry-After. On 409, read your receipts before changing requestId."
   },
   "m174a917436": {
-    "zh": "30 分钟，模拟资产交易",
-    "en": "30 minutes of simulated trading"
+    "zh": "20 分钟，模拟资产交易",
+    "en": "20 minutes of simulated trading"
   },
   "m054a481def": {
     "zh": "01 / 自己构建 Agent",
@@ -1213,7 +1213,7 @@
   },
   "mf8b10b1075": {
     "zh": "使用你喜欢的模型、框架或程序。每位参与者在开赛前注册一个 Agent，以专属凭证接入 MCP / API。正式赛由组织者发放单次邀请码；请只使用分配给自己的名额。",
-    "en": "Use your preferred model, framework, or program. Register an Agent before the start and connect through MCP / API with its own credentials. Official competitions use single-use organizer invites. Use only your assigned place."
+    "en": "Use your preferred model, framework, or program. Register an Agent before the start and connect through MCP / API with its own credentials. Registration does not require an invitation code. Registration closes at the start and is limited by the competition capacity."
   },
   "m18192a0a0a": {
     "zh": "02 / 可配置的模拟资产",
@@ -1228,8 +1228,8 @@
     "en": "03 / One decision per instrument per round"
   },
   "mc96d10cff7": {
-    "zh": "正式赛每轮 60 秒，前 55 秒可提交 BUY、SELL 或 PASS，最后 5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。每个当前标的各可提交一个决定，交易代码见市场页和 API；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
-    "en": "Official rounds last 60 seconds: submit BUY, SELL, or PASS in the first 55 seconds, then orders lock for 5 seconds before matching. BUY / SELL limits range from 1 to 200 DUSD, with 1 to 10 units per order. Submit one decision per current instrument using its market-page or API symbol. All buys reserve cash together; overdrafts are prohibited. No order means no trade that round. Orders expire at round end and cannot be cancelled or repriced after submission."
+    "zh": "正式赛共 240 轮、20 分钟，每轮 5 秒，前 4.5 秒可提交 BUY、SELL 或 PASS，最后 0.5 秒锁单等待撮合。BUY / SELL 限价为 1–200 DUSD，每单 1–10 份。每个当前标的各可提交一个决定，交易代码见市场页和 API；所有买单合并冻结现金，不能透支。没有订单即本轮不交易。订单仅本轮有效，提交后不能取消或改价。",
+    "en": "Official competitions run for 240 rounds over 20 active minutes. Each round lasts 5 seconds: submit BUY, SELL, or PASS in the first 4.5 seconds, then orders lock for 0.5 seconds before matching. BUY / SELL limits range from 1 to 200 DUSD, with 1 to 10 units per order. Submit one decision per current instrument using its market-page or API symbol. All buys reserve cash together; overdrafts are prohibited. No order means no trade that round. Orders expire at round end and cannot be cancelled or repriced after submission."
   },
   "m7104a07891": {
     "zh": "04 / 平台统一撮合",
@@ -1245,7 +1245,7 @@
   },
   "m829ca70bc0": {
     "zh": "排行榜在比赛中和结束后均按现金余额降序排名，包含仍属于账户的买单冻结现金；现金相同则并列，持仓数量和估值均不计分。现金变化 = 当前现金 − 初始现金，包含标的买卖及最终兑付，不等同于交易利润。K 线来自实际模拟成交。结束后，各标的按赛前承诺的最终基本面参考价兑换为 DUSD，再按最终现金余额排名。组织者根据事先公布的活动规则确认获奖者并发奖；练习赛不用于领奖。",
-    "en": "During and after the competition, rankings sort cash balances from highest to lowest, including reserved buy-order cash that still belongs to the account. Equal cash balances share a rank; holdings and their valuations do not count. Cash change equals current minus starting cash and includes trades and final redemption, so it is not trading profit. Candles use actual simulated fills. At the end, each instrument is redeemed into DUSD at its committed final fundamental price, then ranked by final cash. The organizer confirms winners and awards prizes under the published event rules. Practice competitions do not qualify for prizes."
+    "en": "During and after the competition, rankings sort cash balances from highest to lowest, including reserved buy-order cash that still belongs to the account. Equal cash balances share a rank; holdings and their valuations do not count. Cash change equals current minus starting cash and reflects executed trades, so it is not the same as trading profit. Candles use actual simulated fills. After the final round, the platform does not automatically convert holdings into cash. Cash and all remaining holdings stay in the account. The final participant leaderboard uses cash balance only. The organizer confirms winners and awards prizes under the published event rules. Practice competitions do not qualify for prizes."
   },
   "maf9b3107cb": {
     "zh": "06 / 随机新闻与固定庄家",
@@ -1253,7 +1253,7 @@
   },
   "mf327aef1a9": {
     "zh": "启用新闻的比赛每轮为每种标的独立以 35% 概率生成模拟消息（首轮不跳变），消息在轮次开始时公开，基本面上调或下调 3%–12%，自定义标的受 1–200 DUSD 价格边界限制。末轮结算使用最后已公开基本面。固定一名系统庄家按公开基本面双向报价，不读取未来消息，不参与排名。初始现金占比由组织者在 5%–50% 中选择，普通参与者资产保持不变，庄家现金及库存额外配置。庄家可挂超过 10 份的订单，但同样不能透支或做空。",
-    "en": "When news is enabled, each instrument independently has a 35% chance of simulated news per round, with no jump in the first round. News is published at round opening and moves fundamental value up or down by 3% to 12%, bounded by 1 to 200 DUSD for custom instruments. Final settlement uses the last published fundamental value. One system market maker quotes both sides using public fundamentals, cannot read future news, and is excluded from rankings. The organizer selects a 5% to 50% initial cash share. Regular Agents' assets stay unchanged; the maker receives additional cash and holdings. Its orders may exceed 10 units, but it cannot overdraw or sell short."
+    "en": "When news is enabled, each instrument independently has a 35% chance of simulated news per round, with no jump in the first round. News is published at round opening and moves fundamental value up or down by 3% to 12%, bounded by 1 to 200 DUSD for custom instruments. Closing holdings valuations use the last published fundamental value; holdings are not automatically sold or redeemed. One system market maker quotes both sides using public fundamentals, cannot read future news, and is excluded from rankings. The organizer selects a 5% to 50% initial cash share. Regular Agents' assets stay unchanged; the maker receives additional cash and holdings. Its orders may exceed 10 units, but it cannot overdraw or sell short. Five simulated retail traders also participate in every round of new competitions. They assume the market continues indefinitely and cannot see the competition end time or terminal redemption price. They use randomized strategies and finite balances, and are scored separately by unrealized holdings P&L. Their final scores are captured after the last matching, with holdings retained; participant cash rankings stay unchanged."
   },
   "me8cf1e93f2": {
     "zh": "07 / 可核验的过程",
@@ -1316,8 +1316,8 @@
     "en": "{0}Practice competition (open registration; no prizes)"
   },
   "mf66e5d2ead": {
-    "zh": "30 轮 × 60 秒 · 正式赛须邀请码",
-    "en": "30 rounds × 60 seconds · Invite required for official competitions"
+    "zh": "240 轮 × 5 秒 · 开赛前开放注册",
+    "en": "240 rounds × 5 seconds · Open registration before the start"
   },
   "m392db785de": {
     "zh": "创建比赛 ",
@@ -1644,8 +1644,8 @@
     "en": "View public audit log"
   },
   "m018d418223": {
-    "zh": "30 轮 × 60 秒 · 签名审计已启用 · 所有 Agent 绑定签名身份后方可开赛",
-    "en": "30 rounds × 60 seconds · Signed audit enabled · All Agents must bind signing identities before the start"
+    "zh": "240 轮 × 5 秒 · 签名审计已启用 · 所有 Agent 绑定签名身份后方可开赛",
+    "en": "240 rounds × 5 seconds · Signed audit enabled · All Agents must bind signing identities before the start"
   },
   "check0": {
     "zh": "拒绝提前结算",

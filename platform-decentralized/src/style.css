@@ -530,125 +530,8 @@ pre {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
 }
-@media (max-width: 1050px) {
-  .appnav {
-    width: 205px;
-    padding: 30px 14px;
-  }
-  main {
-    margin-left: 205px;
-    width: calc(100% - 205px);
-  }
-  .content {
-    padding: 28px 24px;
-  }
-  header {
-    padding: 0 24px;
-  }
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .stats > div {
-    padding: 0 14px;
-  }
-  .brand {
-    font-size: 15px;
-  }
-}
-@media (max-width: 700px) {
-  .appnav {
-    position: relative;
-    height: auto;
-    width: 100%;
-    padding: 19px 18px;
-    display: block;
-    border-right: 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .app {
-    display: block;
-  }
-  .brand small,
-  .nav-label,
-  .sidebar-bottom p,
-  .sidebar-bottom .tag {
-    display: none;
-  }
-  nav {
-    display: flex;
-    margin-top: 18px;
-    gap: 4px;
-    overflow-x: auto;
-  }
-  nav button {
-    white-space: nowrap;
-    font-size: 13px;
-    padding: 10px;
-    gap: 5px;
-  }
-  .sidebar-bottom {
-    position: absolute;
-    right: 18px;
-    top: 12px;
-    padding: 0;
-  }
-  .sidebar-bottom button {
-    font-size: 12px;
-  }
-  main {
-    margin: 0;
-    width: 100%;
-  }
-  header {
-    height: 52px;
-    padding: 0 19px;
-    font-size: 12px;
-  }
-  .content {
-    padding: 25px 18px;
-  }
-  .pageheading {
-    display: block;
-    margin-bottom: 24px;
-  }
-  h1 {
-    font-size: 28px;
-  }
-  .pageheading .primary {
-    margin-top: 15px;
-  }
-  .stats {
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    padding: 19px 6px;
-  }
-  .stats > div:nth-child(2) {
-    border: 0;
-  }
-  .stats strong {
-    font-size: 25px;
-  }
-  .paneltitle,
-  .padding {
-    padding: 19px;
-  }
-  .split {
-    grid-template-columns: 1fr;
-  }
-  .empty {
-    padding: 45px 15px;
-  }
-  .eyebrow {
-    font-size: 10px;
-  }
-  .chart {
-    height: 200px;
-    margin: 0 10px;
-  }
-  .footnote {
-    font-size: 12px;
-  }
-}
+
+
 @media (prefers-reduced-motion: reduce) {
   * {
     scroll-behavior: auto !important;
@@ -743,7 +626,7 @@ input[type="checkbox"] {
 .admin-participants { max-height: 380px; overflow: auto; }
 .admin-description { white-space: normal; min-width: 200px; max-width: 440px; overflow-wrap: anywhere; color: var(--muted); line-height: 1.6; }
 .admin-anchor { color: var(--green); font-size: 14px; }
-@media(max-width:800px) { .admin-kpis { grid-template-columns: 1fr 1fr; gap: 12px; } .admin-kpi { padding: 18px; } .admin-detail-grid { grid-template-columns: minmax(0,1fr); gap: 0; } .admin-locked { align-items: flex-start; } .admin-locked > svg { flex-shrink: 0; } .admin-pagination { padding: 15px; } .admin-section-title h2 { font-size: 21px; } }
+
 .app { display: block; }
 .appnav { position: sticky; top: 0; width: 100%; height: 76px; padding: 0 40px; flex-direction: row; align-items: center; gap: 48px; border: 0; border-bottom: 1px solid var(--border); }
 .brand { color: #111514; font-size: 19px; white-space: nowrap; }
@@ -821,43 +704,8 @@ tbody tr:hover { background: #f8faf8; }
 pre { background: #f7f9f7; }
 .footnote { color: #656d68; font-size: 12px; text-align: left; }
 button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 2px solid #007b3d; outline-offset: 4px; }
-@media (max-width: 1100px) {
-  .appnav { padding: 0 24px; gap: 28px; }
-  nav { gap: 18px; }
-  .content { padding-left: 28px; padding-right: 28px; }
-  header { padding: 0 28px; }
-  .exchange-grid { gap: 30px; grid-template-columns: minmax(0, 1fr) 280px; }
-}
-@media (max-width: 800px) {
-  .appnav { height: auto; padding: 16px 20px 0; display: grid; grid-template-columns: 1fr auto; gap: 12px; }
-  .brand { font-size: 17px; }
-  .sidebar-bottom { grid-column: 2; grid-row: 1; }
-  nav { grid-column: 1 / -1; grid-row: 2; overflow-x: auto; height: 46px; gap: 25px; width: 100%; }
-  nav button { padding: 0; font-size: 14px; }
-  .content { padding: 10px 20px 30px; }
-  header { padding: 0 20px; height: 42px; }
-  .pageheading { display: flex; margin-bottom: 18px; }
-  .pageheading p, .pageheading > .primary { display: none; }
-  h1 { font-size: 22px; }
-  .marketselect { gap: 10px; margin-bottom: 22px; padding: 10px 0; }
-  .marketselect label { display: grid; grid-template-columns: auto minmax(0, 1fr); width: 100%; }
-  .marketselect select { max-width: 100%; min-width: 0; width: 100%; }
-  .exchange-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; }
-  .instrument-heading { margin-bottom: 18px; }
-  .quote-value { font-size: 44px; }
-  .chart { height: 220px; }
-  .agent-ticket { margin: 0; box-shadow: none; }
-  .ticket-body { gap: 16px; }
-  .market-stats { grid-template-columns: 1fr 1fr; gap: 25px 12px; padding: 22px 0; }
-  .market-stats > div { padding: 0; min-width: 0; }
-  .market-stats strong { font-size: 23px; }
-  .market-stats small { font-size: 13px; }
-  .market-table .paneltitle { align-items: center; gap: 8px; }
-  .market-table h2 { font-size: 20px; }
-  .market-table .tablewrap { max-height: 390px; }
-  .subtle { display: inline-block; margin-left: 5px; }
-  .split, .grid { grid-template-columns: minmax(0, 1fr); }
-}
+
+
 
 /* Instrument selection and execution-price candles. */
 .instrument-tabs { display: flex; gap: 10px; margin: 24px 0; }
@@ -892,13 +740,7 @@ button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 
 .depth-row.bid { color: #168052; background: linear-gradient(to left, #e9f6ee var(--depth), transparent var(--depth)); }
 .depth-row.ask { color: #c34747; background: linear-gradient(to left, #fcf0ee var(--depth), transparent var(--depth)); }
 .depth-note { font-size: 11px; padding: 12px 16px; margin: 0; }
-@media(max-width:600px) {
- .depth-grid th, .depth-grid td { padding: 9px 5px; font-size: 11px; }
- .instrument-tabs button { padding: 10px; flex-direction: column; align-items: flex-start; gap: 4px; }
- .ohlc { gap: 8px; }
- .candle-controls { flex-wrap: wrap; }
- .order-book .paneltitle { gap: 8px; flex-wrap: wrap; }
-}
+
 
 .news-layout {
   display: grid;
@@ -959,19 +801,7 @@ button:focus-visible, a:focus-visible, [role="slider"]:focus-visible { outline: 
   font-size: 14px;
   font-variant-numeric: tabular-nums;
 }
-@media (max-width: 700px) {
-  .news-layout {
-    grid-template-columns: 1fr;
-  }
-  .maker-card {
-    border-left: 0;
-    border-top: 1px solid #e4e8e5;
-  }
-  .news-feed {
-    max-height: 260px;
-    padding: 8px 16px 16px;
-  }
-}
+
 
 .initial-balances-fields { border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin: 0; display: grid; gap: 12px; min-width: 0; }
 .initial-balances-fields legend { font-size: 12px; padding: 0 5px; color: var(--muted); }

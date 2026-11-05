@@ -8,7 +8,11 @@ export default defineConfig({
     }),
   ],
   test: {
-    include: ["tests/runtime.test.ts", "tests/reliability.test.ts"],
+    include: [
+      "tests/runtime.test.ts",
+      "tests/retail.runtime.test.ts",
+      "tests/reliability.test.ts",
+    ],
     testTimeout: 30000,
     reporters: ["default", "json"],
     outputFile: { json: "reports/runtime.json" },

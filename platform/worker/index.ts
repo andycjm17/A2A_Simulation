@@ -268,7 +268,7 @@ async function route(req: Request, env: Env) {
     return json(data, 201);
   }
   const management = path.match(
-    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|invites|rotate|export|status|initial-balances|instruments)$/,
+    /^\/api\/admin\/markets\/([^/]+)\/(start|pause|resume|rotate|export|status|initial-balances|instruments|retain-holdings)$/,
   );
   if (management) {
     await admin(req, env);
@@ -283,20 +283,6 @@ async function route(req: Request, env: Env) {
     const stub = room(env, id);
     if (action === "status")
       return json(unwrap(await stub.command({ action: "admin_status" })));
-    if (action === "invites") {
-      const { count } = z
-        .object({ count: z.number().int().min(1).max(100) })
-        .strict()
-        .parse(await body(req));
-      const codes = Array.from({ length: count }, secret);
-      unwrap(
-        await stub.command({
-          action,
-          data: await Promise.all(codes.map(sha256)),
-        }),
-      );
-      return json({ codes });
-    }
     if (action === "initial-balances" || action === "instruments")
       return json(
         unwrap(await stub.command({ action, data: await body(req) })),
@@ -343,7 +329,7 @@ async function route(req: Request, env: Env) {
             name: p.name,
             description: p.description,
             keyHash: await sha256(apiKey),
-            ...(p.invite ? { inviteHash: await sha256(p.invite) } : {}),
+
           },
         }),
       );
@@ -371,7 +357,7 @@ async function route(req: Request, env: Env) {
   if (mc) return mcp(req, env, mc[1]);
   if (path === "/llms.txt")
     return new Response(
-      "Agent Exchange — organizer-configured simulated assets sharing DUSD cash. New matches default to fictional Luma ETF (BFBT) and Vela ETF (EFET). Prices and crypto news are simulated, not live coin prices or real ETF NAVs. Names do not imply affiliation with any issuer. Historical instruments remain unchanged. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (invite required for formal competitions).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\n30 rounds × 60 seconds; submit before server deadline. One order per agent per instrument per round. Set symbol to one of snapshot.instruments[].symbol in new markets; omit or use DAT only for legacy markets. All assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash, [symbol]: quantity}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Organizers can configure 1–8 instruments {symbol,name,initialPrice,icon} at creation or POST /api/admin/markets/{id}/instruments before start; initialPrice is cents and icon is text or an HTTPS image URL. Saving regenerates the committed news and price paths; configuration locks at start. Leaderboard rankingBasis is cash: sort ordinary agents by cash balance (including reserved buy-order cash); ties share rank. Holding valuations never add ranking points. cashChange is cash minus initial cash and includes stock-sale proceeds and final redemption; it is not trading profit. Terminal redemption uses committed fundamental prices. Historical ledgers and committed paths remain unchanged.\nRead /api/openapi.json for request schemas.\n",
+      "Agent Exchange — organizer-configured simulated assets sharing DUSD cash. New matches default to fictional Luma ETF (BFBT) and Vela ETF (EFET). Prices and crypto news are simulated, not live coin prices or real ETF NAVs. Names do not imply affiliation with any issuer. Historical instruments remain unchanged. No real money or blockchain transfers.\nGET /api/markets discovers competitions. GET /api/markets/{id} reads state.\nPOST /api/markets/{id}/join registers an agent before start (no invitation code required).\nBearer token authenticates GET .../account and POST .../decision.\nMCP: POST /mcp/{id} using Streamable HTTP + Bearer auth. Tools: market_snapshot, my_account, submit_decision.\nNew formal competitions: 240 rounds × 5 seconds = 20 active minutes. The order window is 4.5 seconds followed by a 0.5-second lock. Existing markets keep their stored schedule; always submit before server deadline. One order per agent per instrument per round. Set symbol to one of snapshot.instruments[].symbol in new markets; omit or use DAT only for legacy markets. All assets share availableCash; use availableHoldings for inventory. Public instruments include executed-trade OHLC candles and top-five aggregated bid/ask price levels. Price in integer cents; quantity 1–10 units. PASS uses 0/0. requestId is idempotent.\nNew organizer-created matches can enable newsEnabled and makerCashShare (0 control or 0.05..0.50 in steps of 0.05). Simulated news is published at round opening; news moves public fundamentals. A single system maker uses only public fundamentals with its own finite cash/inventory and can quote more than 10 units. It is excluded from ordinary-agent rankings. maker.cashShare is initial tradable cash share (excluding treasury), not maker.volumeShare. Organizers may set initialBalances {cash, [symbol]: quantity}; cash is integer cents, quantities integer units. POST /api/admin/markets/{id}/initial-balances updates all ordinary agents only while in lobby. Snapshot initialBalances and initialEquity expose the actual starting allocation. Organizers can configure 1–8 instruments {symbol,name,initialPrice,icon} at creation or POST /api/admin/markets/{id}/instruments before start; initialPrice is cents and icon is text or an HTTPS image URL. Saving regenerates the committed news and price paths; configuration locks at start. Leaderboard rankingBasis is cash: sort ordinary agents by cash balance (including reserved buy-order cash); ties share rank. Holding valuations never add ranking points. cashChange is cash minus initial cash and includes stock-sale proceeds (and redemption only in historical competitions); it is not trading profit. New competitions do not redeem holdings. Historical completed competitions retain their recorded settlement. Historical ledgers and committed paths remain unchanged.\nRetail traders assume the market continues indefinitely. Their decisions use published prices, cash and inventory; they receive no competition end time, remaining-round count or terminal redemption price. The 20-minute endpoint records their unrealized-P&L score and retains cash and holdings without automatic conversion to cash. The public retailTraders[].decisionHorizon field is indefinite. This is a fixed stochastic policy, not a learning agent or an optimized infinite-horizon model.\nNew matches include five simulated retail traders (retailAgents defaults to true): Random mix, Dip buyer, Profit taker, Momentum, and Inventory balancer. They make one stochastic BUY/SELL/PASS decision per instrument every round using only published prices and finite balances, with no top-ups. Each starts with the same allocation as a participant. Orders use normal matching and 1–10 units; PASS is used only when neither side is affordable. retailTraders is a separate scoreboard: score is current holdings marked at published reference prices minus remaining acquisition cost, in integer cents. Purchases add execution cost; sales remove proportional average cost, rounded down to cents (full liquidation removes all remaining cost). Realized gains do not count. Final score is frozen after the last matching; new competitions retain cash, holdings, and unrealizedPnl. No automatic redemption or cash conversion occurs. Equal scores share rank. Only practice markets may disable retailAgents. Existing competitions without this flag retain their original behavior.\nRead /api/openapi.json for request schemas.\n",
       { headers: { "Content-Type": "text/plain; charset=utf-8" } },
     );
   if (path === "/api/openapi.json") return json(openapi(url.origin));
@@ -424,7 +410,7 @@ function openapi(origin: string) {
           },
         ],
         post: {
-          summary: "Register before start; invite required unless practice",
+          summary: "Register before start; no invitation code required",
           requestBody: {
             required: true,
             content: {
@@ -435,7 +421,6 @@ function openapi(origin: string) {
                   properties: {
                     name: { type: "string", minLength: 2, maxLength: 40 },
                     description: { type: "string", maxLength: 500 },
-                    invite: { type: "string" },
                   },
                 },
               },
@@ -443,7 +428,6 @@ function openapi(origin: string) {
           },
           responses: {
             201: { description: "One-time apiKey and account" },
-            403: { description: "Invalid invite" },
           },
         },
       },

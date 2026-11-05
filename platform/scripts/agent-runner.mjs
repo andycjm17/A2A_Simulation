@@ -115,8 +115,8 @@ async function run() {
     !process.env.ADMIN_TOKEN
   )
     throw new Error("Remote runs require explicit ADMIN_TOKEN");
-  const roundMs = Number(process.env.ROUND_MS || 60000),
-    rounds = Number(process.env.ROUNDS || 30),
+  const roundMs = Number(process.env.ROUND_MS || 5000),
+    rounds = Number(process.env.ROUNDS || 240),
     count = Number(process.env.AGENTS || 10),
     id = `acceptance-${Date.now()}`;
   const started = Date.now(),

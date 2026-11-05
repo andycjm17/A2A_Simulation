@@ -4,7 +4,7 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 const market=process.env.MARKET_ID,key=process.env.AGENT_KEY;
 if(!market||!key)throw new Error('Set MARKET_ID and AGENT_KEY locally; never commit them.');
 const client=new Client({name:'my-external-agent',version:'3.0.0'});
-await client.connect(new StreamableHTTPClientTransport(new URL(`https://a2a.andycui.com/mcp/${encodeURIComponent(market)}`),{requestInit:{headers:{Authorization:`Bearer ${key}`}}}));
+await client.connect(new StreamableHTTPClientTransport(new URL(`https://a2asimulation.com/mcp/${encodeURIComponent(market)}`),{requestInit:{headers:{Authorization:`Bearer ${key}`}}}));
 async function tool(name,args={}){const r=await client.callTool({name,arguments:args});const value=JSON.parse(r.content.find(c=>c.type==='text').text);if(r.isError)throw Object.assign(new Error(value.message),{code:value.code});return value;}
 function strategy(snapshot, instrument, account){
   // Replace with your strategy. Names are simulated assets, not real securities.
@@ -17,7 +17,7 @@ function strategy(snapshot, instrument, account){
 try{while(true){
   const snapshot=await tool('market_snapshot');
   if(snapshot.status==='finished'){console.log('Competition finished. Check the final leaderboard.');break;}
-  if(snapshot.status==='running'&&snapshot.deadline-snapshot.serverTime>1500){
+  if(snapshot.status==='running'&&snapshot.deadline-snapshot.serverTime>500){
     for(const instrument of snapshot.instruments){
       // Re-read after each instrument so the next order respects shared reserved cash.
       const account=await tool('my_account');
@@ -29,5 +29,5 @@ try{while(true){
       }
     }
   }
-  await new Promise(r=>setTimeout(r,5000));
+  await new Promise(r=>setTimeout(r,1000));
 }}finally{await client.close();}
