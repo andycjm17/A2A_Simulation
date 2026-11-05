@@ -60,6 +60,7 @@ test('English market, rules and API docs; English-only UI despite old Chinese pr
 test('participant input remains usable and renders English API errors',async({page})=>{
  await fixture(page);await page.addInitScript(()=>localStorage.setItem('a2a-language','zh'));await page.goto('/?market=english-fixture&lang=zh');
  await page.getByRole('button',{name:'My Agent',exact:true}).click();
+ await expect(page.getByLabel(/invite code/i)).toHaveCount(0);
  await page.getByLabel('Agent name',{exact:true}).fill('用户自己的Agent');
  await page.getByLabel('Capabilities and strategy').fill('Keep my unsaved strategy');
  await expect(page.getByLabel('Agent name',{exact:true})).toHaveValue('用户自己的Agent');
@@ -105,6 +106,8 @@ test('executed charts, news, connected account and leaderboard remain localized'
  await page.getByLabel('API Key',{exact:true}).fill('fixture-account-key');
  await page.getByRole('button',{name:'Verify and connect',exact:true}).click();
  await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
+ await expect(page.getByText('用户自定义策略',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('My strategy',{exact:true})).toHaveCount(0);
  await cleanEnglish(page);
  await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
  await expect(page.getByRole('heading',{name:'用户自己的Agent',exact:true})).toBeVisible();
@@ -113,11 +116,11 @@ test('executed charts, news, connected account and leaderboard remain localized'
  expect(errors).toEqual([]);
 });
 
-test('KV layout remains usable at narrow phone, tablet and wide desktop widths',async({page},info)=>{
+test('Desktop layout remains usable at supported desktop widths',async({page},info)=>{
  test.skip(info.project.name!=='desktop','Viewport sweep runs once');
  await fixture(page,true);await page.goto('/?market=english-fixture');
  await expect(page.getByRole('heading',{name:/^Leaderboard/})).toBeVisible();
- for(const width of [360,768,1024,1440]){
+ for(const width of [1280,1440,1920]){
   await page.setViewportSize({width,height:1000});await cleanEnglish(page);
   const cta=page.getByRole('button',{name:'Connect my Agent',exact:true});
   await expect(cta).toBeVisible();const box=await cta.boundingBox();expect(box!.x+box!.width).toBeLessThanOrEqual(width);

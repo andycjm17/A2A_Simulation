@@ -489,3 +489,21 @@ it("replays the previous release's full retail ledger byte-for-byte", async () =
     "80b9b7456b4ae986d89d4230f1a2c5e3d58548d2aa32bad91d1de818b2394a1c",
   );
 });
+
+
+it("retains all assets, acquisition costs and final unrealized scores after 240 rounds", async()=>{
+ const s=await setup({autoRedeem:false}); start(s,1000);
+ const treasury=s.treasuryCash;
+ while(s.status==="running") {clearRound(s,settlementAt(s));audit(s);}
+ expect(s.treasuryCash).toBe(treasury);
+ expect(s.agents.every(a=>Object.values(a.holdings!).some(q=>q>0))).toBe(true);
+ const v=publicState(s,s.finishedAt!);
+ for(const row of v.retailTraders){
+  expect(row.score).toBe(row.unrealizedPnl);
+  expect(row.scoreFrozen).toBe(true);
+  const a=s.agents.find(a=>a.id===row.id)!;
+  expect(Object.values(a.inventoryCost!).some(c=>c>0)).toBe(true);
+ }
+ for(const asset of v.instruments){expect(asset.terminalPrice).toBeNull();expect(asset.history).toHaveLength(240);}
+ expect(v.leaderboard.every(a=>!a.id.startsWith("system-"))).toBe(true);
+});

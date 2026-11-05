@@ -197,8 +197,6 @@ export function Admin({
     [initialBalances, setInitialBalances] = useState<InitialBalances>(
       startingBalances({ instruments: DEFAULT_INSTRUMENTS } as Snapshot["config"]),
     ),
-    [count, setCount] = useState(10),
-    [codes, setCodes] = useState<string[]>([]),
     [rotateId, setRotateId] = useState(""),
     [newKey, setNewKey] = useState(""),
     [revision, setRevision] = useState(0);
@@ -220,12 +218,12 @@ export function Admin({
     });
   };
   useEffect(() => {
-    setCodes([]);
+
     setRotateId("");
     setNewKey("");
   }, [id]);
   useEffect(() => {
-    setCodes([]);
+
     setNewKey("");
   }, [token]);
   return (
@@ -274,6 +272,7 @@ export function Admin({
                   rounds: 240,
                   roundMs: 5000,
                   retailAgents: true,
+                  autoRedeem: false,
                 });
                 if (current()) await changed(slug, current);
               }, "credential");
@@ -423,35 +422,6 @@ export function Admin({
                 })
               }
             >{rich("m95fb743d26")}</button>
-            <hr />
-            <label className="field">{rich("m813565f7cd", [<input
-                type="number"
-                min={1}
-                max={100}
-                value={count}
-                onChange={(e) => setCount(Number(e.target.value))}
-              />])}</label>
-            <button
-              className="secondary"
-              disabled={busy || !token || s?.status !== "lobby"}
-              onClick={() =>
-                action(async (current) => {
-                  const data = await api(
-                    `/api/admin/markets/${id}/invites`,
-                    token,
-                    { count },
-                  );
-                  if (current()) setCodes(data.codes);
-                })
-              }
-            >{rich("m0e0d3c019a")}</button>
-            {codes.length > 0 && (
-              <>
-                <div className="notice">{rich("m82f99d736a")}</div>
-                <pre>{codes.join("\n")}</pre>
-                <CopyButton text={codes.join("\n")} />
-              </>
-            )}
           </div>
         </section>
       </div>

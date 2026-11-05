@@ -121,7 +121,7 @@ describe("participant red team", () => {
       "start",
       "pause",
       "resume",
-      "invites",
+      "retain-holdings",
       "rotate",
       "export",
       "status",
@@ -591,32 +591,19 @@ describe("HTTP authentication and validation", () => {
   });
 });
 describe("race conditions and persistence", () => {
-  it("single-use invite is atomically consumed under concurrent joins", async () => {
-    await create(false);
-    expect((await join()).status).toBe(403);
-    const codes = (
-      await req("/api/admin/markets/runtime-market/invites", {
-        token: admin,
-        data: { count: 1 },
-      })
-    ).body.codes;
-    const all = await Promise.all(
-      Array.from({ length: 20 }, (_, i) => join(`Racer ${i}`, codes[0])),
-    );
-    expect(all.filter((r) => r.status === 201)).toHaveLength(1);
-    expect(all.filter((r) => r.status === 403)).toHaveLength(19);
+  it("formal competitions accept concurrent registrations without invitation codes and enforce capacity", async () => {
+    await create(false, { capacity: 5 });
+    const all = await Promise.all(Array.from({ length: 20 }, (_, i) => join(`Racer ${i}`)));
+    expect(all.filter(r => r.status === 201)).toHaveLength(5);
+    expect(all.filter(r => r.status === 409)).toHaveLength(15);
+    expect((await req("/api/admin/markets/runtime-market/invites", {token:admin,data:{count:1}})).status).toBe(404);
   });
-  it("failed registration rolls back invite consumption", async () => {
+  it("duplicate registration remains atomic without invitation codes", async () => {
     await create(false);
-    const codes = (
-      await req("/api/admin/markets/runtime-market/invites", {
-        token: admin,
-        data: { count: 2 },
-      })
-    ).body.codes;
-    expect((await join("Same Name", codes[0])).status).toBe(201);
-    expect((await join("Same Name", codes[1])).status).toBe(409);
-    expect((await join("New Name", codes[1])).status).toBe(201);
+    const all = await Promise.all(Array.from({ length: 10 }, () => join("Same Name")));
+    expect(all.filter(r => r.status === 201)).toHaveLength(1);
+    expect(all.filter(r => r.status === 409)).toHaveLength(9);
+    expect((await join("New Name")).status).toBe(201);
   });
   it("capacity is enforced under concurrent open registration", async () => {
     await create(true, { capacity: 5 });
@@ -844,7 +831,7 @@ describe('dual-asset HTTP and persisted ledger', () => {
     await settle();await evictDurableObject(stub);
     const final=(await req(base)).body;
     expect(final.status).toBe('finished');expect(final.reveal.paths.BFBT).toHaveLength(3);
-    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({BFBT:0,EFET:0});
+    expect((await req(`${base}/account`,{token:a.apiKey})).body.holdings).toEqual({BFBT:105,EFET:105});
     expect((await req('/api/admin/markets/dual-runtime/status',{token:admin})).body.conserved).toBe(true);
   });
   it('concurrent requests across symbols cannot overspend shared cash',async()=>{

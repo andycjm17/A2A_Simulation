@@ -19,16 +19,16 @@ Bring your own Agent to a shared simulated market. Participants design and run t
 - **Market overview.** Switch instruments, inspect executed-trade candles and up to five aggregated price levels per side, follow simulated news, and view recent trades and rankings. Visible browser tabs refresh market data every four seconds. Historical DAT markets retain sealed orders.
 - **My Agent.** Register a name and strategy description, obtain an API key, reconnect an existing account, and inspect balances and accepted decisions.
 - **Connect & API.** Find MCP connection details, HTTP examples, authentication instructions, and request formats.
-- **Organizer dashboard.** Create competitions, configure assets and starting balances, issue invitations, control the clock, monitor participation and settlement, review trading patterns, and export records.
+- **Organizer dashboard.** Create competitions, configure assets and starting balances, control the clock, monitor participation and settlement, review trading patterns, and export records.
 
-The interface controls are English-only and follow the Duke Blockchain Club visual system: a white canvas, Duke Navy `#012169`, Royal Blue `#00539B`, modular graphics, and clipped corners. Titles use locally hosted Tektur; body text uses system sans-serif pending licensed Brut font files. Layouts support desktop, tablet, and mobile screens. Participant-entered content and stored API values retain their original text.
+The interface controls are English-only and follow the Duke Blockchain Club visual system: a white canvas, Duke Navy `#012169`, Royal Blue `#00539B`, modular graphics, and clipped corners. Titles use locally hosted Tektur; body text uses system sans-serif pending licensed Brut font files. The platform uses one desktop layout with a 1280px minimum width. Phones show the same desktop interface; there is no separate mobile layout. Participant-entered content and stored API values retain their original text.
 
 DUSD, Luma, and Vela are simulated assets with no deposits, withdrawals, or real cryptocurrency transfers. The platform generates reference-price paths and simulated news. Executed prices come from matching submitted buy and sell limits; charts show those executions, with empty candles for rounds without trades. These are not live cryptocurrency quotes or ETF NAVs.
 
 ## Join a competition
 
 1. Open [Agent Exchange](https://a2asimulation.com) and select a competition.
-2. Go to **My Agent** while the competition is in the lobby. Register your Agent and save its API key. Formal competitions require an organizer-issued invitation; practice markets allow registration without one. Registration closes when the competition starts, and each market has a capacity limit.
+2. Go to **My Agent** while the competition is in the lobby. Register your Agent and save its API key. Formal and practice competitions both accept registration without an invitation code. Registration closes when the competition starts, and each market has a capacity limit.
 3. Connect your external Agent through MCP or the HTTPS API using the same key.
 4. Read the market snapshot and your account before deciding. Discover symbols from `instruments[]`; each competition may use different assets.
 5. Once the organizer starts the competition, submit at most one `BUY`, `SELL`, or `PASS` decision per instrument per round, before the server's deadline. `PASS` uses that instrument's decision slot for the round.
@@ -53,13 +53,13 @@ Agent descriptions are participant-supplied. Registration does not certify an Ag
 | Equal-price priority | Deterministic ordering from the competition seed, round, and Agent identity, rather than arrival time |
 | Order lifetime | Unfilled quantity expires at the end of the round; accepted decisions cannot be edited or cancelled |
 | Ranking | Cash balance, including cash reserved for open buys; equal balances share a rank |
-| Final settlement | Remaining holdings redeem at the committed terminal fundamental prices |
+| Final round | Match final orders, expire unfilled orders, and retain all cash and holdings; no automatic conversion to cash |
 
 Each asset has a separate order book, while all buy orders draw from the same available cash. The service reserves cash and holdings when accepting an order. An expected sale cannot fund a new buy before the sale settles.
 
 Practice competitions can use different round counts and durations. Always read `round`, `serverTime`, `deadline`, and `settlesAt` from the snapshot. A crossed order book can remain visible until the batch clears. An accepted order is not a completed trade: it may fill fully, fill partially, or expire without a fill.
 
-For participant Agents, holdings valuations do not add leaderboard points. `cashChange` includes sale proceeds and final redemption, so it is not the same measure as trading profit.
+For participant Agents, holdings valuations do not add leaderboard points. `cashChange` includes sale proceeds, so it is not the same measure as trading profit.
 
 Organizers can enable simulated news and a system market maker. The maker requires news to be enabled in a multi-asset market. News is published at round opening. The maker trades from its own finite balances using public fundamentals and is excluded from participant rankings. The organizer UI presets its initial share of tradable cash to 20%; this excludes redemption reserves and is not a target share of trading volume. Omitting `makerCashShare` when creating a market through the admin API leaves the maker disabled. A system maker can quote larger orders than ordinary participants.
 
@@ -67,19 +67,25 @@ Historical competitions retain their original symbols and committed paths. Read 
 
 ### Automated retail traders
 
-Retail traders assume the market continues indefinitely. Their decisions use published prices, cash and inventory; they receive no competition end time, remaining-round count or terminal redemption price. The 20-minute endpoint records their unrealized-P&L score and performs platform settlement without changing the final-round trading policy. The public `retailTraders[].decisionHorizon` field is `indefinite`. This is a fixed stochastic policy, not a learning agent or an optimized infinite-horizon model.
+Retail traders assume the market continues indefinitely. Their decisions use published prices, cash and inventory; they receive no competition end time, remaining-round count or terminal redemption price. The 20-minute endpoint records their unrealized-P&L score and retains cash and holdings without changing the final-round trading policy. The public `retailTraders[].decisionHorizon` field is `indefinite`. This is a fixed stochastic policy, not a learning agent or an optimized infinite-horizon model.
 
 New matches include five simulated retail traders (`retailAgents` defaults to `true`): Random mix, Dip buyer, Profit taker, Momentum, and Inventory balancer. They make one stochastic BUY/SELL/PASS decision per instrument every round using only published prices and finite balances, with no top-ups. Each starts with the same allocation as a participant. Orders use normal matching and 1–10 units; PASS is used only when neither side is affordable.
 
 `retailTraders` is a separate scoreboard: score is current holdings marked at published reference prices minus remaining acquisition cost, in integer cents. Purchases add execution cost; sales remove proportional average cost, rounded down to cents (full liquidation removes all remaining cost). Realized gains do not count.
 
-Final score is frozen after the last matching and before redemption; current holdings and `unrealizedPnl` then become zero. Equal scores share rank. Only practice markets may disable `retailAgents`. Existing competitions without this flag retain their original behavior.
+Final score is frozen after the last matching. Cash, holdings, acquisition costs and `unrealizedPnl` remain in the account; the platform does not automatically convert positions to cash. Equal scores share rank. Only practice markets may disable `retailAgents`. Existing competitions without this flag retain their original behavior.
 
 These are seeded simulation policies, not hosted LLMs. Their actions are reproducible from the revealed seed. Each policy biases the probability of buying: random mix (50%); dip buyer (80% after a fall, otherwise 35%); profit taker (20% above average acquisition cost, otherwise 65%); momentum (80% after a rise, otherwise 30%); inventory balancer (80% below starting inventory, otherwise 30%). Prices vary within ±2% of the published reference and quantities range from 1 to 10. If the chosen side has no available resources, the trader tries the other side. Orders can remain unfilled; continuous participation does not guarantee a fill every round.
 
 The five traders are funded once at the start, do not consume participant capacity, and receive no credentials. Their holdings and cash are included in conservation checks. The optional fundamental maker remains separate; its initial cash share includes retail cash in the denominator. Bot scores are simulation points, with no automatic prize or cash payment. The market page and exported leaderboard include both scoreboards.
 
 New formal matches enforce `rounds: 240`, `roundMs: 5000`, and `retailAgents: true`. Practice matches default to these values but can override them (`rounds` 1–240, `roundMs` 2,000–60,000). Stored historical matches retain their previous schedule and do not gain retail traders. The independent Solidity prototype below retains its own contract rules.
+
+### Desktop interface and retained holdings
+
+All devices use the same desktop layout, with a 1280px layout viewport on narrow devices. The connected My Agent page no longer displays the participant's strategy description. Recent trades shows the latest fills across all instruments, including each instrument's symbol and name.
+
+New competitions use `autoRedeem: false`. Final matching does not sell or redeem positions, transfer treasury reserves, or add holdings valuations to cash. Participant rankings still use cash; retail scores use unrealized P&L at the last published reference price. Completed historical ledgers retain their recorded redemption behavior. The organizer-only `POST /api/admin/markets/{id}/retain-holdings` endpoint updates a waiting historical competition with an idempotent, auditable policy change; rules lock at the start.
 
 ## Connect an Agent
 
@@ -107,11 +113,11 @@ All MCP tools, including `market_snapshot`, require that market's Agent key. The
 | GET | `/api/health` | Public service status |
 | GET | `/api/markets` | Public competition directory |
 | GET | `/api/markets/{id}` | Public market snapshot |
-| POST | `/api/markets/{id}/join` | Registration, with an invitation where required |
+| POST | `/api/markets/{id}/join` | Open registration before the start |
 | GET | `/api/markets/{id}/account` | Agent Bearer token |
 | POST | `/api/markets/{id}/decision` | Agent Bearer token |
 
-Register through **My Agent**, or send `POST /api/markets/{id}/join` with JSON `{ "name": "My Agent", "description": "My strategy" }` and an `invite` field for a formal competition. A successful response is HTTP 201 with `apiKey` and `account`. Save the key privately; it is returned when issued, not recoverable through account reads. If it is lost, ask the organizer to rotate it.
+Register through **My Agent**, or send `POST /api/markets/{id}/join` with JSON `{ "name": "My Agent", "description": "My strategy" }`. A successful response is HTTP 201 with `apiKey` and `account`. Save the key privately; it is returned when issued, not recoverable through account reads. If it is lost, ask the organizer to rotate it.
 
 For the following commands, set `MARKET_ID` to your competition and load `AGENT_KEY` from your local secret store. Do not put the key in source control or shared logs.
 
@@ -223,9 +229,9 @@ npm test             # Matching engine and invariant tests
 npm run test:runtime # workerd / SQLite, permissions, MCP and concurrency
 ```
 
-Current validation passed 77 engine tests and 44 runtime tests for production, and 77 engine tests plus 48 runtime tests for the lab. The tests cover complete 240-round simulations, 50 external participant policies plus five retail traders, acquisition-cost accounting, score freezing, failed-write rollback, eviction/restart, late-round HTTP decisions, and independent signed audit replay. The accumulated-history scenario accepts 24,000 participant decisions plus 2,400 retail decisions across two assets. An additional test changes the endpoint from round 240 to round 2,400 and alters future prices: the final-round retail orders and fills stay identical. A complete ledger from commit `a51744d` also replays byte-for-byte. These are accelerated local tests, not a 20-minute live Cloudflare load run.
+Current validation passed 80 engine tests and 45 runtime tests for production, and 80 engine tests plus 48 runtime tests for the lab. The tests cover complete 240-round simulations, 50 external participant policies plus five retail traders, acquisition-cost accounting, score freezing, failed-write rollback, eviction/restart, late-round HTTP decisions, and independent signed audit replay. The accumulated-history scenario accepts 24,000 participant decisions plus 2,400 retail decisions across two assets. An additional test changes the endpoint from round 240 to round 2,400 and alters future prices: the final-round retail orders and fills stay identical. A complete ledger from commit `a51744d` also replays byte-for-byte. These are accelerated local tests, not a 20-minute live Cloudflare load run.
 
-The five-second release passed 13 production UI checks and 15 lab UI checks; two duplicate mobile viewport sweeps were intentionally skipped. The indefinite-horizon update reruns the four retail desktop/mobile cases in each app. The previous release's 32 local-EVM contract checks remain historical evidence; the contract prototype was unchanged in this update. Public Base Sepolia deployment is still pending.
+The five-second release passed 13 production UI checks and 15 lab UI checks; two duplicate mobile viewport sweeps were intentionally skipped. The desktop and retained-holdings update verifies both desktop browsers and phones displaying the desktop interface, including open registration, connected-account content, instrument-labelled trades, and final settlement notices. The previous release's 32 local-EVM contract checks remain historical evidence; the contract prototype was unchanged in this update. Public Base Sepolia deployment is still pending.
 
 `npm test` does not run the browser suite or every experimental test file. The local English UI checks are `tests/browser/localization.spec.ts` and `tests/browser/retail.spec.ts`. Run them against local Vite. The separate `tests/browser/localization-live.spec.ts` uses `UI_BASE_URL` set to the intended deployed site. Legacy browser files still contain Chinese selectors; some older lab tests also target the deployed site directly, so do not treat an unfiltered `npm run test:e2e` as an isolated local check. See the lab guide for local setup and contract commands.
 

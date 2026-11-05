@@ -18,6 +18,7 @@ import {
   accountState,
   settlementAt,
   setInitialBalances,
+  retainHoldings,
   reconfigureInstruments,
 } from "./engine";
 
@@ -74,6 +75,7 @@ export const configSchema = z
     assetMode: z.enum(["ai", "legacy"]).default("ai"),
     newsEnabled: z.boolean().default(false),
     retailAgents: z.boolean().default(true),
+    autoRedeem: z.literal(false).default(false),
     makerCashShare: z.number().min(0).max(0.5).default(0),
     initialBalances: initialBalancesSchema.optional(),
     instruments: instrumentsSchema.optional(),
@@ -263,33 +265,7 @@ export class MarketRoom extends DurableObject<Env> {
         case "join": {
           const a = joinSchema.parse(c.data);
           const agent = addAgent(s, a, now);
-          this.persist(s, () => {
-            if (!s.config.practice) {
-              ensure(
-                a.inviteHash,
-                "INVITE_REQUIRED",
-                "正式比赛需要组织者的邀请码",
-                403,
-              );
-              const invite = this.ctx.storage.sql
-                .exec<{ agent_id: string | null }>(
-                  "SELECT agent_id FROM invites WHERE hash=?",
-                  a.inviteHash,
-                )
-                .toArray()[0];
-              ensure(
-                invite && !invite.agent_id,
-                "INVALID_INVITE",
-                "邀请码无效或已使用",
-                403,
-              );
-              this.ctx.storage.sql.exec(
-                "UPDATE invites SET agent_id=? WHERE hash=?",
-                a.id,
-                a.inviteHash,
-              );
-            }
-          });
+          this.persist(s);
           data = accountState(s, agent);
           break;
         }
@@ -305,37 +281,10 @@ export class MarketRoom extends DurableObject<Env> {
           resume(s, now);
           changed = true;
           break;
-        case "invites": {
-          ensure(
-            s.status === "lobby",
-            "BAD_STATE",
-            "只能在比赛开始前创建邀请码",
-            409,
-          );
-          const hashes = z
-            .array(z.string().length(64))
-            .min(1)
-            .max(100)
-            .parse(c.data);
-          const count = this.ctx.storage.sql
-            .exec<{ n: number }>("SELECT COUNT(*) as n FROM invites")
-            .one().n;
-          ensure(
-            count + hashes.length <= s.config.capacity * 2,
-            "INVITE_LIMIT",
-            "邀请码数量已达到上限",
-            409,
-          );
-          this.ctx.storage.transactionSync(() => {
-            for (const hash of hashes)
-              this.ctx.storage.sql.exec(
-                "INSERT INTO invites(hash) VALUES(?)",
-                hash,
-              );
-          });
-          data = { count: hashes.length };
+        case "retain-holdings":
+          changed = retainHoldings(s, now);
+          data = publicState(s, now);
           break;
-        }
         case "instruments": {
           const before = this.state;
           await reconfigureInstruments(s, instrumentsSchema.parse(c.data), now);

@@ -23,8 +23,8 @@ export function RetailPanel({ s }: { s: Snapshot }) {
             Traders assume the market continues indefinitely and make decisions
             without knowing when the competition ends. Score: held units ×
             published reference price − remaining acquisition cost.
-            Realized gains do not count. Final scores are saved before
-            redemption. Participant cash rankings are separate.
+            Realized gains do not count. Scores are captured after final matching.
+            Cash and holdings remain in new competitions. Participant cash rankings are separate.
           </caption>
           <thead>
             <tr>

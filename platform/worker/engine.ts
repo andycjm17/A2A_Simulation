@@ -168,6 +168,7 @@ export type MarketConfig = {
   newsEnabled?: boolean;
   makerCashShare?: number;
   retailAgents?: boolean;
+  autoRedeem?: boolean;
   initialBalances?: InitialBalances;
   instruments?: InstrumentConfig[];
 };
@@ -829,7 +830,7 @@ export function clearRound(s: State, now: number) {
             : "expired";
   s.results.push({
     round: s.round,
-    reference: s.path[s.round],
+    reference: s.path[s.config.autoRedeem === false ? s.round - 1 : s.round],
     trades: count,
     volume,
     decisions: orders.length,
@@ -845,17 +846,19 @@ export function clearRound(s: State, now: number) {
   if (s.round === s.config.rounds) {
     for (const a of s.agents.filter((a) => a.system === "retail-trader"))
       a.finalUnrealizedPnl = unrealizedPnl(s, a);
-    for (const symbol of symbols(s)) {
-      const price = pathFor(s, symbol)[s.config.rounds];
-      for (const a of s.agents) {
-        const quantity = holding(a, symbol),
-          payout = quantity * price;
-        s.treasuryCash -= payout;
-        if (symbol === "DAT") s.treasuryDat += quantity;
-        else s.assets![symbol].treasury += quantity;
-        a.cash += payout;
-        changeHolding(a, symbol, -quantity);
-        if (a.inventoryCost) a.inventoryCost[symbol] = 0;
+    if (s.config.autoRedeem !== false) {
+      for (const symbol of symbols(s)) {
+        const price = pathFor(s, symbol)[s.config.rounds];
+        for (const a of s.agents) {
+          const quantity = holding(a, symbol),
+            payout = quantity * price;
+          s.treasuryCash -= payout;
+          if (symbol === "DAT") s.treasuryDat += quantity;
+          else s.assets![symbol].treasury += quantity;
+          a.cash += payout;
+          changeHolding(a, symbol, -quantity);
+          if (a.inventoryCost) a.inventoryCost[symbol] = 0;
+        }
       }
     }
     s.status = "finished";
@@ -863,8 +866,10 @@ export function clearRound(s: State, now: number) {
     event(
       s,
       now,
-      "redeemed",
-      "all instruments redeemed at their committed terminal prices",
+      s.config.autoRedeem === false ? "competition_finished" : "redeemed",
+      s.config.autoRedeem === false
+        ? "final matching complete; cash and holdings retained without automatic redemption"
+        : "all instruments redeemed at their committed terminal prices",
     );
   } else {
     s.round++;
@@ -961,7 +966,9 @@ export function audit(s: State) {
 export function publicState(s: State, now: number) {
   const reference =
     s.path[
-      s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds
+        : Math.max(0, s.round - 1)
     ];
   const counts = new Map<
     string,
@@ -1029,7 +1036,9 @@ export function publicState(s: State, now: number) {
     reference,
     history: s.path.slice(
       0,
-      s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds + 1
+        : Math.max(1, s.round),
     ),
     commitment: s.commitment,
     participantCount: s.agents.filter((a) => !a.system).length,
@@ -1046,7 +1055,10 @@ export function publicState(s: State, now: number) {
     trades: s.trades.slice(-100).reverse(),
     results: s.results,
     settlementMode: "simulation" as const,
-    terminalPrice: s.status === "finished" ? reference : null,
+    terminalPrice:
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? reference
+        : null,
     reveal:
       s.status === "finished"
         ? s.assets
@@ -1147,7 +1159,11 @@ export function instrumentState(s: State, symbol: Symbol) {
       .map(([price, quantity]) => ({ price, quantity }));
   };
   const reference =
-    path[s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)];
+    path[
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds
+        : Math.max(0, s.round - 1)
+    ];
   return {
     symbol,
     name: assetName(symbol, s.config),
@@ -1157,9 +1173,14 @@ export function instrumentState(s: State, symbol: Symbol) {
     reference,
     history: path.slice(
       0,
-      s.status === "finished" ? s.config.rounds + 1 : Math.max(1, s.round),
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? s.config.rounds + 1
+        : Math.max(1, s.round),
     ),
-    terminalPrice: s.status === "finished" ? reference : null,
+    terminalPrice:
+      s.status === "finished" && s.config.autoRedeem !== false
+        ? reference
+        : null,
     lastPrice: trades.at(-1)?.price ?? null,
     trades: trades.slice(-100).reverse(),
     tradeCount: trades.length,
@@ -1298,7 +1319,9 @@ export function makerState(s: State) {
         sum +
         holding(a, symbol) *
           pathFor(s, symbol)[
-            s.status === "finished" ? s.config.rounds : Math.max(0, s.round - 1)
+            s.status === "finished" && s.config.autoRedeem !== false
+              ? s.config.rounds
+              : Math.max(0, s.round - 1)
           ],
       0,
     );
@@ -1525,4 +1548,23 @@ export function retailDecision(
   const quantity = Math.min(desired, feasible(side));
   if (!quantity) side = "PASS";
   return { side, price: side === "PASS" ? 0 : price, quantity };
+}
+
+/** Explicit, auditable update for a waiting historical market; never rewrites a completed ledger. */
+export function retainHoldings(s: State, now: number) {
+  ensure(
+    s.status === "lobby",
+    "BAD_STATE",
+    "End-of-competition rules are locked after the start",
+    409,
+  );
+  if (s.config.autoRedeem === false) return false;
+  s.config.autoRedeem = false;
+  event(
+    s,
+    now,
+    "settlement_policy_changed",
+    "keep cash and holdings after the final round",
+  );
+  return true;
 }

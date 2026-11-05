@@ -16,6 +16,7 @@ for (const finished of [false, true])
       {
         id: "retail-ui",
         name: "Twenty-minute competition",
+        autoRedeem: false,
         rounds: 240,
         roundMs: 5000,
         capacity: 50,
@@ -66,7 +67,14 @@ for (const finished of [false, true])
     await expect(panel).toContainText("Momentum");
     await expect(panel).toContainText("Traders assume the market continues indefinitely");
     await expect(panel).toContainText(finished ? "240 / 240" : "1 / 240");
-    if (finished) await expect(panel).toContainText("Final scores");
+    if (finished) {
+      await expect(panel).toContainText("Final scores");
+      await expect(page.getByRole("table",{name:"Recent trades"})).toContainText("Instrument");
+      const trades=page.getByRole("table",{name:"Recent trades"});
+      await expect(trades).toContainText("BFBT"); await expect(trades).toContainText("EFET");
+      await expect(page.locator("body")).toContainText("Cash and holdings are retained");
+    }
+    expect(await page.evaluate(()=>innerWidth)).toBeGreaterThanOrEqual(1280);
     const human = page
       .locator("section")
       .filter({ has: page.getByRole("heading", { name: /^Leaderboard/ }) });

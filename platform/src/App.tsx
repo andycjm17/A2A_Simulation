@@ -483,7 +483,7 @@ function MarketView({
             {s.status === "running"
               ? t("mbe2bacb0d8", [s.round, secs ? t("med4bda5ca9", [secs]) : t("m0aab9522e2"), s.config.roundMs / 1000])
               : s.status === "finished"
-                ? t("m8319551931")
+                ? (s.config.autoRedeem === false ? "All rounds have settled. Cash and holdings are retained; no automatic conversion to cash." : t("m8319551931"))
                 : s.status === "paused"
                   ? t("m191feee058", [s.pauseReason === "scheduler_delay" ? t("mb61c552a20") : ""])
                   : t("m485c2ef1b9")}
@@ -611,14 +611,15 @@ function MarketView({
       </section>
       <section className="panel market-table">
         <div className="paneltitle">
-          <h2>{rich("m3aa093fc13", [<span className="subtle">{displayName(instrument.name)}</span>])}</h2>
+          <h2>Recent trades <span className="subtle">All instruments</span></h2>
           <span className="hint">{rich("m4116f5a5f4")}</span>
         </div>
         <div className="tablewrap">
-          <table>
+          <table aria-label="Recent trades">
             <thead>
               <tr>
                 <th>{rich("m4890584bb5")}</th>
+                <th>Instrument</th>
                 <th>{rich("m1042114048")}</th>
                 <th>{rich("mb8c500522e")}</th>
                 <th>{rich("m1d83c362e2")}</th>
@@ -626,9 +627,10 @@ function MarketView({
               </tr>
             </thead>
             <tbody>
-              {instrument.trades.map((t) => (
+              {s.trades.map((t) => (
                 <tr key={t.id}>
                   <td>R{t.round}</td>
+                  <td>{t.symbol ?? "DAT"} · {displayName(assetName(t.symbol ?? "DAT", s.config))}</td>
                   <td>{names.get(t.buyer)}</td>
                   <td>{names.get(t.seller)}</td>
                   <td>{money(t.price)}</td>
@@ -637,7 +639,7 @@ function MarketView({
               ))}
             </tbody>
           </table>
-          {!instrument.tradeCount && (
+          {!s.tradeCount && (
             <div className="empty">{rich("m51faa06bcc")}</div>
           )}
         </div>
@@ -704,7 +706,6 @@ function AgentView({
   const [name, setName] = useState(""),
     [duplicateName, setDuplicateName] = useState(""),
     [description, setDescription] = useState(""),
-    [invite, setInvite] = useState(""),
     [restore, setRestore] = useState(""),
     [show, setShow] = useState(false),
     [fresh, setFresh] = useState(false);
@@ -726,10 +727,6 @@ function AgentView({
             </div>
             <div className="padding stack">
               <span className="badge">{rich("m997d1ed624")}</span>
-              <div>
-                <span className="hint">{rich("m909909b669")}</span>
-                <p>{account.description || t("m1c64182187")}</p>
-              </div>
               <div className="split">
                 <div>
                   <span className="hint">{rich("mc3ee29d0be")}</span>
@@ -842,7 +839,6 @@ function AgentView({
                 const r = await api(`/api/markets/${id}/join`, "", {
                   name,
                   description,
-                  ...(invite ? { invite } : {}),
                 });
                 if (!current()) return;
                 setFresh(true);
@@ -881,14 +877,6 @@ function AgentView({
               onChange={(e) => setDescription(e.target.value)}
               placeholder={t("m109b4b1760")}
             />])}</label>
-          {!s?.config.practice && (
-            <label className="field">{rich("m119df53088", [<input
-                required
-                autoComplete="off"
-                value={invite}
-                onChange={(e) => setInvite(e.target.value)}
-              />])}</label>
-          )}
           <span className="hint">{rich("mb30a71ae36")}</span>
           <button className="primary" disabled={busy || nameTaken || s?.status !== "lobby"}>
             {busy ? t("m7c0305bc0c") : t("m831fa1cf5e")}
