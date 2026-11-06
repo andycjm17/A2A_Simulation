@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import {
   startingBalances,
   DEFAULT_INSTRUMENTS,
+  GRADED_MAKER_POLICY,
   type InitialBalances,
   type InstrumentConfig,
+  type MakerPolicy,
 } from "../worker/engine";
 import {
   InstrumentFields,
@@ -214,6 +216,7 @@ export function Admin({
     [capacity, setCapacity] = useState(50),
     [schedule, setSchedule] = useState<Schedule>({minutes:20,seconds:5}),
     [makerCashShare, setMakerCashShare] = useState(0.2),
+    [makerPolicy, setMakerPolicy] = useState<MakerPolicy>(GRADED_MAKER_POLICY),
     [instruments, setInstruments] = useState<InstrumentConfig[]>(
       DEFAULT_INSTRUMENTS.map((i) => ({ ...i, name: displayName(i.name) })),
     ),
@@ -290,6 +293,7 @@ export function Admin({
                   assetMode: "ai",
                   newsEnabled: true,
                   makerCashShare,
+                  makerPolicy,
                   initialBalances,
                   instruments,
                   ...scheduleValue(schedule),
@@ -338,6 +342,16 @@ export function Admin({
                   </option>
                 ))}
               </select>])}</label>
+            <label className="field">
+              Market maker policy
+              <select
+                value={makerPolicy}
+                onChange={(e) => setMakerPolicy(e.target.value as MakerPolicy)}
+              >
+                <option value={GRADED_MAKER_POLICY}>Risk-limited with graduated buying</option>
+                <option value="capital-preserving-v1">Capital-preserving</option>
+              </select>
+            </label>
             <p className="hint">{rich("m06a4831e5e")}</p>
             <label className="row hint">{rich("m8f6a46ecb1", [<input
                 type="checkbox"

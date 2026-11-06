@@ -157,6 +157,9 @@ function validateBalances(config: MarketConfig) {
     "启用庄家时，普通 Agent 初始现金须大于 0",
   );
 }
+export const GRADED_MAKER_POLICY = "risk-limited-v2";
+export type MakerPolicy = "capital-preserving-v1" | typeof GRADED_MAKER_POLICY;
+
 export type MarketConfig = {
   id: string;
   name: string;
@@ -167,7 +170,7 @@ export type MarketConfig = {
   assetMode?: "ai" | "legacy";
   newsEnabled?: boolean;
   makerCashShare?: number;
-  makerPolicy?: "capital-preserving-v1";
+  makerPolicy?: MakerPolicy;
   retailAgents?: boolean;
   autoRedeem?: boolean;
   initialBalances?: InitialBalances;
@@ -1268,6 +1271,10 @@ function openRound(s: State, now: number) {
     openCapitalPreservingMaker(s, a, now);
     return;
   }
+  if (s.config.makerPolicy === GRADED_MAKER_POLICY) {
+    openRiskLimitedMaker(s, a, now);
+    return;
+  }
   // Fixed, public policy: 1% half-spread, inventory skew capped at 2%, and 10%
   // of current cash per asset / 10% of inventory offered per round. No future reads.
   const cashPerAsset = Math.floor(
@@ -1315,9 +1322,7 @@ function openRound(s: State, now: number) {
   }
 }
 
-export function makerState(s: State) {
-  const a = s.agents.find((a) => a.system === "fundamental-maker");
-  if (!a) return null;
+function makerEquity(s: State, a: Agent) {
   const initialInventory =
     a.initialInventory ??
     Object.fromEntries(
@@ -1342,6 +1347,24 @@ export function makerState(s: State) {
           ],
       0,
     );
+  return { initialInventory, initialEquity, equity };
+}
+
+export function makerState(s: State) {
+  const a = s.agents.find((a) => a.system === "fundamental-maker");
+  if (!a) return null;
+  const { initialInventory, initialEquity, equity } = makerEquity(s, a);
+  const buyScale =
+    s.config.makerPolicy === GRADED_MAKER_POLICY
+      ? makerBuyScale(equity, initialEquity)
+      : null;
+  let riskMode = equity < initialEquity * 0.9
+    ? "no-new-buys"
+    : equity < initialEquity ? "reduced-buying" : "normal";
+  if (buyScale !== null)
+    riskMode = buyScale === 0
+      ? "no-new-buys"
+      : buyScale < 1 ? "reduced-buying" : "normal";
   const makerVolume = s.trades
     .filter((t) => t.buyer === a.id || t.seller === a.id)
     .reduce((sum, t) => sum + t.quantity, 0);
@@ -1370,14 +1393,10 @@ export function makerState(s: State) {
             a.cash +
             Object.values(a.inventoryCost!).reduce((n, c) => n + c, 0) -
             initialEquity,
-          riskMode:
-            equity < initialEquity * 0.9
-              ? "no-new-buys"
-              : equity < initialEquity
-                ? "reduced-buying"
-                : "normal",
+          riskMode,
         }
       : {}),
+    ...(buyScale !== null ? { buyScale } : {}),
   };
 }
 
@@ -1638,6 +1657,96 @@ export async function setSchedule(
   setInitialBalances(s, startingBalances(s.config), now);
   event(s, now, "schedule_changed", JSON.stringify(schedule));
 }
+export function makerBuyScale(equity: number, initialEquity: number) {
+  // Compare integer marks directly so the tier boundaries do not depend on float rounding.
+  const value = equity * 100;
+  if (value <= initialEquity * 85) return 0;
+  if (value <= initialEquity * 90) return 0.25;
+  if (value <= initialEquity * 95) return 0.5;
+  if (value <= initialEquity * 98) return 0.75;
+  return 1;
+}
+
+function openRiskLimitedMaker(s: State, a: Agent, now: number) {
+  const { equity, initialEquity } = makerEquity(s, a);
+  const buyingScale = makerBuyScale(equity, initialEquity);
+  // Reserve worst-case execution losses across all quotes at the current public marks.
+  let lossBudget = Math.max(0, equity - Math.ceil(initialEquity * 0.95));
+  const protectPrice =
+    lossBudget === 0 ||
+    (s.config.autoRedeem !== false && s.round === s.config.rounds);
+  const marketSymbols = symbols(s);
+  const cashPerAsset = Math.floor(
+    a.cash * Math.min(0.1, 0.8 / marketSymbols.length) * buyingScale,
+  );
+  for (const symbol of marketSymbols) {
+    const path = pathFor(s, symbol);
+    const reference = path[s.round - 1];
+    const previous = path[Math.max(0, s.round - 2)];
+    const newsMove = (reference - previous) / previous;
+    const halfSpread = Math.min(0.0125, 0.0075 + Math.abs(newsMove) * 0.05);
+    const owned = holding(a, symbol);
+    const initial = a.initialInventory![symbol];
+    const imbalance = (owned - initial) / Math.max(1, initial);
+    const skew = Math.max(-0.02, Math.min(0.02, imbalance * 0.02));
+    const center = reference * (1 - skew);
+    const ask = Math.max(
+      MIN_PRICE + 1,
+      protectPrice ? reference : MIN_PRICE,
+      Math.min(MAX_PRICE, Math.ceil(center + reference * halfSpread)),
+    );
+    const bid = Math.min(
+      ask - 1,
+      protectPrice ? reference : MAX_PRICE,
+      Math.max(MIN_PRICE, Math.floor(center - reference * halfSpread)),
+    );
+    const inventoryLimit = initial
+      ? Math.floor(initial * 1.5)
+      : Math.floor((a.initialCash! * 0.1) / path[0]);
+    const inventoryScale = Math.max(1, initial || inventoryLimit / 2);
+    const newsTilt = Math.max(-0.25, Math.min(0.25, newsMove * 2.5));
+    const target = Math.max(0, initial + inventoryScale * newsTilt);
+    const sizeTilt = Math.max(
+      -0.5,
+      Math.min(0.5, (target - owned) / inventoryScale),
+    );
+    for (const side of ["BUY", "SELL"] as const) {
+      const buying = side === "BUY";
+      const price = buying ? bid : ask;
+      const available = buying
+        ? Math.floor(cashPerAsset / price)
+        : Math.floor(owned * 0.1);
+      if (available < 1) continue;
+      const size = Math.min(1, 0.8 + 0.5 * (buying ? sizeTilt : -sizeTilt));
+      let quantity = Math.max(1, Math.floor(available * size));
+      if (buying)
+        quantity = Math.min(quantity, Math.max(0, inventoryLimit - owned));
+      const lossPerUnit = buying ? price - reference : reference - price;
+      if (lossPerUnit > 0) {
+        quantity = Math.min(quantity, Math.floor(lossBudget / lossPerUnit));
+        lossBudget -= quantity * lossPerUnit;
+      }
+      if (quantity < 1) continue;
+      const id = `${s.config.id}:${s.round}:${a.id}:${symbol}:${side}`;
+      s.orders.push({
+        id,
+        requestId: id,
+        agentId: a.id,
+        symbol,
+        round: s.round,
+        side,
+        price,
+        quantity,
+        createdAt: now,
+        filled: 0,
+        cashFlow: 0,
+        status: "pending",
+        note: "Risk-limited maker: public news, inventory caps and graduated buying budgets",
+      });
+    }
+  }
+}
+
 export function setMakerPolicy(s: State, now: number) {
   ensure(
     s.status === "lobby",
