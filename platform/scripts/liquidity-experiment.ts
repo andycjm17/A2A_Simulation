@@ -11,15 +11,7 @@ import {
   sha256,
 } from "../worker/engine";
 import { mkdir, writeFile } from "node:fs/promises";
-
-function rng(seed: number) {
-  return () => {
-    let t = (seed += 0x6d2b79f5);
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
+import { seededRandom, scriptedDecision } from "./scripted-trader";
 const output = process.argv[2] ?? "experiments/raw.json";
 const primarySeeds = Number(process.env.EXPERIMENT_SEEDS ?? 200);
 const populations = process.env.EXPERIMENT_PRIMARY_ONLY ? [20] : [20, 10, 40];
@@ -29,7 +21,7 @@ for (const population of populations) {
     population === 20 ? primarySeeds : Math.min(primarySeeds, 100);
   for (let seedIndex = 0; seedIndex < repetitions; seedIndex++) {
     const seed = `capital-v1:${seedIndex}`;
-    const random = rng(
+    const random = seededRandom(
       parseInt((await sha256(`${seed}:traders`)).slice(0, 8), 16),
     );
     const draws = Array.from({ length: 30 }, () =>
@@ -73,45 +65,13 @@ for (const population of populations) {
           for (let j = 0; j < 2; j++) {
             const a = s.agents[i],
               instrument = snapshot.instruments[j];
-            const [pass, sideDraw, qtyDraw, noise, aggression] = draws[r][i][j];
-            const f = instrument.reference;
-            const kind = i % 5;
-            const last = instrument.history.at(-2) ?? f;
-            const center = kind < 2 ? f : kind < 4 ? f : f + (f - last) * 0.5;
-            const noiseRange = kind < 2 ? 0.02 : kind < 4 ? 0.1 : 0.04;
-            let side: "BUY" | "SELL" | "PASS" =
-              pass < 0.08 ? "PASS" : sideDraw < 0.5 ? "BUY" : "SELL";
-            let price = Math.max(
-              100,
-              Math.min(
-                20000,
-                Math.round(
-                  center +
-                    f * (noise * 2 - 1) * noiseRange +
-                    (side === "BUY" ? 1 : -1) * aggression * f * 0.02,
-                ),
-              ),
-            );
-            const account = accountState(s, a);
-            let quantity = Math.min(
-              1 + Math.floor(qtyDraw * 10),
-              side === "BUY"
-                ? Math.floor(account.availableCash / price)
-                : account.availableHoldings[instrument.symbol],
-            );
-            if (side === "PASS" || quantity < 1) {
-              side = "PASS";
-              price = quantity = 0;
-            }
             submit(
               s,
               a.id,
               {
                 symbol: instrument.symbol,
                 round: s.round,
-                side,
-                price,
-                quantity,
+                ...scriptedDecision(i, instrument, accountState(s, a), draws[r][i][j]),
                 requestId: `${a.id}-${r}-${j}`,
               },
               s.openedAt + 1,

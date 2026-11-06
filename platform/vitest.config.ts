@@ -6,6 +6,7 @@ export default defineConfig({
       "tests/retail.test.ts",
       "tests/multi-asset.test.ts",
       "tests/news-maker.test.ts",
+      "tests/graded-maker.test.ts",
       "tests/configurable-assets.test.ts",
     ],
     reporters: ["default", "json"],

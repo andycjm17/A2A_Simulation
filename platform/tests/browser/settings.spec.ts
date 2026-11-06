@@ -32,6 +32,7 @@ test('participant names and history stay clean; admin edits duration and interva
  await expect.poll(()=>saved).toEqual({rounds:450,roundMs:4000});
  await expect(editor).toContainText('450 rounds');
  const create=page.locator('form').filter({has:page.getByRole('button',{name:'Create competition',exact:true})});
+ await expect(create.getByLabel('Market maker policy')).toHaveValue('risk-limited-v2');
  await create.getByLabel('Competition name',{exact:true}).fill('New scheduled event');
  await create.getByLabel('Competition ID',{exact:true}).fill('new-scheduled');
  await create.getByLabel('Total duration (minutes)').fill('10');
@@ -40,5 +41,6 @@ test('participant names and history stay clean; admin edits duration and interva
  await page.route('**/api/admin/markets',async r=>{created=r.request().postDataJSON();await r.fulfill({status:400,json:{error:{code:'VALIDATION_ERROR'}}});});
  await create.getByRole('button',{name:'Create competition',exact:true}).click();
  await expect.poll(()=>created?.rounds).toBe(200);expect(created.roundMs).toBe(3000);
+ expect(created.makerPolicy).toBe('risk-limited-v2');
  await page.screenshot({path:`reports/admin-settings-${info.project.name}.png`,fullPage:true});
 });

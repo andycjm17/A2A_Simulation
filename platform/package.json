@@ -12,7 +12,8 @@
     "test:runtime": "vitest run --config vitest.runtime.config.ts",
     "test:e2e": "playwright test",
     "deploy": "npm run build && wrangler deploy",
-    "experiment": "node scripts/run-liquidity.mjs"
+    "experiment": "node scripts/run-liquidity.mjs",
+    "experiment:maker": "node scripts/run-maker-comparison.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "1.2.4",

@@ -1,10 +1,12 @@
 import { t, rich, useLocale, localizedLabels, localeTag, message, displayName, newsHeadline } from "./i18n";
 import type { Snapshot } from "./App";
 import { money } from "./App";
+import { GRADED_MAKER_POLICY } from "../worker/engine";
 export function NewsPanel({ s }: { s: Snapshot }) {
   useLocale();
   if (!s.config.newsEnabled) return null;
   const maker = s.maker;
+  const graduated = s.config.makerPolicy === GRADED_MAKER_POLICY;
   return (
     <section className="panel news-panel" aria-label={t("mfd84b94893")}>
       <div className="paneltitle">
@@ -41,7 +43,7 @@ export function NewsPanel({ s }: { s: Snapshot }) {
         {(s.config.makerCashShare ?? 0) > 0 ? (
           <aside className="maker-card">
             <span className="instrument-symbol">SYSTEM MARKET MAKER</span>
-            <h3>{rich("mb9de636315")}</h3>
+            <h3>{graduated ? "Risk-limited market maker" : rich("mb9de636315")}</h3>
             <p>{s.config.makerPolicy ? "Goal: provide liquidity while protecting capital, and trade on public market information." : rich("ma25a2d4f9b")}</p>
             <dl>
               <div>
@@ -66,7 +68,13 @@ export function NewsPanel({ s }: { s: Snapshot }) {
                 <dd>{maker ? money(maker.profit) : t("m626c8ed764")}</dd>
               </div>
             </dl>
-            <p className="hint">{s.config.makerPolicy ? "Quotes respond to published fundamentals, news and completed trades. Sell quotes stay at or above average acquisition cost. Buying shrinks during losses and stops at a 10% portfolio loss. Cash is reserved, with no borrowing or top-ups. These controls target capital preservation; price moves can still cause losses or leave quotes unfilled." : rich("mbca153665a")}</p>
+            <p className="hint">
+              {graduated
+                ? "Public news and inventory determine quote sizes. Buying budgets reduce to 75%, 50%, and 25% at portfolio losses of 2%, 5%, and 10%, and stop at 15%. Inventory is capped and potential execution losses are budgeted. Price moves can still exceed these loss thresholds."
+                : s.config.makerPolicy
+                  ? "Quotes respond to published fundamentals, news and completed trades. Sell quotes stay at or above average acquisition cost. Buying shrinks during losses and stops at a 10% portfolio loss. Cash is reserved, with no borrowing or top-ups. These controls target capital preservation; price moves can still cause losses or leave quotes unfilled."
+                  : rich("mbca153665a")}
+            </p>
           </aside>
         ) : (
           <aside className="maker-card">

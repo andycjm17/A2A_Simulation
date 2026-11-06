@@ -3,6 +3,7 @@ import { z } from "zod";
 import { adminStatus } from "./admin-status";
 import {
   type State,
+  GRADED_MAKER_POLICY,
   MarketError,
   ensure,
   createState,
@@ -78,7 +79,9 @@ export const configSchema = z
     newsEnabled: z.boolean().default(false),
     retailAgents: z.boolean().default(true),
     autoRedeem: z.literal(false).default(false),
-    makerPolicy: z.literal("capital-preserving-v1").default("capital-preserving-v1"),
+    makerPolicy: z
+      .enum(["capital-preserving-v1", GRADED_MAKER_POLICY])
+      .default(GRADED_MAKER_POLICY),
     makerCashShare: z.number().min(0).max(0.5).default(0),
     initialBalances: initialBalancesSchema.optional(),
     instruments: instrumentsSchema.optional(),

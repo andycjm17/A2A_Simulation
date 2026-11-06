@@ -1067,7 +1067,7 @@ it("persists the lobby retention policy across eviction and locks it at start",a
 it("admin controls timing before start, persists it, and validates extended round numbers",async()=>{
  await create(false,{rounds:300,roundMs:4000});
  const initial=(await req("/api/markets/runtime-market")).body;
- expect(initial.config).toMatchObject({rounds:300,roundMs:4000,makerPolicy:"capital-preserving-v1"});
+ expect(initial.config).toMatchObject({rounds:300,roundMs:4000,makerPolicy:"risk-limited-v2"});
  const a=(await join()).body;
  expect((await req("/api/admin/markets/runtime-market/schedule",{token:a.apiKey,data:{rounds:400,roundMs:3000}})).status).toBe(403);
  expect((await req("/api/admin/markets/runtime-market/schedule",{token:admin,data:{rounds:400,roundMs:3000}})).status).toBe(200);
@@ -1078,4 +1078,28 @@ it("admin controls timing before start, persists it, and validates extended roun
  expect((await req("/api/admin/markets/runtime-market/schedule",{token:admin,data:{rounds:20,roundMs:5000}})).status).toBe(409);
  const d=await req("/api/markets/runtime-market/decision",{token:a.apiKey,data:{round:241,side:"PASS",price:0,quantity:0,requestId:"future-241-test"}});
  expect(d.body.error.code).toBe("WRONG_ROUND");
+});
+
+it("creates and persists the graduated maker with 240 rounds and five retail traders", async () => {
+  const base = "/api/markets/runtime-market";
+  const management = "/api/admin/markets/runtime-market";
+  await create(false, {
+    assetMode: "ai", rounds: 240, roundMs: 5000, retailAgents: true,
+    newsEnabled: true, makerCashShare: 0.2,
+  });
+  const lobby = (await req(base)).body;
+  expect(lobby.config).toMatchObject({
+    rounds: 240, roundMs: 5000, retailAgents: true,
+    autoRedeem: false, makerPolicy: "risk-limited-v2",
+  });
+  await join();
+  expect((await req(`${management}/start`, { token: admin, data: {} })).status).toBe(200);
+  await evictDurableObject(env.MARKETS.get(env.MARKETS.idFromName("runtime-market")));
+  const running = (await req(base)).body;
+  expect(running.maker).toMatchObject({
+    id: "system-maker:runtime-market", policy: "risk-limited-v2", buyScale: 1,
+  });
+  expect(running.retailTraders).toHaveLength(5);
+  expect(running.retailTraders.every((a: any) => a.decisionHorizon === "indefinite")).toBe(true);
+  expect((await req(`${management}/status`, { token: admin })).body.conserved).toBe(true);
 });
