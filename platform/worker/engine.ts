@@ -414,7 +414,8 @@ export async function createState(
         const before = values.at(-1)!;
         let after = before;
         if (draw(0) % 100 < 35) {
-          const impactBps = (draw(8) % 2 ? 1 : -1) * (300 + (draw(16) % 901));
+          const direction = draw(8) % 100 < 60 ? 1 : -1;
+          const impactBps = direction * (300 + (draw(16) % 901));
           after = Math.max(
             config.instruments ? MIN_PRICE : 2500,
             Math.min(
