@@ -30,18 +30,21 @@ export function AdminDashboard({
   token: string;
   id: string;
   revision: number;
-  select: (id: string) => Promise<void>;
+  select: (id: string, current?: () => boolean) => Promise<void>;
   lock: () => void;
 }) {
   useLocale();
   const [enabled, setEnabled] = useState(false),
     [page, setPage] = useState<DashboardPage | null>(null),
-    [detail, setDetail] = useState<AdminStatus | null>(null),
+    [fetchedDetail, setDetail] = useState<AdminStatus | null>(null),
     [offset, setOffset] = useState(0),
     [tick, setTick] = useState(0),
     [loading, setLoading] = useState(false),
     [error, setError] = useState(""),
-    [filter, setFilter] = useState("all");
+    [filter, setFilter] = useState("all"),
+    [opening, setOpening] = useState<string | null>(null);
+  const detailHeading = useRef<HTMLDivElement>(null);
+  const selection = useRef<AbortController | null>(null);
   const currentToken = useRef(token);
   currentToken.current = token;
   useEffect(() => {
@@ -51,6 +54,8 @@ export function AdminDashboard({
     setError("");
     setOffset(0);
     setLoading(false);
+    setOpening(null);
+    return () => selection.current?.abort();
   }, [token]);
   useEffect(() => {
     if (!enabled || !token) return;
@@ -97,6 +102,32 @@ export function AdminDashboard({
   }, [enabled, token, id, offset, tick, revision]);
   const rows = page?.markets || [],
     shown = rows.filter((m) => filter === "all" || m.status === filter);
+  const detail = rows.find((m) => m.id === id) ?? fetchedDetail;
+  useEffect(() => {
+    if (opening !== id || detail?.id !== id || !detailHeading.current) return;
+    detailHeading.current.focus({ preventScroll: true });
+    detailHeading.current.scrollIntoView({ block: "start", inline: "nearest" });
+    setOpening(null);
+  }, [opening, id, detail]);
+
+  async function openCompetition(marketId: string) {
+    selection.current?.abort();
+    const request = new AbortController();
+    selection.current = request;
+    const current = () => !request.signal.aborted && currentToken.current === token;
+    setError("");
+    setOpening(marketId);
+    if (marketId === id) return;
+    try {
+      await select(marketId, current);
+    } catch (e) {
+      if (current()) {
+        setOpening(null);
+        setError((e as Error).message);
+      }
+    }
+  }
+
   const issues = rows.filter(
     (m) =>
       !m.conserved ||
@@ -274,14 +305,13 @@ export function AdminDashboard({
                       <td>{m.trades}</td>
                       <td>
                         <button
+                          type="button"
                           className="textbutton"
-                          onClick={() =>
-                            void select(m.id).catch((e) =>
-                              setError((e as Error).message),
-                            )
-                          }
+                          onClick={() => void openCompetition(m.id)}
+                          disabled={opening === m.id}
                           aria-label={t("m443cb3b17b", [m.name])}
-                        >{rich("mf26f11ae4f")}</button>
+                          aria-busy={opening === m.id}
+                        >{opening === m.id ? t("m2336147a7f") : rich("mf26f11ae4f")}</button>
                       </td>
                     </tr>
                   ))}
@@ -311,7 +341,7 @@ export function AdminDashboard({
           </section>
           {detail && detail.id === id && (
             <>
-              <div className="admin-section-title row between">
+              <div className="admin-section-title row between" ref={detailHeading} tabIndex={-1}>
                 <div>
                   <span className="eyebrow">SELECTED COMPETITION</span>
                   <h2>{detail.name}</h2>
